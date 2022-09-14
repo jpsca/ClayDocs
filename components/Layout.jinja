@@ -1,0 +1,26 @@
+{#
+title = ''
+description = ''
+lang = 'en'
+-#}
+{% set DEFAULT_TITLE = "Documentation" -%}
+{% set title = (title + " | " + DEFAULT_TITLE) if title else DEFAULT_TITLE -%}
+
+<!DOCTYPE html>
+<html lang="{{ lang }}">
+<head>
+	<meta charset="utf-8">
+	<title>{{ title }}</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+	<link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+	<link rel="stylesheet" href="/static/docs.css">
+	<script src="/static/docs.js" defer></script>
+	{{ components_assets }}
+  {% if title %}<meta property="og:title" content="{{ title }}">{% endif %}
+  {% if description -%}<meta property="og:description" content="{{ description }}">{% endif -%}
+	<meta property="og:type" content="profile" />
+</head>
+<body {{ attrs.render() }}>
+	{{ content }}
+</body>
+</html>
