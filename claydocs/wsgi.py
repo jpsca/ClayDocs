@@ -4,17 +4,28 @@ from urllib.parse import quote
 from gunicorn.app.base import BaseApplication
 
 
-DEFAULT_HOST = "localhost"
+DEFAULT_HOST = "127.0.0.1"
 DEFAULT_PORT = 8000
+START_MESSAGE = """
+ ─────────────────────────────────────────────────
+  ClayDocs running at {addr}
+
+  Press [Ctrl]+[C] to quit
+ ─────────────────────────────────────────────────
+"""
+LOG_FORMAT = "%(m)s %(U)s -> %(s)s"
 
 
-class WSGIApp(BaseApplication):
-    def __init__(self, docs, host=DEFAULT_HOST, port=DEFAULT_PORT, **kw):
+def on_starting(server):
+    """Gunicorn hook"""
+    host, port = server.address[0]
+    print(START_MESSAGE.format(addr=f"http://{host}:{port}"))
+
+
+class WSGIApp:
+    def __init__(self, docs):
         self.docs = docs
-        kw.setdefault("bind", f"{host}:{port}")
-        kw.setdefault("accesslog", "-")
-        kw.setdefault("access_log_format", "%(h)s %(m)s %(U)s -> HTTP %(s)s")
-        super().__init__(**kw)
+        super().__init__()
 
     def __call__(self, environ, start_response):
         return self.wsgi_app(environ, start_response)
@@ -31,19 +42,31 @@ class WSGIApp(BaseApplication):
 
     def call(self, request):
         path = request.path
-        print(path)
         if request.method == "HEAD":
             body = ""
         else:
-            print("rendering file", path)
             body = self.docs.render(path, request=request)
 
         mime = mimetypes.guess_type(path)[0] or "text/plain"
-        response_headers = [("Content-Type", mime)]
+        response_headers = [
+            ("Server", "ClayDocs"),
+            ("Content-Type", mime),
+            ("Content-Type", "text/html")
+        ]
         return body, "200 OK", response_headers
 
     def redirect_to(self, path):
         return "", "302 Found", [("Location", quote(path.encode("utf8")))]
+
+    def run(self, host: str = DEFAULT_HOST, port: int = DEFAULT_PORT) -> None:
+        server = GunicornBaseApplication(
+            self,
+            bind=f"{host}:{port}",
+            accesslog=None,
+            loglevel="error",
+            on_starting=on_starting
+        )
+        server.run()
 
 
 class Request:
@@ -59,4 +82,21 @@ class Request:
         if not path_info:
             return ""
         path = path_info.encode("iso-8859-1", "replace").decode("utf-8", "replace")
-        return path[1:] + "index.html" if path.endswith("/") else path[1:]
+        if path.endswith("/"):
+            return path[1:] + "index"
+        return path[1:]
+
+
+class GunicornBaseApplication(BaseApplication):
+    def __init__(self, app, **options):
+        self.app = app
+        self.options = options
+        super().__init__()
+
+    def load_config(self):
+        for key, value in self.options.items():
+            if key in self.cfg.settings and value is not None:
+                self.cfg.set(key.lower(), value)
+
+    def load(self):
+        return self.app
