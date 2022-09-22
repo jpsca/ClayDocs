@@ -1,4 +1,5 @@
 import mimetypes
+import traceback
 from urllib.parse import quote
 
 from gunicorn.app.base import BaseApplication
@@ -13,7 +14,17 @@ START_MESSAGE = """
   Press [Ctrl]+[C] to quit
  ─────────────────────────────────────────────────
 """
-LOG_FORMAT = "%(m)s %(U)s -> %(s)s"
+STATIC_FILES = ("favicon.ico", "robots.txt", "humans.txt")
+HTTP_OK = "200 OK"
+HTTP_ERROR = "500 Internal Server Error"
+ERROR_BODY = """<body>
+<title>{title}</title>
+<h1>{title}</h1>
+<h2><var>{path}</var></h2>
+<h3>{error}</h3>
+<pre>{traceback}</pre>
+</body>
+"""
 
 
 def on_starting(server):
@@ -42,10 +53,14 @@ class WSGIApp:
 
     def call(self, request):
         path = request.path
+        if path in STATIC_FILES:
+            return self.redirect_to(f"/static/{path}")
+
+        status = HTTP_OK
         if request.method == "HEAD":
             body = ""
         else:
-            body = self.docs.render(path, request=request)
+            body, status = self.render_page(path, request)
 
         mime = mimetypes.guess_type(path)[0] or "text/plain"
         response_headers = [
@@ -53,10 +68,24 @@ class WSGIApp:
             ("Content-Type", mime),
             ("Content-Type", "text/html")
         ]
-        return body, "200 OK", response_headers
+        return body, status, response_headers
 
     def redirect_to(self, path):
         return "", "302 Found", [("Location", quote(path.encode("utf8")))]
+
+    def render_page(self, path, request):
+        try:
+            return self.docs.render(path, request=request), HTTP_OK
+        except Exception as exception:
+            return self.render_error_page(exception), HTTP_ERROR
+
+    def render_error_page(self, exception):
+        return ERROR_BODY.format(
+            title=exception.__class__.__name__,
+            path=exception.args[0],
+            error=exception.args[1],
+            traceback="".join(traceback.format_exception(exception))
+        )
 
     def run(self, host: str = DEFAULT_HOST, port: int = DEFAULT_PORT) -> None:
         server = GunicornBaseApplication(

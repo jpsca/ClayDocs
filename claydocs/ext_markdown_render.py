@@ -8,8 +8,6 @@ if t.TYPE_CHECKING:
     from jinja2 import Environment
 
 
-__all__ = ["DEFAULT_EXTENSIONS", "MarkdownExtension"]
-
 DEFAULT_EXTENSIONS = [
     "attr_list",
     "sane_lists",
@@ -29,7 +27,7 @@ DEFAULT_EXTENSIONS = [
 ]
 
 
-class MarkdownExtension(ContainerTag):
+class MarkdownRenderExtension(ContainerTag):
     tags = {"markdown"}
 
     def __init__(self, environment: "Environment", extensions: "list[str]" = DEFAULT_EXTENSIONS) -> None:

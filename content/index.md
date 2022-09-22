@@ -1,4 +1,7 @@
-<Page title="Hola">
+---
+title = 'Hello World!'
+---
+
 Heading
 =======
 
@@ -9,4 +12,3 @@ Paragraphs are separated by a blank line.
 
 Two spaces at the end of a line  
 produce a line break. ????
-</Page>
