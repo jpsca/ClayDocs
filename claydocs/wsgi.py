@@ -1,36 +1,32 @@
-import mimetypes
 import traceback
 from urllib.parse import quote
+from sys import exc_info
 
 from gunicorn.app.base import BaseApplication
 
+from .utils import LOGGER_NAME, logger
+
 
 DEFAULT_HOST = "127.0.0.1"
-DEFAULT_PORT = 8000
+DEFAULT_PORT = 8080
 START_MESSAGE = """
- ─────────────────────────────────────────────────
-  ClayDocs running at {addr}
-
-  Press [Ctrl]+[C] to quit
- ─────────────────────────────────────────────────
+─────────────────────────────────────────────────
+Running at {addr}
+Press [Ctrl]+[C] to quit
+─────────────────────────────────────────────────
 """
 STATIC_FILES = ("favicon.ico", "robots.txt", "humans.txt")
+
 HTTP_OK = "200 OK"
+HTTP_NOT_FOUND = "404 Not Found"
 HTTP_ERROR = "500 Internal Server Error"
 ERROR_BODY = """<body>
 <title>{title}</title>
 <h1>{title}</h1>
-<h2><var>{path}</var></h2>
-<h3>{error}</h3>
+<h2>{error}</h2>
 <pre>{traceback}</pre>
 </body>
 """
-
-
-def on_starting(server):
-    """Gunicorn hook"""
-    host, port = server.address[0]
-    print(START_MESSAGE.format(addr=f"http://{host}:{port}"))
 
 
 class WSGIApp:
@@ -43,12 +39,13 @@ class WSGIApp:
 
     def wsgi_app(self, environ, start_response):
         request = Request(environ)
-        body, status, headers = self.call(request)
+        self.headers = {"Server": "ClayDocs"}
+        body, status = self.call(request)
         if hasattr(body, "encode"):
             body = body.encode("utf8")
 
-        headers.append(("Content-Length", str(len(body))))
-        start_response(status, headers)
+        self.headers["Content-Length"] = str(len(body))
+        start_response(status, list(self.headers.items()))
         return [body]
 
     def call(self, request):
@@ -62,38 +59,51 @@ class WSGIApp:
         else:
             body, status = self.render_page(path, request)
 
-        mime = mimetypes.guess_type(path)[0] or "text/plain"
-        response_headers = [
-            ("Server", "ClayDocs"),
-            ("Content-Type", mime),
-            ("Content-Type", "text/html")
-        ]
-        return body, status, response_headers
+        self.headers.setdefault("Content-Type", "text/html")
+        return body, status
 
     def redirect_to(self, path):
-        return "", "302 Found", [("Location", quote(path.encode("utf8")))]
+        self.headers["Location"] = quote(path.encode("utf8"))
+        logger.info("Redirecting to: %s", self.headers["Location"])
+        return "", "302 Found"
 
     def render_page(self, path, request):
         try:
-            return self.docs.render(path, request=request), HTTP_OK
+            body = self.docs.render(path, request=request)
         except Exception as exception:
+            logger.exception(f"/{path}")
             return self.render_error_page(exception), HTTP_ERROR
+
+        if body:
+            return body, HTTP_OK
+        else:
+            logger.error(f"/{path} - Not Found")
+            return f"{path}.md not found", HTTP_NOT_FOUND
 
     def render_error_page(self, exception):
         return ERROR_BODY.format(
             title=exception.__class__.__name__,
-            path=exception.args[0],
-            error=exception.args[1],
-            traceback="".join(traceback.format_exception(exception))
+            error=str(exception),
+            traceback="".join(traceback.format_exception(*exc_info())),
         )
 
     def run(self, host: str = DEFAULT_HOST, port: int = DEFAULT_PORT) -> None:
+        def on_starting(server):
+            print(START_MESSAGE.format(addr=f"http://{host}:{port}"))
+
+        def on_exit(server):
+            print()  # To cleanup the printed "^C"
+            logger.info("Shutting down...")
+
         server = GunicornBaseApplication(
             self,
             bind=f"{host}:{port}",
             accesslog=None,
             loglevel="error",
-            on_starting=on_starting
+            reload=True,
+            reload_extra_files="docs.py",
+            on_starting=on_starting,
+            on_exit=on_exit,
         )
         server.run()
 

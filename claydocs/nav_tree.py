@@ -2,44 +2,86 @@
 nav_config example:
 
 [
-    { "Home": "index.md" },
+    ("index.md", "Home"),
     "faq.md",
-    {
-        "Guide": [
+    (
+        "Guide", (
             "guide/index.md",
             "guide/attributes.md",
             "guide/extra.md",
             "guide/css_and_js.md",
-        ]
-    }
+        )
+    )
 """
 from pathlib import Path
-from typing import Union
+from typing import Union, Sequence
 
-from .extra import load_markdown_metadata
+from .utils import load_markdown_metadata
 from .exceptions import InvalidNav
 
 
-TNavConfig = list[Union[str, dict[str, str], dict[str, "TNavConfig"]]]
+TNavConfig = Sequence[Union[str, tuple[str, str], tuple[str, "TNavConfig"]]]
 
 
 class NavTree:
     def __init__(self, content_folder: Path, nav_config: "TNavConfig") -> None:
-        nav = {}
+        self.titles = get_titles({}, content_folder, nav_config)
+        self.files = list(self.titles.keys())
+        self.max_index = len(self.files) - 1
+
+    def get_title(self, filename):
+        return self.titles[filename][1]
+
+    def get_prev(self, filename):
+        index = self.titles[filename][0]
+        if index <= 0:
+            return None, None
+        prev_filename = self.files[index - 1]
+        prev_title = self.title[prev_filename]
+        return prev_title, prev_filename
+
+    def get_next(self, filename):
+        index = self.titles[filename][0]
+        if index >= self.max_index:
+            return None, None
+        next_filename = self.files[index + 1]
+        next_title = self.title[next_filename]
+        return next_title, next_filename
 
 
 def get_titles(
+    titles: "dict[str, tuple[int, str]]",
     content_folder: Path,
     nav_config: "TNavConfig",
-    titles: "dict[str, dict[str, Union[str, int]]]",
-    curr_index: int = 0,
-) -> None:
+    index: int = 0,
+) -> "dict[str, tuple[int, str]]":
     for item in nav_config:
         if isinstance(item, str):
-            meta, _ = load_markdown_metadata(content_folder, item)
-            title = meta.get("title", item)
-            curr_index += 1
-            titles[item] = {"index": curr_index, "title": title}
-        elif isinstance(item, dict):
-            pass
+            filepath = content_folder / item
+            title = get_title(filepath)
+            titles[item] = (index, title)
+
+        elif isinstance(item, tuple) and len(item) == 2:
+            key, value = item
+            if isinstance(value, str):
+                titles[key] = (index, value)
+
+            elif isinstance(item, tuple):
+                get_titles(titles, content_folder, nav_config=value)
+
+            else:
+                raise InvalidNav(item)
         else:
+            raise InvalidNav(item)
+
+        index += 1
+    return titles
+
+
+def get_title(filepath: Path) -> str:
+    source = filepath.read_text()
+    meta, source = load_markdown_metadata(source, filepath)
+    title = meta.get("title")
+    if not title:
+        title = filepath
+    return title

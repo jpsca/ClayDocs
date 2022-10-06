@@ -1,0 +1,6 @@
+.highlight a {
+  text-decoration: none;
+}
+[data-linenos]:before {
+  content: attr(data-linenos);
+}
