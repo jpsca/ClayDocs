@@ -8,3 +8,7 @@ class InvalidFrontMatter(ClayDocsException):
 
 class InvalidNav(ClayDocsException):
     pass
+
+
+class Abort(ClayDocsException):
+    pass

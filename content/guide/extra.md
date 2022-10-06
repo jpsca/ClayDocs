@@ -1,11 +1,12 @@
-# Extra Attributes
+# Extra Arguments
 
-If you pass attributes not declared in a component, those are not discarded, but rather collected in a `attrs` object that can render these extra attributes calling `attrs.render()`
+If you pass arguments not declared in a component, those are not discarded, but rather collected in a `attrs` object that can render these extra arguments calling `attrs.render()`
 
 For example, this component:
 
 ```html+jinja title="components/Card.jinja"
-{# title = ... #}
+{#def title #}
+
 <div {{ attrs.render() }}>
   <h1>{{ title }}</h1>
   {{ content }}
@@ -15,26 +16,24 @@ For example, this component:
 Called as:
 
 ```html+jinja
-<Card title="Products" class="bg-blue-500 mb-10" open>
-bla
-</Card>
+<Card title="Products" class="mb-10" open>bla</Card>
 ```
 
 Will be rendered as:
 
 ```html
-<div class="bg-blue-500 mb-10" open>
+<div class="mb-10" open>
   <h1>Products</h1>
   bla
 </div>
 ```
 
-You can add or remove attributes before rendering them using the other methods of the `attrs` object. For example:
+You can add or remove arguments before rendering them using the other methods of the `attrs` object. For example:
 
 ```html+jinja
-{# title = ... #}
-{% do attrs.add_class("card") -%}
+{#def title #}
 
+{% do attrs.add_class("card") -%}
 <div {{ attrs.render() }}>
   <h1>{{ title }}</h1>
   {{ content }}
@@ -128,9 +127,9 @@ To provide consistent output, the attributes and properties are sorted by name a
 ```
 
 !!! warning
-    Using `<Component {{ attrs.render() }}>` as attributes for other component **will not work**, because the components are translated to macros before the page render.
+    Using `<Component {{ attrs.render() }}>` to pass the extra arguments to other components **WILL NOT WORK**. That is because the components are translated to macros before the page render.
 
-    You must pass them as the special attribute `__attrs`.
+    You must pass them as the special argument `__attrs`.
 
     ```html+jinja
     {#--- WRONG 😵 ---#}
@@ -140,11 +139,10 @@ To provide consistent output, the attributes and properties are sorted by name a
     <MyButton __attrs={attrs} />
     ```
 
-    Another options is to explicity define which attributes are needed for the sub-components:
+    Another options is to explicity define which arguments are needed for the sub-components:
 
     ```html+jinja
-    {#
-    btn_class = ''
-    -#}
+    {#def btn_class='' #}
+
     <MyButton class={btn_class} />
     ```

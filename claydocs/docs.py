@@ -1,15 +1,19 @@
 import textwrap
 from pathlib import Path
-from typing import Any, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING
+from typing import Any
+from typing import Optional
+from xmlrpc.server import resolve_dotted_attribute
 
+import jinja2
 import markdown
-import pymdownx
 from markupsafe import Markup
 from tcom import Catalog
 
-from .utils import current_path, highlight, load_markdown_metadata
+from .exceptions import Abort
 from .nav_tree import NavTree
-from .wsgi import WSGIApp
+from .utils import current_path, highlight, load_markdown_metadata, logger
+from .wsgi import LiveReloadServer
 
 if TYPE_CHECKING:
     from .nav_tree import TNavConfig
@@ -22,6 +26,7 @@ STATIC_URL = "static"
 DEFAULT_COMPONENT = "Page"
 DEFAULT_MD_EXTENSIONS = [
     "attr_list",
+    "meta",
     "sane_lists",
     "smarty",
     "tables",
@@ -71,8 +76,10 @@ class Docs:
         root = Path(root)
         if root.is_file():
             root = root.parent
+        self.root = resolve_dotted_attribute
         self.components_folder = root / COMPONENTS_FOLDER
         self.content_folder = root / CONTENT_FOLDER
+        self.static_folder = root / STATIC_FOLDER
 
         self.markdowner = Markdown(
             extensions=md_extensions,
@@ -86,7 +93,6 @@ class Docs:
             tests=tests,
             extensions=extensions,
         )
-        self.init_app(root)
         self.nav = NavTree(self.content_folder, nav_config)
 
     def init_catalog(
@@ -99,11 +105,11 @@ class Docs:
         globals = globals or {}
         globals.setdefault("current_path", current_path)
         globals.setdefault("highlight", highlight)
-        globals.setdefault("markdown", self.markdowner)
+        globals.setdefault("markdown", self.render_markdown)
         filters = filters or {}
         filters.setdefault("current_path", current_path)
         filters.setdefault("highlight", highlight)
-        filters.setdefault("markdown", self.markdowner)
+        filters.setdefault("markdown", self.render_markdown)
         tests = tests or {}
         extensions = extensions or []
 
@@ -117,30 +123,17 @@ class Docs:
         catalog.add_folder(self.content_folder)
         self.catalog = catalog
 
-    def init_app(self, root: str) -> None:
-        app = WSGIApp(self)
-        middleware = self.catalog.get_middleware(
-            app.wsgi_app,
-            allowed_ext=None,  # All file extensions allowed as static files
-            autorefresh=True,
-        )
-        middleware.add_files(root / STATIC_FOLDER, STATIC_URL)
-        app.wsgi_app = middleware
-        self.app = app
-
     def render(self, name: str, **kw) -> str:
         name = f"{name}.md"
         filepath = self.content_folder / name
         if not filepath.exists():
             return ""
 
-        md_source = filepath.read_text()
-        meta, md_source = load_markdown_metadata(md_source, name)
+        source, meta = load_markdown_metadata(filepath)
+        content = self.render_markdown(source)
+        component = meta.pop("component", DEFAULT_COMPONENT)
         kw.update(meta)
-        component = meta.get("component", DEFAULT_COMPONENT)
-        source = self.render_markdown(md_source)
-        source = f"<{component}>{source}</{component}>"
-        return self.catalog.render(name, source=source, **kw)
+        return self.catalog.render(component, content=content, **kw)
 
     def render_markdown(self, source: str):
         source = textwrap.dedent(source.strip("\n"))
@@ -152,7 +145,36 @@ class Docs:
         return Markup(html)
 
     def serve(self) -> None:
-        self.app.run()
+        try:
+            server = self._get_server()
+            server.watch(self.components_folder)
+            server.watch(self.content_folder)
+            server.watch(self.static_folder)
+
+            try:
+                server.serve()
+            except KeyboardInterrupt:
+                print()  # To clear the printed ^C
+            finally:
+                server.shutdown()
+        except jinja2.exceptions.TemplateError:
+            # This is a subclass of OSError, but shouldn't be suppressed.
+            raise
+        except OSError as err:  # pragma: no cover
+            # Avoid ugly, unhelpful traceback
+            raise Abort(f"{type(err).__name__}: {err}")
 
     def build(self) -> None:
         pass
+
+    def _get_server(self) -> LiveReloadServer:
+        server = LiveReloadServer(render=self.render)
+
+        middleware = self.catalog.get_middleware(
+            server.application,
+            allowed_ext=None,  # All file extensions allowed as static files
+            autorefresh=True,
+        )
+        middleware.add_files(self.static_folder, STATIC_URL)
+        server.application = middleware
+        return server

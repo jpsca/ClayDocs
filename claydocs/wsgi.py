@@ -1,10 +1,23 @@
+import logging
+import re
+import socketserver
+import string
+import time
 import traceback
+import threading
+import typing as t
+import wsgiref.simple_server
 from urllib.parse import quote
 from sys import exc_info
 
-from gunicorn.app.base import BaseApplication
+import watchdog.events
+import watchdog.observers.polling
 
-from .utils import LOGGER_NAME, logger
+from .utils import logger
+
+if t.TYPE_CHECKING:
+    from pathlib import Path
+    from watchdog.observers import ObservedWatch
 
 
 DEFAULT_HOST = "127.0.0.1"
@@ -16,6 +29,8 @@ Press [Ctrl]+[C] to quit
 ─────────────────────────────────────────────────
 """
 STATIC_FILES = ("favicon.ico", "robots.txt", "humans.txt")
+LIVERELOAD_URL = "livereload/"
+RX_LIVERELOAD = re.compile(rf"{LIVERELOAD_URL}([0-9]+)/?")
 
 HTTP_OK = "200 OK"
 HTTP_NOT_FOUND = "404 Not Found"
@@ -27,37 +42,135 @@ ERROR_BODY = """<body>
 <pre>{traceback}</pre>
 </body>
 """
+SCRIPT_TEMPLATE_STR = """
+var livereload = function(epoch) {
+    var req = new XMLHttpRequest();
+    req.onloadend = function() {
+        if (parseFloat(this.responseText) > epoch) {
+            location.reload();
+            return;
+        }
+        var launchNext = livereload.bind(this, epoch);
+        if (this.status === 200) {
+            launchNext();
+        } else {
+            setTimeout(launchNext, 3000);
+        }
+    };
+    req.open("GET", "/livereload/" + epoch);
+    req.send();
+
+    console.log('Enabled live reload');
+}
+livereload(${epoch});
+"""
+SCRIPT_TEMPLATE = string.Template(SCRIPT_TEMPLATE_STR)
 
 
-class WSGIApp:
-    def __init__(self, docs):
-        self.docs = docs
-        super().__init__()
+def _timestamp() -> int:
+    return round(time.monotonic() * 1000)
 
-    def __call__(self, environ, start_response):
-        return self.wsgi_app(environ, start_response)
 
-    def wsgi_app(self, environ, start_response):
+class LiveReloadServer(socketserver.ThreadingMixIn, wsgiref.simple_server.WSGIServer):
+    daemon_threads = True
+    poll_response_timeout = 60
+
+    def __init__(
+        self,
+        render: "t.Callable",
+        *,
+        host: str = DEFAULT_HOST,
+        port: int = DEFAULT_PORT,
+        polling_interval: float = 0.5,
+        shutdown_delay: float = 0.25,
+        **kwargs
+    ) -> None:
+        self._render = render
+        self.host = host
+        self.port = port
+        self.polling_interval = polling_interval
+        self.shutdown_delay = shutdown_delay
+
+        self.epoch = _timestamp()  # This version of the docs
+        self.epoch_cond = threading.Condition()  # Must be held when accessing epoch.
+        self.must_refresh = False
+        self.must_refresh_cond = threading.Condition()  # Must be held when accessing must_refresh.
+
+        self.serve_thread = threading.Thread(
+            target=lambda: self.serve_forever(shutdown_delay)
+        )
+        self.observer = watchdog.observers.polling.PollingObserver(
+            timeout=polling_interval
+        )
+        self.watch_refs: "dict[str, ObservedWatch]" = {}
+        self.running = False
+
+        super().__init__((host, port), RequestHandler, **kwargs)
+
+    def watch(self, path: "Path", recursive: bool = True) -> None:
+        """Add the 'path' to watched paths, call the function and reload when any file changes under it."""
+        path = str(path.absolute())
+        if path in self.watch_refs:
+            return
+
+        def callback(event):
+            if event.is_directory:
+                return
+            logger.debug(str(event))
+            with self.must_refresh_cond:
+                self.must_refresh = True
+                self.must_refresh_cond.notify_all()
+
+        handler = watchdog.events.FileSystemEventHandler()
+        handler.on_any_event = callback
+        logger.debug(f"Watching '{path}'")
+        self.watch_refs[path] = self.observer.schedule(
+            handler, path, recursive=recursive
+        )
+
+    def application(self, environ, start_response):
+        self.headers = {"Server": "ClayDocs", "Content-Length": "0"}
         request = Request(environ)
-        self.headers = {"Server": "ClayDocs"}
+        if request.path.startswith(LIVERELOAD_URL):
+            return self.livereload(request.path, start_response)
+
         body, status = self.call(request)
         if hasattr(body, "encode"):
             body = body.encode("utf8")
+        body = self._inject_js_into_html(body)
 
         self.headers["Content-Length"] = str(len(body))
         start_response(status, list(self.headers.items()))
         return [body]
 
+    def livereload(self, path, start_response):
+        match = RX_LIVERELOAD.fullmatch(path)
+        if not match:
+            start_response(HTTP_NOT_FOUND, list(self.headers.items()))
+            return [b""]
+
+        epoch = int(match[1])
+        start_response("200 OK", [("Content-Type", "text/plain")])
+
+        def condition():
+            return self.epoch > epoch
+
+        with self.epoch_cond:
+            if not condition():
+                # Stall the browser, respond as soon as there's something new.
+                # If there's not, respond anyway after a timeout
+                self.epoch_cond.wait_for(condition, timeout=self.poll_response_timeout)
+            return [b"%d" % self.epoch]
+
     def call(self, request):
-        path = request.path
-        if path in STATIC_FILES:
-            return self.redirect_to(f"/static/{path}")
+        if request.path in STATIC_FILES:
+            return self.redirect_to(f"/static/{request.path}")
 
         status = HTTP_OK
         if request.method == "HEAD":
             body = ""
         else:
-            body, status = self.render_page(path, request)
+            body, status = self.render_page(request)
 
         self.headers.setdefault("Content-Type", "text/html")
         return body, status
@@ -67,18 +180,18 @@ class WSGIApp:
         logger.info("Redirecting to: %s", self.headers["Location"])
         return "", "302 Found"
 
-    def render_page(self, path, request):
+    def render_page(self, request):
         try:
-            body = self.docs.render(path, request=request)
+            body = self._render(request.path, request=request)
         except Exception as exception:
-            logger.exception(f"/{path}")
+            logger.exception(f"/{request.path}")
             return self.render_error_page(exception), HTTP_ERROR
 
         if body:
             return body, HTTP_OK
         else:
-            logger.error(f"/{path} - Not Found")
-            return f"{path}.md not found", HTTP_NOT_FOUND
+            logger.error(f"/{request.path} - Not Found")
+            return f"{request.path}.md not found", HTTP_NOT_FOUND
 
     def render_error_page(self, exception):
         return ERROR_BODY.format(
@@ -87,25 +200,72 @@ class WSGIApp:
             traceback="".join(traceback.format_exception(*exc_info())),
         )
 
-    def run(self, host: str = DEFAULT_HOST, port: int = DEFAULT_PORT) -> None:
-        def on_starting(server):
-            print(START_MESSAGE.format(addr=f"http://{host}:{port}"))
+    def serve(self) -> None:
+        self.running = True
+        self.observer.start()
+        print(START_MESSAGE.format(addr=f"http://{self.host}:{self.port}"))
+        self.serve_thread.start()
+        self.refresh_loop()
 
-        def on_exit(server):
-            print()  # To cleanup the printed "^C"
-            logger.info("Shutting down...")
+    def refresh_loop(self) -> None:
+        while True:
+            with self.must_refresh_cond:
+                while not self.must_refresh_cond.wait_for(
+                    lambda: self.must_refresh or not self.running, timeout=self.shutdown_delay
+                ):
+                    # We could have used just one wait instead of a loop + timeout, but we need
+                    # occasional breaks, otherwise on Windows we can't receive KeyboardInterrupt.
+                    pass
+                if not self.running:
+                    return
+                logger.info("Detected file changes")
+                self.must_refresh = False
 
-        server = GunicornBaseApplication(
-            self,
-            bind=f"{host}:{port}",
-            accesslog=None,
-            loglevel="error",
-            reload=True,
-            reload_extra_files="docs.py",
-            on_starting=on_starting,
-            on_exit=on_exit,
+            with self.epoch_cond:
+                logger.info("Reloading page")
+                self.epoch = _timestamp()
+                self.epoch_cond.notify_all()
+
+    def shutdown(self) -> None:
+        self.observer.stop()
+        logger.info("Shutting down...")
+        self.running = False
+
+        if self.serve_thread.is_alive():
+            super().shutdown()
+
+    def _inject_js_into_html(self, content: bytes) -> bytes:
+        try:
+            body_end = content.rindex(b"</body>")
+        except ValueError:
+            body_end = len(content)
+        # The page will reload if the livereload poller returns a newer epoch than what it knows.
+        with self.epoch_cond:
+            script = SCRIPT_TEMPLATE.substitute(epoch=self.epoch)
+
+        return b"%b<script>%b</script>%b" % (
+            content[:body_end],
+            script.encode(),
+            content[body_end:],
         )
-        server.run()
+
+
+class RequestHandler(wsgiref.simple_server.WSGIRequestHandler):
+    def log_request(self, code="200", size="-"):
+        code = str(code)
+        if code.startswith("5"):
+            level = logging.ERROR
+        elif code.startswith("4"):
+            level = logging.WARNING
+        elif self.path.startswith(LIVERELOAD_URL):
+            level = logging.DEBUG
+        else:
+            level = logging.INFO
+
+        logger.log(level, self.requestline)
+
+    def log_message(self, format, *args):
+        logger.debug(format, *args)
 
 
 class Request:
@@ -124,18 +284,3 @@ class Request:
         if path.endswith("/"):
             return path[1:] + "index"
         return path[1:]
-
-
-class GunicornBaseApplication(BaseApplication):
-    def __init__(self, app, **options):
-        self.app = app
-        self.options = options
-        super().__init__()
-
-    def load_config(self):
-        for key, value in self.options.items():
-            if key in self.cfg.settings and value is not None:
-                self.cfg.set(key.lower(), value)
-
-    def load(self):
-        return self.app

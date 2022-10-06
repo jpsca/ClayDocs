@@ -1,10 +1,7 @@
-{#
-title = ''
-description = ''
-lang = 'en'
--#}
-{% set DEFAULT_TITLE = "Documentation" -%}
-{% set title = (title + " | " + DEFAULT_TITLE) if title else DEFAULT_TITLE -%}
+{#def title="", description="", lang="en" #}
+
+{% set DEFAULT_TITLE = "Documentation" %}
+{% set title = (title + " | " + DEFAULT_TITLE) if title else DEFAULT_TITLE %}
 
 <!DOCTYPE html>
 <html lang="{{ lang }}">
@@ -18,7 +15,7 @@ lang = 'en'
 	<script src="/static/docs.js" defer></script>
 	{{ components_assets }}
 
-  {% if title %}<meta property="og:title" content="{{ title }}">{% endif %}
+  <meta property="og:title" content="{{ title }}">
 	<meta property="generator" content="ClayDocs" />
   {% if description -%}<meta property="og:description" content="{{ description }}">{% endif -%}
 	<meta property="og:type" content="profile" />

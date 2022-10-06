@@ -1,13 +1,10 @@
-# Component Attributes
+# Component Arguments
 
-More often than not, a component takes one or more attributes to render. Every attribute must be declared in the metadata section (the comment at the top) of the component.
+More often than not, a component takes one or more arguments to render. Every argument must be declared at the beginning of the component with `{#def arguments #}`. The syntax is very similar to how you declare the arguments of a python function:
 
 ```html+jinja title="components/Form.jinja"
-{#
-action = ...
-method = 'post'
-multipart = false
-#}
+{#def action, method='post', multipart=False #}
+
 <form method="{{ method }}" action="{{ action }}"
   {%- if multipart %} enctype="multipart/form-data"{% endif %}
 >
@@ -15,11 +12,7 @@ multipart = false
 </form>
 ```
 
-In this example, the component takes three attributes: "action", "method", and "multipart". The last two have a default value, so they are optional, but the first one has `...` as value. That means that it must be passed when rendering this component.
-
-!!! note
-
-    Required attributes must have a value of three dots **without quotes**.
+In this example, the component takes three arguments: "action", "method", and "multipart". The last two have a default value, so they are optional, but the first one doesn't. That means it must be passed a value when rendering the component.
 
 So all of these are valid forms to use this component:
 
@@ -29,15 +22,18 @@ So all of these are valid forms to use this component:
 <Form multipart={False} action="/new">...</Form>
 ```
 
-The values of the declared attributes can be used in the template as values with the same name.
+The values of the declared arguments can be used in the template as values with the same name.
 
 
-## Non-string attributes
+## Non-string arguments
 
 In the example above, both "action" and "method" are strings, but "multipart" is a boolean, so we cannot pass it like `multipart="false"`
 because that will make it a string that evaluates as `True`, which is the opposite of what we want.
 
-Instead, you must use curly brackets instead of quotes (`name={value}` instead of `name="value"`).
+Instead, you must use curly brackets: `multipart={False}`, instead of quotes: `multipart="False"`.
+
+!!! info
+    Using lowercase booleans (`true` or `false`) is also valid.
 
 Between the brackets, you can use datetimes, objects, lists, or any Python expressions.
 
@@ -62,16 +58,17 @@ So far we have seen self-closing components, but there is another, much more use
 
 ```html+jinja
 {# Self-closing component #}
-<Name attributes />
+<Name arguments />
 
 {# Component with content #}
-<Name attributes> ...content here... </Name>
+<Name arguments> ...content here... </Name>
 ```
 
 A great use case is to make layout components:
 
 ```html+jinja title="components/PageLayout.jinja"
-{# title = ... #}
+{#def title #}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -84,22 +81,23 @@ A great use case is to make layout components:
 ```
 
 ```html+jinja title="components/ArchivePage.jinja"
-{# posts = ... #}
+{#def posts #}
+
 <PageLayout title="Archive">
   {% for post in posts %}
-  <Post post={ post }} />
+  <Post post={post} />
   {% endfor %}
 </PageLayout>
 ```
 
 Everything between the open and close tags of the components will be rendered and passed to the `PageLayout` component as a special, implicit, `content` variable.
 
-To test a component in isolation, you can also manually send a content attribute using the special `__content` attribute:
+To test a component in isolation, you can also manually send a content argument using the special `__content` argument:
 
 ```python
 catalog.render("PageLayout", title="Hello world", __content="TEST")
 ```
 
-## Extra attributes
+## Extra arguments
 
-If you pass attributes not declared in a component, those are not discarded, but rather collected in a `attrs` object. Read more about it in the next section.
+If you pass arguments not declared in a component, those are not discarded, but rather collected in a `attrs` object. Read more about it in the next section.

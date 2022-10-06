@@ -1,23 +1,8 @@
-"""
-nav_config example:
-
-[
-    ("index.md", "Home"),
-    "faq.md",
-    (
-        "Guide", (
-            "guide/index.md",
-            "guide/attributes.md",
-            "guide/extra.md",
-            "guide/css_and_js.md",
-        )
-    )
-"""
 from pathlib import Path
 from typing import Union, Sequence
 
-from .utils import load_markdown_metadata
 from .exceptions import InvalidNav
+from .utils import load_markdown_metadata
 
 
 TNavConfig = Sequence[Union[str, tuple[str, str], tuple[str, "TNavConfig"]]]
@@ -25,6 +10,24 @@ TNavConfig = Sequence[Union[str, tuple[str, str], tuple[str, "TNavConfig"]]]
 
 class NavTree:
     def __init__(self, content_folder: Path, nav_config: "TNavConfig") -> None:
+        """
+        A `nav_config` looks like this:
+
+        ```python
+        [
+            "filename.md",
+            ("filename.md", "Custom title"),
+            ...,
+            (
+                "Subsection title", (
+                    "path/filename.md",
+                    ...
+                ),
+            ),
+        ]
+        ```
+
+        """
         self.titles = get_titles({}, content_folder, nav_config)
         self.files = list(self.titles.keys())
         self.max_index = len(self.files) - 1
@@ -79,9 +82,8 @@ def get_titles(
 
 
 def get_title(filepath: Path) -> str:
-    source = filepath.read_text()
-    meta, source = load_markdown_metadata(source, filepath)
+    _source, meta = load_markdown_metadata(filepath)
     title = meta.get("title")
     if not title:
-        title = filepath
+        title = filepath.name
     return title

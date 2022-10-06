@@ -6,7 +6,7 @@ nav = [
         "Guide",
         (
             "guide/index.md",
-            "guide/attributes.md",
+            "guide/arguments.md",
             "guide/extra.md",
             "guide/css_and_js.md",
         ),
