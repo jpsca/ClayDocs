@@ -22,7 +22,7 @@ LOGGER_NAME = "claydocs"
 META_START = "---"
 META_END = "\n---"
 
-logger = logging.getLogger()
+logger = logging.getLogger(LOGGER_NAME)
 logger.setLevel(logging.DEBUG)
 ch = logging.StreamHandler()
 ch.setLevel(logging.DEBUG)

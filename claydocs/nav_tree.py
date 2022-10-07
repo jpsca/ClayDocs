@@ -1,14 +1,21 @@
+import json
+import re
 from pathlib import Path
 from typing import Union, Sequence
 
 from .exceptions import InvalidNav
-from .utils import load_markdown_metadata
+from .utils import load_markdown_metadata, logger
 
 
 TNavConfig = Sequence[Union[str, tuple[str, str], tuple[str, "TNavConfig"]]]
 
+rx_markdwown_h1 = re.compile(r"(^|\n)#\s*(?P<h1>[^\n]+)(\n|$)")
+rx_html_h1 = re.compile(r"<h1>(?P<h1>.+)</h1>")
+
 
 class NavTree:
+    __slots__ = ("titles", "sections", "toc", "_content_folder", "_urls", "_max_index")
+
     def __init__(self, content_folder: Path, nav_config: "TNavConfig") -> None:
         """
         A `nav_config` looks like this:
@@ -28,62 +35,113 @@ class NavTree:
         ```
 
         """
-        self.titles = get_titles({}, content_folder, nav_config)
-        self.files = list(self.titles.keys())
-        self.max_index = len(self.files) - 1
+        self._content_folder = content_folder
+        self.titles: dict[str, dict] = {}
+        self.sections: list[str] = []
+        self.set_titles(nav_config)
+        self.set_toc()
+        self._urls = tuple(self.titles.keys())
+        self._max_index = len(self._urls) - 1
 
-    def get_title(self, filename):
-        return self.titles[filename][1]
+        logger.debug(f"Sections\n{self.sections}")
+        log_titles = json.dumps(self.titles, indent=2)
+        logger.debug(f"Titles\n{log_titles}")
+        logger.debug(f"TOC\n{self.toc}")
 
-    def get_prev(self, filename):
-        index = self.titles[filename][0]
+    def get_page(self, filepath: Union[str, Path]) -> str:
+        url = self._get_url(filepath)
+        return url, self.titles[url]["title"]
+
+    def get_prev(self, filepath: Union[str, Path]) -> tuple[str, str]:
+        url = self._get_url(filepath)
+        index = self.titles[url]["index"]
         if index <= 0:
-            return None, None
-        prev_filename = self.files[index - 1]
-        prev_title = self.title[prev_filename]
-        return prev_title, prev_filename
+            return None, None, None
 
-    def get_next(self, filename):
-        index = self.titles[filename][0]
-        if index >= self.max_index:
-            return None, None
-        next_filename = self.files[index + 1]
-        next_title = self.title[next_filename]
-        return next_title, next_filename
+        prev_ = self.title[prev_url]
+        prev_section = self.sections[prev_["section"]]
+        prev_url = self._urls[index - 1]
+        prev_title = prev_["title"]
+        return prev_section, prev_url, prev_title
 
+    def get_next(self, filepath: Union[str, Path]) -> tuple[str, str]:
+        url = self._get_url(filepath)
+        index = self.titles[url]["index"]
+        if index >= self._max_index:
+            return None, None, None
 
-def get_titles(
-    titles: "dict[str, tuple[int, str]]",
-    content_folder: Path,
-    nav_config: "TNavConfig",
-    index: int = 0,
-) -> "dict[str, tuple[int, str]]":
-    for item in nav_config:
-        if isinstance(item, str):
-            filepath = content_folder / item
-            title = get_title(filepath)
-            titles[item] = (index, title)
+        next_ = self.title[next_url]
+        next_section = self.sections[next_["section"]]
+        next_url = self._urls[index + 1]
+        next_title = next_["title"]
+        return next_section, next_url, next_title
 
-        elif isinstance(item, tuple) and len(item) == 2:
-            key, value = item
-            if isinstance(value, str):
-                titles[key] = (index, value)
+    def set_titles(
+        self,
+        nav_config: "TNavConfig",
+        *,
+        index: int = 0,
+        section: int = 0,
+    ) -> dict[str, tuple[int, str]]:
+        for item in nav_config:
+            if isinstance(item, str):
+                title = self._extract_page_title(item)
+                if not self.sections:
+                    self.sections.append("")
+                self._set_title(item, title=title, index=index, section=section)
 
-            elif isinstance(item, tuple):
-                get_titles(titles, content_folder, nav_config=value)
+            elif isinstance(item, tuple) and len(item) == 2:
+                key, value = item
+                if isinstance(value, str):
+                    if not self.sections:
+                        self.sections.append("")
+                    self._set_title(key, title=value, index=index, section=section)
 
+                elif isinstance(item, tuple):
+                    self.sections.append(key.strip())
+                    self.set_titles(
+                        nav_config=value,
+                        index=index,
+                        section=section + 1,
+                    )
+
+                else:
+                    raise InvalidNav(item)
             else:
                 raise InvalidNav(item)
-        else:
-            raise InvalidNav(item)
 
-        index += 1
-    return titles
+            index += 1
 
+    def set_toc(self) -> None:
+        sections = {}
+        for url, data in self.titles.items():
+            sectitle = self.sections[data["section"]]
+            sections.setdefault(sectitle, [])
+            sections[sectitle].append((url, data["title"]))
 
-def get_title(filepath: Path) -> str:
-    _source, meta = load_markdown_metadata(filepath)
-    title = meta.get("title")
-    if not title:
-        title = filepath.name
-    return title
+        self.toc = tuple((title, tuple(pages)) for title, pages in sections.items())
+
+    def _get_url(self, filepath: Union[str, Path]) -> str:
+        filepath = str(filepath).strip(" /").removesuffix(".md").removesuffix("/index")
+        return f"/{filepath}"
+
+    def _set_title(self, filepath: Path, **data) -> None:
+        url = self._get_url(filepath)
+        self.titles[url] = data
+
+    def _extract_page_title(self, path: str) -> str:
+        filepath = self._content_folder / path
+        source, meta = load_markdown_metadata(filepath)
+        title = meta.get("title")
+        if title:
+            return title
+
+        match = rx_markdwown_h1.search(source)
+        if match:
+            return match.group("h1")
+
+        match = rx_html_h1.search(source)
+        if match:
+            return match.group("h1")
+
+        return filepath.name
