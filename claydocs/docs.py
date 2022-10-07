@@ -165,7 +165,11 @@ class Docs:
             raise Abort(f"{type(err).__name__}: {err}")
 
     def build(self) -> None:
-        pass
+        logger.info("Building docs...")
+        for url, data in self.nav.titles.items():
+            pass
+        logger.info("Done!")
+
 
     def _get_server(self) -> LiveReloadServer:
         server = LiveReloadServer(render=self.render)
