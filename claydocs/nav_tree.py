@@ -10,7 +10,7 @@ from .utils import load_markdown_metadata, logger
 TNavConfig = Sequence[Union[str, tuple[str, str], tuple[str, "TNavConfig"]]]
 
 rx_markdwown_h1 = re.compile(r"(^|\n)#\s*(?P<h1>[^\n]+)(\n|$)")
-rx_html_h1 = re.compile(r"<h1>(?P<h1>.+)</h1>")
+rx_html_h1 = re.compile(r"<h1>(?P<h1>.+)</h1>", re.IGNORECASE)
 
 
 class NavTree:
@@ -50,7 +50,7 @@ class NavTree:
 
     def get_page(self, filepath: Union[str, Path]) -> str:
         url = self._get_url(filepath)
-        return url, self.titles[url]["title"]
+        return url, self.titles.get(url) or {"title": "", "section": "", "index": None}
 
     def get_prev(self, filepath: Union[str, Path]) -> tuple[str, str]:
         url = self._get_url(filepath)
@@ -122,7 +122,7 @@ class NavTree:
         self.toc = tuple((title, tuple(pages)) for title, pages in sections.items())
 
     def _get_url(self, filepath: Union[str, Path]) -> str:
-        filepath = str(filepath).strip(" /").removesuffix(".md").removesuffix("/index")
+        filepath = str(filepath).strip(" /").removesuffix(".md")
         return f"/{filepath}"
 
     def _set_title(self, filepath: Path, **data) -> None:

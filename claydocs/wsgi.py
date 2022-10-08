@@ -24,8 +24,8 @@ DEFAULT_HOST = "127.0.0.1"
 DEFAULT_PORT = 8080
 START_MESSAGE = """
 ─────────────────────────────────────────────────
-Running at {addr}
-Press [Ctrl]+[C] to quit
+ Running at {addr}
+ Press [Ctrl]+[C] to quit
 ─────────────────────────────────────────────────
 """
 STATIC_FILES = ("favicon.ico", "robots.txt", "humans.txt")

@@ -18,14 +18,15 @@ except ImportError:  # pragma: no cover
     from yaml import SafeLoader  # type: ignore
 
 
+LOGGER_LEVEL = logging.INFO
 LOGGER_NAME = "claydocs"
 META_START = "---"
 META_END = "\n---"
 
 logger = logging.getLogger(LOGGER_NAME)
-logger.setLevel(logging.DEBUG)
+logger.setLevel(LOGGER_LEVEL)
 ch = logging.StreamHandler()
-ch.setLevel(logging.DEBUG)
+ch.setLevel(LOGGER_LEVEL)
 formatter = logging.Formatter(
     fmt="{levelname: <10}-  [{asctime}] {message}",
     style="{",

@@ -22,8 +22,11 @@ if TYPE_CHECKING:
 COMPONENTS_FOLDER = "components"
 CONTENT_FOLDER = "content"
 STATIC_FOLDER = "static"
+BUILD_FOLDER = "build"
+
 STATIC_URL = "static"
 DEFAULT_COMPONENT = "Page"
+
 DEFAULT_MD_EXTENSIONS = [
     "attr_list",
     "meta",
@@ -54,6 +57,11 @@ DEFAULT_MD_EXT_CONFIG = {
         "camel_case": True,
     },
 }
+BUILD_MESSAGE = """
+─────────────────────────────────────────────────
+ Building documentation...
+─────────────────────────────────────────────────
+"""
 
 
 class Markdown(markdown.Markdown):
@@ -80,7 +88,9 @@ class Docs:
         self.components_folder = root / COMPONENTS_FOLDER
         self.content_folder = root / CONTENT_FOLDER
         self.static_folder = root / STATIC_FOLDER
+        self.build_folder = root / BUILD_FOLDER
 
+        self.nav = NavTree(self.content_folder, nav_config)
         self.markdowner = Markdown(
             extensions=md_extensions,
             extension_configs=md_ext_config,
@@ -93,7 +103,6 @@ class Docs:
             tests=tests,
             extensions=extensions,
         )
-        self.nav = NavTree(self.content_folder, nav_config)
 
     def init_catalog(
         self,
@@ -106,6 +115,8 @@ class Docs:
         globals.setdefault("current_path", current_path)
         globals.setdefault("highlight", highlight)
         globals.setdefault("markdown", self.render_markdown)
+        globals["nav"] = self.nav
+
         filters = filters or {}
         filters.setdefault("current_path", current_path)
         filters.setdefault("highlight", highlight)
@@ -124,16 +135,25 @@ class Docs:
         self.catalog = catalog
 
     def render(self, name: str, **kw) -> str:
-        name = f"{name}.md"
-        filepath = self.content_folder / name
+        filepath = self.content_folder / f"{name}.md"
         if not filepath.exists():
             return ""
 
-        source, meta = load_markdown_metadata(filepath)
-        content = self.render_markdown(source)
-        component = meta.pop("component", DEFAULT_COMPONENT)
-        kw.update(meta)
-        return self.catalog.render(component, content=content, **kw)
+        md_source, meta = load_markdown_metadata(filepath)
+        meta.update(kw)
+        url, nav_page = self.nav.get_page(filepath)
+        meta.setdefault("component", DEFAULT_COMPONENT)
+        meta.setdefault("title", nav_page["title"])
+        meta.setdefault("section", nav_page["section"])
+        meta["current_page"] = url
+
+        component = meta["component"]
+        content = self.render_markdown(md_source)
+        source = "<%(component)s __attrs={attrs}>%(content)s</%(component)s>" % {
+            "component": component,
+            "content": content,
+        }
+        return self.catalog.render(component, source=source, **meta)
 
     def render_markdown(self, source: str):
         source = textwrap.dedent(source.strip("\n"))
@@ -165,11 +185,21 @@ class Docs:
             raise Abort(f"{type(err).__name__}: {err}")
 
     def build(self) -> None:
-        logger.info("Building docs...")
-        for url, data in self.nav.titles.items():
-            pass
-        logger.info("Done!")
+        print(BUILD_MESSAGE)
 
+        for url in self.nav.titles:
+            name = url.strip("/")
+            if name.endswith("/index") or name == "index":
+                filename = f"{name}.html"
+            else:
+                filename = f"{name}/index.html"
+            filepath = self.build_folder / filename
+            filepath.parent.mkdir(parents=True, exist_ok=True)
+            print(f" - {BUILD_FOLDER}/{filename}")
+            html = self.render(name)
+            filepath.write_text(html)
+
+        print("\n ✨ Done! ✨  \n")
 
     def _get_server(self) -> LiveReloadServer:
         server = LiveReloadServer(render=self.render)
