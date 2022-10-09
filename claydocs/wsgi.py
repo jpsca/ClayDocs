@@ -28,8 +28,8 @@ START_MESSAGE = """
  Press [Ctrl]+[C] to quit
 ─────────────────────────────────────────────────
 """
-STATIC_FILES = ("favicon.ico", "robots.txt", "humans.txt")
-LIVERELOAD_URL = "livereload/"
+STATIC_FILES = ("/favicon.ico", "/robots.txt", "/humans.txt")
+LIVERELOAD_URL = "/livereload/"
 RX_LIVERELOAD = re.compile(rf"{LIVERELOAD_URL}([0-9]+)/?")
 
 HTTP_OK = "200 OK"
@@ -129,12 +129,13 @@ class LiveReloadServer(socketserver.ThreadingMixIn, wsgiref.simple_server.WSGISe
         )
 
     def application(self, environ, start_response):
-        self.headers = {"Server": "ClayDocs", "Content-Length": "0"}
-        request = Request(environ)
-        if request.path.startswith(LIVERELOAD_URL):
-            return self.livereload(request.path, start_response)
+        self.request = Request(environ)
+        path = self.request.path
+        if path.startswith(LIVERELOAD_URL):
+            return self.livereload(path, start_response)
 
-        body, status = self.call(request)
+        self.headers = {"Server": "ClayDocs"}
+        body, status = self.call()
         if hasattr(body, "encode"):
             body = body.encode("utf8")
         body = self._inject_js_into_html(body)
@@ -144,13 +145,14 @@ class LiveReloadServer(socketserver.ThreadingMixIn, wsgiref.simple_server.WSGISe
         return [body]
 
     def livereload(self, path, start_response):
+        headers = [("Content-Type", "text/plain")]
         match = RX_LIVERELOAD.fullmatch(path)
         if not match:
-            start_response(HTTP_NOT_FOUND, list(self.headers.items()))
+            start_response(HTTP_NOT_FOUND, headers)
             return [b""]
 
+        start_response(HTTP_OK, headers)
         epoch = int(match[1])
-        start_response("200 OK", [("Content-Type", "text/plain")])
 
         def condition():
             return self.epoch > epoch
@@ -162,36 +164,37 @@ class LiveReloadServer(socketserver.ThreadingMixIn, wsgiref.simple_server.WSGISe
                 self.epoch_cond.wait_for(condition, timeout=self.poll_response_timeout)
             return [b"%d" % self.epoch]
 
-    def call(self, request):
-        if request.path in STATIC_FILES:
-            return self.redirect_to(f"/static/{request.path}")
+    def call(self):
+        if self.request.path in STATIC_FILES:
+            return self.redirect_to(f"/static{self.request.path}")
 
         status = HTTP_OK
-        if request.method == "HEAD":
+        if self.request.method == "HEAD":
             body = ""
         else:
-            body, status = self.render_page(request)
+            body, status = self.render_page()
 
         self.headers.setdefault("Content-Type", "text/html")
         return body, status
 
     def redirect_to(self, path):
-        self.headers["Location"] = quote(path.encode("utf8"))
-        logger.info("Redirecting to: %s", self.headers["Location"])
+        location = quote(path.encode("utf8"))
+        self.headers["Location"] = location
+        logger.info(f"{self.request.path} -> {location}")
         return "", "302 Found"
 
-    def render_page(self, request):
+    def render_page(self):
+        path = self.request.path
         try:
-            body = self._render(request.path, request=request)
+            body = self._render(path[1:])
         except Exception as exception:
-            logger.exception(f"/{request.path}")
+            logger.exception(path)
             return self.render_error_page(exception), HTTP_ERROR
 
         if body:
             return body, HTTP_OK
         else:
-            logger.error(f"/{request.path} - Not Found")
-            return f"{request.path}.md not found", HTTP_NOT_FOUND
+            return f"{path}.md not found", HTTP_NOT_FOUND
 
     def render_error_page(self, exception):
         return ERROR_BODY.format(
@@ -222,7 +225,7 @@ class LiveReloadServer(socketserver.ThreadingMixIn, wsgiref.simple_server.WSGISe
                 self.must_refresh = False
 
             with self.epoch_cond:
-                logger.info("Reloading page")
+                logger.info("Reloading page...")
                 self.epoch = _timestamp()
                 self.epoch_cond.notify_all()
 
@@ -252,17 +255,20 @@ class LiveReloadServer(socketserver.ThreadingMixIn, wsgiref.simple_server.WSGISe
 
 class RequestHandler(wsgiref.simple_server.WSGIRequestHandler):
     def log_request(self, code="200", size="-"):
+        message = self.path
         code = str(code)
         if code.startswith("5"):
             level = logging.ERROR
         elif code.startswith("4"):
             level = logging.WARNING
-        elif self.path.startswith(LIVERELOAD_URL):
+            if code == "404":
+                message = f"{self.path} - NOT FOUND"
+        elif self.path.startswith(f"/{LIVERELOAD_URL}"):
             level = logging.DEBUG
         else:
             level = logging.INFO
 
-        logger.log(level, self.requestline)
+        logger.log(level, message)
 
     def log_message(self, format, *args):
         logger.debug(format, *args)
@@ -279,8 +285,8 @@ class Request:
     def get_path(self):
         path_info = self.environ.get("PATH_INFO")
         if not path_info:
-            return ""
+            return "/"
         path = path_info.encode("iso-8859-1", "replace").decode("utf-8", "replace")
         if path.endswith("/"):
-            return path[1:] + "index"
-        return path[1:]
+            return path + "index"
+        return path

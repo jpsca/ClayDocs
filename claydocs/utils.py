@@ -27,6 +27,7 @@ logger = logging.getLogger(LOGGER_NAME)
 logger.setLevel(LOGGER_LEVEL)
 ch = logging.StreamHandler()
 ch.setLevel(LOGGER_LEVEL)
+
 formatter = logging.Formatter(
     fmt="{levelname: <10}-  [{asctime}] {message}",
     style="{",
@@ -73,5 +74,4 @@ def highlight(source, language="", *, linenos=True, **options):
     )
     html = pygments.highlight(source, lexer=lexer, formatter=formatter)
     html = html.replace("{", "&lbrace;")
-    print("=" * 20, "\n", html)
     return Markup(html)
