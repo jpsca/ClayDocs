@@ -9,7 +9,7 @@ from .utils import load_markdown_metadata, logger
 
 TNavConfig = Sequence[Union[str, tuple[str, str], tuple[str, "TNavConfig"]]]
 
-rx_markdwown_h1 = re.compile(r"(^|\n)#\s*(?P<h1>[^\n]+)(\n|$)")
+rx_markdwown_h1 = re.compile(r"(^|\n)#\s+(?P<h1>[^\n]+)(\n|$)")
 rx_html_h1 = re.compile(r"<h1>(?P<h1>.+)</h1>", re.IGNORECASE)
 
 
@@ -38,8 +38,8 @@ class NavTree:
         self._content_folder = content_folder
         self.titles: dict[str, dict] = {}
         self.sections: list[str] = []
-        self.set_titles(nav_config)
-        self.set_toc()
+        self.toc = []
+        self.build_toc(nav_config, section=self.toc)
         self._urls = tuple(self.titles.keys())
         self._max_index = len(self._urls) - 1
 
@@ -58,9 +58,9 @@ class NavTree:
         if index <= 0:
             return None, None, None
 
-        prev_ = self.title[prev_url]
-        prev_section = self.sections[prev_["section"]]
         prev_url = self._urls[index - 1]
+        prev_ = self.titles[prev_url]
+        prev_section = prev_["section"]
         prev_title = prev_["title"]
         return prev_section, prev_url, prev_title
 
@@ -70,39 +70,46 @@ class NavTree:
         if index >= self._max_index:
             return None, None, None
 
-        next_ = self.title[next_url]
-        next_section = self.sections[next_["section"]]
         next_url = self._urls[index + 1]
+        next_ = self.titles[next_url]
+        next_section = next_["section"]
         next_title = next_["title"]
         return next_section, next_url, next_title
 
-    def set_titles(
+    def build_toc(
         self,
         nav_config: "TNavConfig",
         *,
-        index: int = 0,
-        section: int = 0,
-    ) -> dict[str, tuple[int, str]]:
+        section_title: str = "",
+        section: list,
+    ) -> None:
+        tuple_or_list = (tuple, list)
+
         for item in nav_config:
             if isinstance(item, str):
                 title = self._extract_page_title(item)
-                if not self.sections:
-                    self.sections.append("")
-                self._set_title(item, title=title, index=index, section=section)
+                url = self._get_url(item)
+                index = len(self.titles.keys())
+                self.titles[url] = dict(title=title, index=index, section=section_title)
+                section.append([url, title])
 
-            elif isinstance(item, tuple) and len(item) == 2:
+            elif isinstance(item, tuple_or_list) and len(item) == 2:
                 key, value = item
                 if isinstance(value, str):
-                    if not self.sections:
-                        self.sections.append("")
-                    self._set_title(key, title=value, index=index, section=section)
+                    value = value.strip()
+                    url = self._get_url(key)
+                    index = len(self.titles.keys())
+                    self.titles[url] = dict(title=value, index=index, section=section_title)
+                    section.append([url, value])
 
-                elif isinstance(item, tuple):
-                    self.sections.append(key.strip())
-                    self.set_titles(
+                elif isinstance(item, tuple_or_list):
+                    new_section_title = key.strip()
+                    new_section = [new_section_title, []]
+                    section.append(new_section)
+                    self.build_toc(
                         nav_config=value,
-                        index=index,
-                        section=section + 1,
+                        section_title=new_section_title,
+                        section=new_section[1],
                     )
 
                 else:
@@ -110,24 +117,9 @@ class NavTree:
             else:
                 raise InvalidNav(item)
 
-            index += 1
-
-    def set_toc(self) -> None:
-        sections = {}
-        for url, data in self.titles.items():
-            sectitle = self.sections[data["section"]]
-            sections.setdefault(sectitle, [])
-            sections[sectitle].append((url, data["title"]))
-
-        self.toc = tuple((title, tuple(pages)) for title, pages in sections.items())
-
     def _get_url(self, filepath: Union[str, Path]) -> str:
         filepath = str(filepath).strip(" /").removesuffix(".md")
         return f"/{filepath}"
-
-    def _set_title(self, filepath: Path, **data) -> None:
-        url = self._get_url(filepath)
-        self.titles[url] = data
 
     def _extract_page_title(self, path: str) -> str:
         filepath = self._content_folder / path

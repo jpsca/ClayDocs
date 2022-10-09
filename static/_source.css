@@ -1,6 +1,26 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*! purgecss start ignore */
+a.headerlink {
+  @apply opacity-0 transition-opacity inline-block ml-1 no-underline;
+}
+h1 a.headerlink {
+  display: none;
+}
+h2:hover a.headerlink,
+h3:hover a.headerlink,
+h4:hover a.headerlink,
+h5:hover a.headerlink,
+h6:hover a.headerlink {
+  @apply opacity-50;
+}
+
 .highlight a {
   text-decoration: none;
 }
 [data-linenos]:before {
   content: attr(data-linenos);
 }
+/*! purgecss end ignore */

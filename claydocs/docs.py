@@ -1,5 +1,7 @@
+import sys
 import textwrap
 from pathlib import Path
+from signal import SIGTERM, signal
 from typing import TYPE_CHECKING
 from typing import Any
 from typing import Optional
@@ -7,6 +9,7 @@ from xmlrpc.server import resolve_dotted_attribute
 
 import jinja2
 import markdown
+from markdown.extensions.toc import slugify_unicode
 from markupsafe import Markup
 from tcom import Catalog
 
@@ -33,6 +36,7 @@ DEFAULT_MD_EXTENSIONS = [
     "sane_lists",
     "smarty",
     "tables",
+    "toc",
     "pymdownx.betterem",
     "pymdownx.caret",
     "pymdownx.critic",
@@ -49,12 +53,19 @@ DEFAULT_MD_EXTENSIONS = [
     "pymdownx.tilde",
 ]
 DEFAULT_MD_EXT_CONFIG = {
+    "keys": {
+        "camel_case": True,
+    },
+    "toc": {
+        "marker": "",
+        "toc_class": "",
+        "anchorlink": False,
+        "permalink": True,
+        "slugify": slugify_unicode,
+    },
     "pymdownx.highlight": {
         "linenums_style": "pymdownx-inline",
         "anchor_linenums": True,
-    },
-    "keys": {
-        "camel_case": True,
     },
 }
 BUILD_MESSAGE = """
@@ -166,7 +177,7 @@ class Docs:
 
     def serve(self) -> None:
         try:
-            server = self._get_server()
+            server = self.get_server()
             server.watch(self.components_folder)
             server.watch(self.content_folder)
             server.watch(self.static_folder)
@@ -183,6 +194,18 @@ class Docs:
         except OSError as err:  # pragma: no cover
             # Avoid ugly, unhelpful traceback
             raise Abort(f"{type(err).__name__}: {err}")
+
+    def get_server(self) -> LiveReloadServer:
+        server = LiveReloadServer(render=self.render)
+
+        middleware = self.catalog.get_middleware(
+            server.application,
+            allowed_ext=None,  # All file extensions allowed as static files
+            autorefresh=True,
+        )
+        middleware.add_files(self.static_folder, STATIC_URL)
+        server.application = middleware
+        return server
 
     def build(self) -> None:
         print(BUILD_MESSAGE)
@@ -201,14 +224,25 @@ class Docs:
 
         print("\n ✨ Done! ✨  \n")
 
-    def _get_server(self) -> LiveReloadServer:
-        server = LiveReloadServer(render=self.render)
+    def run(self) -> None:
+        def sigterm_handler(_, __):
+            raise SystemExit(1)
 
-        middleware = self.catalog.get_middleware(
-            server.application,
-            allowed_ext=None,  # All file extensions allowed as static files
-            autorefresh=True,
-        )
-        middleware.add_files(self.static_folder, STATIC_URL)
-        server.application = middleware
-        return server
+        signal(SIGTERM, sigterm_handler)
+
+        try:
+            py, *sysargs = sys.argv
+            cmd = sysargs[0] if sysargs else "serve"
+            if cmd == "serve":
+                self.serve()
+            elif cmd == "build":
+                self.build()
+            else:
+                print(f"""
+Valid commands:
+  python {py} serve
+  python {py} build
+""")
+        finally:
+            sys.stderr.write("\n")
+            exit(1)

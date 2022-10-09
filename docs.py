@@ -17,4 +17,4 @@ docs = Docs(nav)
 
 
 if __name__ == "__main__":
-    docs.serve()
+    docs.run()

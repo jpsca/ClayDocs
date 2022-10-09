@@ -263,7 +263,7 @@ class RequestHandler(wsgiref.simple_server.WSGIRequestHandler):
             level = logging.WARNING
             if code == "404":
                 message = f"{self.path} - NOT FOUND"
-        elif self.path.startswith(f"/{LIVERELOAD_URL}"):
+        elif self.path.startswith(LIVERELOAD_URL):
             level = logging.DEBUG
         else:
             level = logging.INFO
