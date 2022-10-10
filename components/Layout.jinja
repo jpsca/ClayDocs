@@ -20,6 +20,7 @@
   {% if description -%}<meta property="og:description" content="{{ description }}">{% endif -%}
 	<meta property="og:type" content="profile" />
 </head>
+{% do attrs.add_classes("antialiased text-slate-800 dark:text-slate-400 bg-white dark:bg-slate-900") -%}
 <body {{ attrs.render() }}>
 	{{ content }}
 </body>

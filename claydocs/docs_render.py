@@ -115,15 +115,15 @@ class DocsRender(THasPaths if t.TYPE_CHECKING else object):
             "component": component,
             "content": content,
         }
+
         page_toc = self.nav.get_page_toc(self.markdowner.toc_tokens)  # type: ignore
-        meta["nav"] = {
+        self.catalog.jinja_env.globals["nav"] = {
             "page": page,
             "page_toc": page_toc,
             "prev_page": self.nav.get_prev(url=page["url"]),
             "next_page": self.nav.get_next(url=page["url"]),
             "toc": self.nav.toc,
         }
-
         return self.catalog.render(component, source=source, **meta)
 
     def render_markdown(self, source: str) -> Markup:

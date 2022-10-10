@@ -1,0 +1,25 @@
+{#def page_toc #}
+
+{% set max_depth = 2 %}
+{% set margins = ["ml-0", "ml-4", "ml-8"] %}
+
+{% macro render_sub_items(pages, depth=1) %}
+{%- for url, title, children in pages %}
+  <PageTocSubItem url={url} title={title} class={margins[depth]} />
+  {% if depth < max_depth -%}
+    {{ render_sub_items(children, depth=depth + 1) }}
+  {%- endif %}
+{%- endfor %}
+{% endmacro %}
+
+<div class="fixed z-20 top-[3.8125rem] bottom-0 right-[max(0px,calc(50%-45rem))] w-[19.5rem] py-10 overflow-y-auto hidden xl:block">
+  <div class="px-8">
+    <h5 class="text-slate-900 font-semibold mb-4 text-sm leading-6 dark:text-slate-100">On this page</h5>
+    <ul class="text-slate-700 text-sm leading-6">
+      {%- for url, title, children in page_toc %}
+      <PageTocItem url={url} title={title} />
+      {{ render_sub_items(children) }}
+      {%- endfor %}
+    </ul>
+  </div>
+</div>
