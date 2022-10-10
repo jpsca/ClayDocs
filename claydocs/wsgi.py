@@ -17,7 +17,7 @@ from .utils import logger
 
 if t.TYPE_CHECKING:
     from pathlib import Path
-    from watchdog.observers import ObservedWatch
+    from watchdog.observers import ObservedWatch  # type: ignore
 
 
 DEFAULT_HOST = "127.0.0.1"
@@ -81,35 +81,36 @@ class LiveReloadServer(socketserver.ThreadingMixIn, wsgiref.simple_server.WSGISe
         *,
         host: str = DEFAULT_HOST,
         port: int = DEFAULT_PORT,
-        polling_interval: float = 0.5,
         shutdown_delay: float = 0.25,
-        **kwargs
+        **kwargs,
     ) -> None:
         self._render = render
         self.host = host
         self.port = port
-        self.polling_interval = polling_interval
         self.shutdown_delay = shutdown_delay
 
-        self.epoch = _timestamp()  # This version of the docs
-        self.epoch_cond = threading.Condition()  # Must be held when accessing epoch.
+        # This version of the docs
+        self.epoch = _timestamp()
+        # Must be held when accessing epoch
+        self.epoch_cond = threading.Condition()
+
         self.must_refresh = False
-        self.must_refresh_cond = threading.Condition()  # Must be held when accessing must_refresh.
+        # Must be held when accessing must_refresh.
+        self.must_refresh_cond = threading.Condition()
 
         self.serve_thread = threading.Thread(
             target=lambda: self.serve_forever(shutdown_delay)
         )
-        self.observer = watchdog.observers.polling.PollingObserver(
-            timeout=polling_interval
-        )
+        self.observer = watchdog.observers.polling.PollingObserver()
         self.watch_refs: "dict[str, ObservedWatch]" = {}
         self.running = False
 
         super().__init__((host, port), RequestHandler, **kwargs)
 
-    def watch(self, path: "Path", recursive: bool = True) -> None:
-        """Add the 'path' to watched paths, call the function and reload when any file changes under it."""
-        path = str(path.absolute())
+    def watch(self, path_to_watch: "Path", recursive: bool = True) -> None:
+        """Add the 'path' to watched paths, call the function and reload
+        when any file changes under it."""
+        path = str(path_to_watch.absolute())
         if path in self.watch_refs:
             return
 
@@ -128,23 +129,22 @@ class LiveReloadServer(socketserver.ThreadingMixIn, wsgiref.simple_server.WSGISe
             handler, path, recursive=recursive
         )
 
-    def application(self, environ, start_response):
+    def application(self, environ: dict, start_response: t.Callable) -> list[bytes]:
         self.request = Request(environ)
         path = self.request.path
         if path.startswith(LIVERELOAD_URL):
             return self.livereload(path, start_response)
 
         self.headers = {"Server": "ClayDocs"}
-        body, status = self.call()
-        if hasattr(body, "encode"):
-            body = body.encode("utf8")
+        str_body, status = self.call()
+        body = str_body.encode("utf8")
         body = self._inject_js_into_html(body)
 
         self.headers["Content-Length"] = str(len(body))
         start_response(status, list(self.headers.items()))
         return [body]
 
-    def livereload(self, path, start_response):
+    def livereload(self, path: str, start_response: t.Callable) -> list[bytes]:
         headers = [("Content-Type", "text/plain")]
         match = RX_LIVERELOAD.fullmatch(path)
         if not match:
@@ -164,7 +164,7 @@ class LiveReloadServer(socketserver.ThreadingMixIn, wsgiref.simple_server.WSGISe
                 self.epoch_cond.wait_for(condition, timeout=self.poll_response_timeout)
             return [b"%d" % self.epoch]
 
-    def call(self):
+    def call(self) -> tuple[str, str]:
         if self.request.path in STATIC_FILES:
             return self.redirect_to(f"/static{self.request.path}")
 
@@ -177,31 +177,32 @@ class LiveReloadServer(socketserver.ThreadingMixIn, wsgiref.simple_server.WSGISe
         self.headers.setdefault("Content-Type", "text/html")
         return body, status
 
-    def redirect_to(self, path):
+    def redirect_to(self, path: str) -> tuple[str, str]:
         location = quote(path.encode("utf8"))
         self.headers["Location"] = location
         logger.info(f"{self.request.path} -> {location}")
         return "", "302 Found"
 
-    def render_page(self):
+    def render_page(self) -> tuple[str, str]:
         path = self.request.path
         try:
             body = self._render(path[1:])
         except Exception as exception:
             logger.exception(path)
-            return self.render_error_page(exception), HTTP_ERROR
+            return self.render_error_page(exception)
 
         if body:
             return body, HTTP_OK
         else:
             return f"{path}.md not found", HTTP_NOT_FOUND
 
-    def render_error_page(self, exception):
-        return ERROR_BODY.format(
+    def render_error_page(self, exception: Exception) -> tuple[str, str]:
+        body = ERROR_BODY.format(
             title=exception.__class__.__name__,
             error=str(exception),
             traceback="".join(traceback.format_exception(*exc_info())),
         )
+        return body, HTTP_ERROR
 
     def serve(self) -> None:
         self.running = True
@@ -214,7 +215,8 @@ class LiveReloadServer(socketserver.ThreadingMixIn, wsgiref.simple_server.WSGISe
         while True:
             with self.must_refresh_cond:
                 while not self.must_refresh_cond.wait_for(
-                    lambda: self.must_refresh or not self.running, timeout=self.shutdown_delay
+                    lambda: self.must_refresh or not self.running,
+                    timeout=self.shutdown_delay,
                 ):
                     # We could have used just one wait instead of a loop + timeout, but we need
                     # occasional breaks, otherwise on Windows we can't receive KeyboardInterrupt.
@@ -254,7 +256,11 @@ class LiveReloadServer(socketserver.ThreadingMixIn, wsgiref.simple_server.WSGISe
 
 
 class RequestHandler(wsgiref.simple_server.WSGIRequestHandler):
-    def log_request(self, code="200", size="-"):
+    def log_request(
+        self,
+        code: str = "200",
+        _size: "t.Union[int, str]" = "-",
+    ) -> None:
         message = self.path
         code = str(code)
         if code.startswith("5"):
@@ -270,19 +276,19 @@ class RequestHandler(wsgiref.simple_server.WSGIRequestHandler):
 
         logger.log(level, message)
 
-    def log_message(self, format, *args):
+    def log_message(self, format: str, *args) -> None:
         logger.debug(format, *args)
 
 
 class Request:
-    def __init__(self, environ=None, path=None):
+    def __init__(self, environ: t.Optional[dict] = None, path: str = "") -> None:
         environ = environ or {}
         self.environ = environ
         self.path = path or self.get_path()
         self.method = environ.get("REQUEST_METHOD", "GET").upper()
         self.remote_addr = environ.get("REMOTE_ADDR", "127.0.0.1")
 
-    def get_path(self):
+    def get_path(self) -> str:
         path_info = self.environ.get("PATH_INFO")
         if not path_info:
             return "/"

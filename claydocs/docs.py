@@ -1,34 +1,23 @@
+import random
 import sys
 import textwrap
 from pathlib import Path
 from signal import SIGTERM, signal
-from typing import TYPE_CHECKING
-from typing import Any
-from typing import Optional
-from xmlrpc.server import resolve_dotted_attribute
+import typing as t
 
-import jinja2
 import markdown
-from markdown.extensions.toc import slugify_unicode
+from markdown.extensions.toc import slugify_unicode  # type: ignore
 from markupsafe import Markup
-from tcom import Catalog
+from tcom.catalog import Catalog
 
-from .exceptions import Abort
-from .nav_tree import NavTree
-from .utils import current_path, highlight, load_markdown_metadata, logger
-from .wsgi import LiveReloadServer
+from .docs_builder import DocsBuilder
+from .docs_server import DocsServer
+from .nav import Nav
+from .utils import load_markdown_metadata, logger
 
-if TYPE_CHECKING:
-    from .nav_tree import TNavConfig
+if t.TYPE_CHECKING:
+    from .nav import TNavConfig
 
-
-COMPONENTS_FOLDER = "components"
-CONTENT_FOLDER = "content"
-STATIC_FOLDER = "static"
-BUILD_FOLDER = "build"
-
-STATIC_URL = "static"
-DEFAULT_COMPONENT = "Page"
 
 DEFAULT_MD_EXTENSIONS = [
     "attr_list",
@@ -52,6 +41,7 @@ DEFAULT_MD_EXTENSIONS = [
     "pymdownx.tasklist",
     "pymdownx.tilde",
 ]
+
 DEFAULT_MD_EXT_CONFIG = {
     "keys": {
         "camel_case": True,
@@ -68,40 +58,55 @@ DEFAULT_MD_EXT_CONFIG = {
         "anchor_linenums": True,
     },
 }
-BUILD_MESSAGE = """
-─────────────────────────────────────────────────
- Building documentation...
-─────────────────────────────────────────────────
-"""
+
+RANDOM_MESSAGES = [
+    "Distilling enjoyment",
+    "Adding emotional depth",
+    "Filtering the ozone",
+    "Testing for perfection",
+    "Stretching the truth",
+    "Optimizing for happiness",
+    "Swapping time and space",
+    "Reversing the polarity",
+    "Self-affirming",
+    "Extracting meaning",
+]
 
 
 class Markdown(markdown.Markdown):
     pass
 
 
-class Docs:
+class Docs(DocsServer, DocsBuilder):
+    COMPONENTS_FOLDER = "components"
+    CONTENT_FOLDER = "content"
+    STATIC_FOLDER = "static"
+    BUILD_FOLDER = "build"
+    STATIC_URL = "static"
+    DEFAULT_COMPONENT = "Page"
+
     def __init__(
         self,
         nav_config: "TNavConfig",
         *,
-        root: str = ".",
-        globals: "Optional[dict[str, Any]]" = None,
-        filters: "Optional[dict[str, Any]]" = None,
-        tests: "Optional[dict[str, Any]]" = None,
-        extensions: "Optional[list]" = None,
+        root: "t.Union[str,Path]" = ".",
+        globals: "t.Optional[dict[str,t.Any]]" = None,
+        filters: "t.Optional[dict[str,t.Any]]" = None,
+        tests: "t.Optional[dict[str,t.Any]]" = None,
+        extensions: "t.Optional[list]" = None,
         md_extensions: "list[str]" = DEFAULT_MD_EXTENSIONS,
-        md_ext_config: "dict[str, Any]" = DEFAULT_MD_EXT_CONFIG,
+        md_ext_config: "dict[str,t.Any]" = DEFAULT_MD_EXT_CONFIG,
     ) -> None:
         root = Path(root)
         if root.is_file():
             root = root.parent
-        self.root = resolve_dotted_attribute
-        self.components_folder = root / COMPONENTS_FOLDER
-        self.content_folder = root / CONTENT_FOLDER
-        self.static_folder = root / STATIC_FOLDER
-        self.build_folder = root / BUILD_FOLDER
+        self.root = root
+        self.components_folder = root / self.COMPONENTS_FOLDER
+        self.content_folder = root / self.CONTENT_FOLDER
+        self.static_folder = root / self.STATIC_FOLDER
+        self.build_folder = root / self.BUILD_FOLDER
 
-        self.nav = NavTree(self.content_folder, nav_config)
+        self.nav = Nav(self.content_folder, nav_config)
         self.markdowner = Markdown(
             extensions=md_extensions,
             extension_configs=md_ext_config,
@@ -114,24 +119,17 @@ class Docs:
             tests=tests,
             extensions=extensions,
         )
+        super().__init__()
 
     def init_catalog(
         self,
-        globals: "Optional[dict[str, Any]]" = None,
-        filters: "Optional[dict[str, Any]]" = None,
-        tests: "Optional[dict[str, Any]]" = None,
-        extensions: "Optional[list]" = None,
+        globals: "t.Optional[dict[str,t.Any]]" = None,
+        filters: "t.Optional[dict[str,t.Any]]" = None,
+        tests: "t.Optional[dict[str,t.Any]]" = None,
+        extensions: "t.Optional[list]" = None,
     ) -> None:
         globals = globals or {}
-        globals.setdefault("current_path", current_path)
-        globals.setdefault("highlight", highlight)
-        globals.setdefault("markdown", self.render_markdown)
-        globals["nav"] = self.nav
-
         filters = filters or {}
-        filters.setdefault("current_path", current_path)
-        filters.setdefault("highlight", highlight)
-        filters.setdefault("markdown", self.render_markdown)
         tests = tests or {}
         extensions = extensions or []
 
@@ -146,17 +144,24 @@ class Docs:
         self.catalog = catalog
 
     def render(self, name: str, **kw) -> str:
-        filepath = self.content_folder / f"{name}.md"
+        filename = f"{name}.md"
+        logger.debug(f"Trying to render `{name}`...")
+        filepath = self.content_folder / filename
+        logger.debug(f"Looking for `{filepath}`...")
         if not filepath.exists():
-            return ""
+            filename = f"{name}/index.md"
+            filepath = self.content_folder / filename
+            logger.debug(f"Looking for `{filepath}`...")
+            if not filepath.exists():
+                return ""
 
+        logger.debug(f"Rendering `{filepath}`")
         md_source, meta = load_markdown_metadata(filepath)
         meta.update(kw)
-        url, nav_page = self.nav.get_page(filepath)
-        meta.setdefault("component", DEFAULT_COMPONENT)
-        meta.setdefault("title", nav_page["title"])
-        meta.setdefault("section", nav_page["section"])
-        meta["current_page"] = url
+        page = self.nav.get_page(filename)
+        meta.setdefault("component", self.DEFAULT_COMPONENT)
+        meta.setdefault("title", page["title"])
+        meta.setdefault("section", page["section"])
 
         component = meta["component"]
         content = self.render_markdown(md_source)
@@ -164,9 +169,18 @@ class Docs:
             "component": component,
             "content": content,
         }
+        page_toc = self.nav.get_page_toc(self.markdowner.toc_tokens)  # type: ignore
+        meta["nav"] = {
+            "page": page,
+            "page_toc": page_toc,
+            "prev_page": self.nav.get_prev(url=page["url"]),
+            "next_page": self.nav.get_next(url=page["url"]),
+            "toc": self.nav.toc,
+        }
+
         return self.catalog.render(component, source=source, **meta)
 
-    def render_markdown(self, source: str):
+    def render_markdown(self, source: str) -> Markup:
         source = textwrap.dedent(source.strip("\n"))
         html = (
             self.markdowner.convert(source)
@@ -175,54 +189,9 @@ class Docs:
         )
         return Markup(html)
 
-    def serve(self) -> None:
-        try:
-            server = self.get_server()
-            server.watch(self.components_folder)
-            server.watch(self.content_folder)
-            server.watch(self.static_folder)
-
-            try:
-                server.serve()
-            except KeyboardInterrupt:
-                print()  # To clear the printed ^C
-            finally:
-                server.shutdown()
-        except jinja2.exceptions.TemplateError:
-            # This is a subclass of OSError, but shouldn't be suppressed.
-            raise
-        except OSError as err:  # pragma: no cover
-            # Avoid ugly, unhelpful traceback
-            raise Abort(f"{type(err).__name__}: {err}")
-
-    def get_server(self) -> LiveReloadServer:
-        server = LiveReloadServer(render=self.render)
-
-        middleware = self.catalog.get_middleware(
-            server.application,
-            allowed_ext=None,  # All file extensions allowed as static files
-            autorefresh=True,
-        )
-        middleware.add_files(self.static_folder, STATIC_URL)
-        server.application = middleware
-        return server
-
-    def build(self) -> None:
-        print(BUILD_MESSAGE)
-
-        for url in self.nav.titles:
-            name = url.strip("/")
-            if name.endswith("/index") or name == "index":
-                filename = f"{name}.html"
-            else:
-                filename = f"{name}/index.html"
-            filepath = self.build_folder / filename
-            filepath.parent.mkdir(parents=True, exist_ok=True)
-            print(f" - {BUILD_FOLDER}/{filename}")
-            html = self.render(name)
-            filepath.write_text(html)
-
-        print("\n ✨ Done! ✨  \n")
+    def print_random_messages(self, num=2) -> None:
+        for message in random.sample(RANDOM_MESSAGES, num):
+            logger.info(f"{message}...")
 
     def run(self) -> None:
         def sigterm_handler(_, __):
@@ -238,11 +207,13 @@ class Docs:
             elif cmd == "build":
                 self.build()
             else:
-                print(f"""
+                print(
+                    f"""
 Valid commands:
   python {py} serve
   python {py} build
-""")
+"""
+                )
         finally:
             sys.stderr.write("\n")
             exit(1)

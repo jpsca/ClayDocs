@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>Component Arguments | Documentation</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+	<link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+
+	<link rel="stylesheet" href="/static/docs.css">
+	<script src="/static/docs.js" defer></script>
+	
+
+  <meta property="og:title" content="Component Arguments | Documentation">
+	<meta property="generator" content="ClayDocs" />
+  <meta property="og:type" content="profile" />
+</head>
+<body class="antialiased bg-white dark:bg-slate-900 dark:text-slate-400 text-slate-500">
+	<div class="relative z-20 prose prose-slate mt-8 dark:prose-dark">
+  <h1 id="component-arguments">Component Arguments<a class="headerlink" href="#component-arguments" title="Permanent link">&para;</a></h1>
+<p>More often than not, a component takes one or more arguments to render. Every argument must be declared at the beginning of the component with <code>{#def arguments #}</code>. The syntax is very similar to how you declare the arguments of a python function:</p>
+<div class="highlight"><span class="filename">components/Form.jinja</span><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="c">{#def action, method=&#39;post&#39;, multipart=False #}</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="p">&lt;</span><span class="nt">form</span> <span class="na">method</span><span class="o">=</span><span class="s">&quot;</span><span class="cp">{{</span> <span class="nv">method</span> <span class="cp">}}</span><span class="s">&quot;</span> <span class="na">action</span><span class="o">=</span><span class="s">&quot;</span><span class="cp">{{</span> <span class="nv">action</span> <span class="cp">}}</span><span class="s">&quot;</span>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>  <span class="cp">{%</span>- <span class="k">if</span> <span class="nv">multipart</span> <span class="cp">%}</span> <span class="na">enctype</span><span class="o">=</span><span class="s">&quot;multipart/form-data&quot;</span><span class="cp">{%</span> <span class="k">endif</span> <span class="cp">%}</span>
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="p">&gt;</span>
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>  <span class="cp">{{</span> <span class="nv">content</span> <span class="cp">}}</span>
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="p">&lt;/</span><span class="nt">form</span><span class="p">&gt;</span>
+</code></pre></div>
+<p>In this example, the component takes three arguments: &ldquo;action&rdquo;, &ldquo;method&rdquo;, and &ldquo;multipart&rdquo;. The last two have a default value, so they are optional, but the first one doesn&rsquo;t. That means it must be passed a value when rendering the component.</p>
+<p>So all of these are valid forms to use this component:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="p">&lt;</span><span class="nt">Form</span> <span class="na">action</span><span class="o">=</span><span class="s">&quot;/new&quot;</span><span class="p">&gt;</span>...<span class="p">&lt;/</span><span class="nt">Form</span><span class="p">&gt;</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="p">&lt;</span><span class="nt">Form</span> <span class="na">action</span><span class="o">=</span><span class="s">&quot;/new&quot;</span> <span class="na">method</span><span class="o">=</span><span class="s">&quot;PATCH&quot;</span><span class="p">&gt;</span>...<span class="p">&lt;/</span><span class="nt">Form</span><span class="p">&gt;</span>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="p">&lt;</span><span class="nt">Form</span> <span class="na">multipart</span><span class="o">=</span><span class="s">{False}</span> <span class="na">action</span><span class="o">=</span><span class="s">&quot;/new&quot;</span><span class="p">&gt;</span>...<span class="p">&lt;/</span><span class="nt">Form</span><span class="p">&gt;</span>
+</code></pre></div>
+<p>The values of the declared arguments can be used in the template as values with the same name.</p>
+<h2 id="non-string-arguments">Non-string arguments<a class="headerlink" href="#non-string-arguments" title="Permanent link">&para;</a></h2>
+<p>In the example above, both &ldquo;action&rdquo; and &ldquo;method&rdquo; are strings, but &ldquo;multipart&rdquo; is a boolean, so we cannot pass it like <code>multipart="false"</code>
+because that will make it a string that evaluates as <code>True</code>, which is the opposite of what we want.</p>
+<p>Instead, you must use curly brackets: <code>multipart={False}</code>, instead of quotes: <code>multipart="False"</code>.</p>
+<p>!!! info
+    Using lowercase booleans (<code>true</code> or <code>false</code>) is also valid.</p>
+<p>Between the brackets, you can use datetimes, objects, lists, or any Python expressions.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="c">{# A datetime value #}</span>
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="p">&lt;</span><span class="nt">DateTime</span> <span class="na">date</span><span class="o">=</span><span class="s">{datetime_value}</span> <span class="p">/&gt;</span>
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="c">{# A query result #}</span>
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="p">&lt;</span><span class="nt">Post</span> <span class="na">post</span><span class="o">=</span><span class="s">{post}</span> <span class="p">/&gt;</span>
+<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>
+<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a><span class="c">{# In-place calculations #}</span>
+<a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a><span class="p">&lt;</span><span class="nt">FooBar</span> <span class="na">number</span><span class="o">=</span><span class="s">{2**10}</span> <span class="p">/&gt;</span>
+<a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a>
+<a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a><span class="c">{# A list #}</span>
+<a id="__codelineno-10-11" name="__codelineno-10-11" href="#__codelineno-10-11"></a><span class="p">&lt;</span><span class="nt">FooBar</span> <span class="na">items</span><span class="o">=</span><span class="s">{[1,2,3,4]}</span> <span class="p">/&gt;</span>
+</code></pre></div>
+<h2 id="components-with-content">Components with content<a class="headerlink" href="#components-with-content" title="Permanent link">&para;</a></h2>
+<p>So far we have seen self-closing components, but there is another, much more useful type: components that wrap other HTML content and/or other components.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="c">{# Self-closing component #}</span>
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="p">&lt;</span><span class="nt">Name</span> <span class="na">arguments</span> <span class="p">/&gt;</span>
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="c">{# Component with content #}</span>
+<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a><span class="p">&lt;</span><span class="nt">Name</span> <span class="na">arguments</span><span class="p">&gt;</span> ...content here... <span class="p">&lt;/</span><span class="nt">Name</span><span class="p">&gt;</span>
+</code></pre></div>
+<p>A great use case is to make layout components:</p>
+<div class="highlight"><span class="filename">components/PageLayout.jinja</span><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="c">{#def title #}</span>
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="cp">&lt;!DOCTYPE html&gt;</span>
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="p">&lt;</span><span class="nt">html</span> <span class="na">lang</span><span class="o">=</span><span class="s">&quot;en&quot;</span><span class="p">&gt;</span>
+<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a><span class="p">&lt;</span><span class="nt">head</span><span class="p">&gt;</span>
+<a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a>  <span class="p">&lt;</span><span class="nt">meta</span> <span class="na">charset</span><span class="o">=</span><span class="s">&quot;utf-8&quot;</span><span class="p">&gt;</span>
+<a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a>  <span class="p">&lt;</span><span class="nt">title</span><span class="p">&gt;</span><span class="cp">{{</span> <span class="nv">title</span> <span class="cp">}}</span><span class="p">&lt;/</span><span class="nt">title</span><span class="p">&gt;</span>
+<a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a><span class="p">&lt;/</span><span class="nt">head</span><span class="p">&gt;</span>
+<a id="__codelineno-12-9" name="__codelineno-12-9" href="#__codelineno-12-9"></a><span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
+<a id="__codelineno-12-10" name="__codelineno-12-10" href="#__codelineno-12-10"></a><span class="cp">{{</span> <span class="nv">content</span> <span class="cp">}}</span>
+<a id="__codelineno-12-11" name="__codelineno-12-11" href="#__codelineno-12-11"></a><span class="p">&lt;/</span><span class="nt">body</span><span class="p">&gt;</span>
+</code></pre></div>
+<div class="highlight"><span class="filename">components/ArchivePage.jinja</span><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="c">{#def posts #}</span>
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="p">&lt;</span><span class="nt">PageLayout</span> <span class="na">title</span><span class="o">=</span><span class="s">&quot;Archive&quot;</span><span class="p">&gt;</span>
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>  <span class="cp">{%</span> <span class="k">for</span> <span class="nv">post</span> <span class="k">in</span> <span class="nv">posts</span> <span class="cp">%}</span>
+<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>  <span class="p">&lt;</span><span class="nt">Post</span> <span class="na">post</span><span class="o">=</span><span class="s">{post}</span> <span class="p">/&gt;</span>
+<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a>  <span class="cp">{%</span> <span class="k">endfor</span> <span class="cp">%}</span>
+<a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a><span class="p">&lt;/</span><span class="nt">PageLayout</span><span class="p">&gt;</span>
+</code></pre></div>
+<p>Everything between the open and close tags of the components will be rendered and passed to the <code>PageLayout</code> component as a special, implicit, <code>content</code> variable.</p>
+<p>To test a component in isolation, you can also manually send a content argument using the special <code>__content</code> argument:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="n">catalog</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="s2">&quot;PageLayout&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Hello world&quot;</span><span class="p">,</span> <span class="n">__content</span><span class="o">=</span><span class="s2">&quot;TEST&quot;</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="extra-arguments">Extra arguments<a class="headerlink" href="#extra-arguments" title="Permanent link">&para;</a></h2>
+<p>If you pass arguments not declared in a component, those are not discarded, but rather collected in a <code>attrs</code> object. Read more about it in the next section.</p>
+  </div>
+</body>
+</html>

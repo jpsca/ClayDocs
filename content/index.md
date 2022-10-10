@@ -3,11 +3,29 @@ title: Meh
 component: HomePage
 ---
 
-A component can begin with a Jinja comment where it declare what arguments it takes.
+# T1
 
-```html+jinja
-{#def title, message='Hi' #}
+a
 
-<h1>{{ title }}</h1>
-<div>{{ message }}. This is my component</div>
-```
+## T2A
+
+a
+
+## T2B
+a
+
+### T3A
+
+a
+
+## T2C
+
+a
+
+### T3B
+
+a
+
+### T3C
+
+a

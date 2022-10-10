@@ -12,7 +12,7 @@ coverage:
 
 .PHONY: types
 types:
-	mypy claydocs
+	pyright claydocs
 
 .PHONY: install
 install:

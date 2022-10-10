@@ -1,14 +1,9 @@
 import logging
 import re
-import textwrap
 from fnmatch import fnmatch
 from pathlib import Path
 
-import pygments
 import yaml
-from markupsafe import Markup
-from pygments.lexers import get_lexer_by_name
-from pygments.formatters import HtmlFormatter
 
 from .exceptions import InvalidFrontMatter
 
@@ -52,26 +47,15 @@ def load_markdown_metadata(filepath: Path) -> tuple[str, dict]:
     return source.lstrip(" -"), meta
 
 
-def current_path(path, *url_patterns, partial=False, classes="active"):
+def current_path(
+    path,
+    *url_patterns,
+    partial: bool = False,
+    classes: str = "active",
+) -> str:
     curr_path = re.sub("index.html$", "", path).strip("/")
     for urlp in url_patterns:
         urlp = re.sub("index.html$", "", urlp.strip("/")).strip("/")
         if fnmatch(curr_path, urlp) or (partial and curr_path.startswith(urlp)):
             return classes
     return ""
-
-
-def highlight(source, language="", *, linenos=True, **options):
-    source = textwrap.dedent(source.strip("\n"))
-    lexer = None
-    if language:
-        lexer = get_lexer_by_name(language, stripall=True)
-
-    options.setdefault("wrapcode", True)
-    formatter = HtmlFormatter(
-        linenos="inline" if linenos else False,
-        **options,
-    )
-    html = pygments.highlight(source, lexer=lexer, formatter=formatter)
-    html = html.replace("{", "&lbrace;")
-    return Markup(html)

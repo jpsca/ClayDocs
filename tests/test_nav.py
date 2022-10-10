@@ -1,8 +1,8 @@
-from claydocs.nav_tree import NavTree
+from claydocs.nav import Nav
 
 
 def test_toc():
-    nav = NavTree(None, [
+    nav = Nav("", [
         ["1.md", "One"],
         ["a", [
             ["2.md", "Two"],
@@ -18,12 +18,12 @@ def test_toc():
     ])
 
     assert nav.titles == {
-        "/1": {"title": "One", "index": 0, "section": ""},
-        "/2": {"title": "Two", "index": 1, "section": "a"},
-        "/3": {"title": "Three", "index": 2, "section": "a"},
-        "/4": {"title": "Four", "index": 3, "section": "b"},
-        "/5": {"title": "Five", "index": 4, "section": "c"},
-        "/6": {"title": "Six", "index": 5, "section": ""},
+        "/1": {"url": "/1", "title": "One", "index": 0, "section": ""},
+        "/2": {"url": "/2", "title": "Two", "index": 1, "section": "a"},
+        "/3": {"url": "/3", "title": "Three", "index": 2, "section": "a"},
+        "/4": {"url": "/4", "title": "Four", "index": 3, "section": "b"},
+        "/5": {"url": "/5", "title": "Five", "index": 4, "section": "c"},
+        "/6": {"url": "/6", "title": "Six", "index": 5, "section": ""},
     }
 
     assert nav.toc == [
@@ -43,7 +43,7 @@ def test_toc():
 
 
 def test_next():
-    nav = NavTree(None, [
+    nav = Nav("", [
         ["1.md", "One"],
         ["a", [
             ["2.md", "Two"],
@@ -63,11 +63,11 @@ def test_next():
     assert nav.get_next("3") == ("b", "/4", "Four")
     assert nav.get_next("4") == ("c", "/5", "Five")
     assert nav.get_next("5") == ("", "/6", "Six")
-    assert nav.get_next("6") == (None, None, None)
+    assert nav.get_next("6") == ("", "", "")
 
 
 def test_prev():
-    nav = NavTree(None, [
+    nav = Nav("", [
         ["1.md", "One"],
         ["a", [
             ["2.md", "Two"],
@@ -87,4 +87,4 @@ def test_prev():
     assert nav.get_prev("4") == ("a", "/3", "Three")
     assert nav.get_prev("3") == ("a", "/2", "Two")
     assert nav.get_prev("2") == ("", "/1", "One")
-    assert nav.get_prev("1") == (None, None, None)
+    assert nav.get_prev("1") == ("", "", "")
