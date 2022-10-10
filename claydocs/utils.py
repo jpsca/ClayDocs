@@ -1,7 +1,8 @@
 import logging
+import random
 import re
+import typing as t
 from fnmatch import fnmatch
-from pathlib import Path
 
 import yaml
 
@@ -11,6 +12,11 @@ try:
     from yaml import CSafeLoader as SafeLoader
 except ImportError:  # pragma: no cover
     from yaml import SafeLoader  # type: ignore
+
+if t.TYPE_CHECKING:
+    from pathlib import Path
+    from tcom.catalog import Catalog
+    from .nav import Nav
 
 
 LOGGER_LEVEL = logging.INFO
@@ -32,7 +38,30 @@ ch.setFormatter(formatter)
 logger.addHandler(ch)
 
 
-def load_markdown_metadata(filepath: Path) -> tuple[str, dict]:
+class THasPaths:
+    COMPONENTS_FOLDER: str
+    CONTENT_FOLDER: str
+    STATIC_FOLDER: str
+    BUILD_FOLDER: str
+    STATIC_URL: str
+    DEFAULT_COMPONENT: str
+
+    components_folder: "Path"
+    content_folder: "Path"
+    static_folder: "Path"
+    build_folder: "Path"
+
+    nav: "Nav"
+
+
+class THasRender(THasPaths):
+    catalog: "Catalog"
+
+    def render(self, name: str, **kw) -> str:  # type: ignore
+        ...
+
+
+def load_markdown_metadata(filepath: "Path") -> tuple[str, dict]:
     source = filepath.read_text().lstrip()
     if not source.startswith(META_START):
         return source, {}
@@ -59,3 +88,31 @@ def current_path(
         if fnmatch(curr_path, urlp) or (partial and curr_path.startswith(urlp)):
             return classes
     return ""
+
+
+def is_current_path(
+    path,
+    *url_patterns,
+    partial: bool = False,
+    classes: str = "active",
+) -> bool:
+    return bool(current_path(path, *url_patterns, partial=partial, classes=classes))
+
+
+RANDOM_MESSAGES = [
+    "Distilling enjoyment",
+    "Adding emotional depth",
+    "Filtering the ozone",
+    "Testing for perfection",
+    "Stretching the truth",
+    "Optimizing for happiness",
+    "Swapping time and space",
+    "Reversing the polarity",
+    "Self-affirming",
+    "Extracting meaning",
+]
+
+
+def print_random_messages(num=2) -> None:
+    for message in random.sample(RANDOM_MESSAGES, num):
+        logger.info(f"{message}...")

@@ -2,34 +2,17 @@ import jinja2
 import typing as t
 
 from .exceptions import Abort
-from .utils import logger
+from .utils import logger, print_random_messages
 from .wsgi import LiveReloadServer
 
 if t.TYPE_CHECKING:
-    from pathlib import Path
-    from tcom.catalog import Catalog
-    from .nav import Nav
+    from .utils import THasRender
 
 
-class HasRender:
-    STATIC_URL: str
-    components_folder: "Path"
-    content_folder: "Path"
-    static_folder: "Path"
-    catalog: "Catalog"
-    nav: "Nav"
-
-    def print_random_messages(self, num=2) -> None:  # type: ignore
-        ...
-
-    def render(self, name: str, **kw) -> str:  # type: ignore
-        ...
-
-
-class DocsServer(HasRender if t.TYPE_CHECKING else object):
+class DocsServer(THasRender if t.TYPE_CHECKING else object):
     def serve(self) -> None:
         logger.info("Starting server...")
-        self.print_random_messages()
+        print_random_messages()
         try:
             server = self.get_server()
             server.watch(self.components_folder)

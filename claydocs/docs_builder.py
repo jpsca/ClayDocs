@@ -1,23 +1,11 @@
 import re
 import typing as t
 
-from .utils import logger
+from .utils import logger, print_random_messages
 
 if t.TYPE_CHECKING:
     from pathlib import Path
-    from .nav import Nav
-
-
-class HasRender:
-    BUILD_FOLDER: str
-    build_folder: "Path"
-    nav: "Nav"
-
-    def print_random_messages(self, num=2) -> None:  # type: ignore
-        ...
-
-    def render(self, name: str, **kw) -> str:  # type: ignore
-        ...
+    from .utils import THasRender
 
 
 RX_ABS_URL = re.compile(
@@ -26,7 +14,7 @@ RX_ABS_URL = re.compile(
 )
 
 
-class DocsBuilder(HasRender if t.TYPE_CHECKING else object):
+class DocsBuilder(THasRender if t.TYPE_CHECKING else object):
     def build(self) -> None:
         logger.info("Rendering pages...")
 
@@ -49,7 +37,7 @@ class DocsBuilder(HasRender if t.TYPE_CHECKING else object):
             logger.info(f"{self.BUILD_FOLDER}/{filename}")
             filepath.write_text(html)
 
-        self.print_random_messages()
+        print_random_messages()
         print("\n✨ Done! ✨")
 
     def relativize_urls(

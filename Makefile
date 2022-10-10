@@ -17,7 +17,6 @@ types:
 .PHONY: install
 install:
 	pip install -e .[test,dev]
-	pip install -r docs/requirements.txt
 	# pre-commit install
 
 .PHONY: tailwind
