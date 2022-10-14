@@ -9,7 +9,8 @@
     aspect-square
     rounded-full
     touch-manipulation
-    outline-offset-4"
+    outline-offset-4
+  "
   type="button"
   aria-label="auto"
   aria-live="polite"
@@ -26,16 +27,18 @@
   >
     <circle
       class="sun
-      origin-center
-      transform-gpu
-      stroke-transparent
-      fill-gray-600
-      dark:fill-gray-400
-      group-hover:fill-gray-800
-      dark:group-hover:fill-gray-200
-       dark:scale-125
-       motion-safe:transition-[transform,0.5,ease-elastic-3]
-       motion-safe:dark:transition-[transform,250ms,ease-3]"
+        origin-center
+        transform-gpu
+        stroke-transparent
+        fill-gray-600
+        dark:fill-gray-400
+        group-hover:fill-gray-800
+        dark:group-hover:fill-gray-200
+        scale-100
+        dark:scale-125
+        dark:motion-safe:transition-[transform,250ms,ease-3]
+        motion-safe:transition-[transform,500ms,ease-elastic-3]
+      "
       cx="12" cy="12" r="6"
       mask="url(#moon-mask)"
     ></circle>
@@ -50,7 +53,8 @@
         dark:rotate-[-25deg]
         motion-safe:transition-[transform,500ms,ease-elastic-3]
         motion-safe:transition-[opacity,500ms,ease-3]
-        motion-safe:dark:duration-150"
+        dark:motion-safe:duration-150
+        "
     >
       <line x1="12" y1="1" x2="12" y2="3" />
       <line x1="12" y1="21" x2="12" y2="23" />
@@ -65,7 +69,8 @@
       class="moon
         origin-center
         fill-gray-600
-        group-hover:fill-gray-800"
+        group-hover:fill-gray-800
+      "
       id="moon-mask"
     >
       <rect x="0" y="0" width="100%" height="100%" fill="white" />
@@ -74,8 +79,9 @@
           transform-gpu
           dark:translate-x-[-7px]
           motion-safe:transition-[transform,250ms,ease-out-5]
-          motion-safe:dark:duration-500
-          motion-safe:dark:delay-[250ms]"
+          dark:motion-safe:duration-500
+          dark:motion-safe:delay-[250ms]
+        "
         cx="24" cy="10" r="6"
       ></circle>
     </mask>

@@ -1342,6 +1342,12 @@ video {
   transform-origin: center;
 }
 
+.scale-100 {
+  --tw-scale-x: 1;
+  --tw-scale-y: 1;
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+}
+
 .transform-gpu {
   transform: translate3d(var(--tw-translate-x), var(--tw-translate-y), 0) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
 }
@@ -1420,16 +1426,12 @@ video {
   fill: #4b5563;
 }
 
-.stroke-current {
-  stroke: currentColor;
+.stroke-transparent {
+  stroke: transparent;
 }
 
 .stroke-gray-600 {
   stroke: #4b5563;
-}
-
-.stroke-transparent {
-  stroke: transparent;
 }
 
 .stroke-2 {
@@ -1646,18 +1648,6 @@ h6:hover a.headerlink {
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .motion-safe\:transition-\[transform\2c 250ms\2c ease-out-5\] {
-    transition-property: transform,250ms,ease-out-5;
-    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-    transition-duration: 150ms;
-  }
-
-  .motion-safe\:transition-\[transform\2c 0\.5\2c ease-elastic-3\] {
-    transition-property: transform,0.5,ease-elastic-3;
-    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-    transition-duration: 150ms;
-  }
-
   .motion-safe\:transition-\[transform\2c 500ms\2c ease-elastic-3\] {
     transition-property: transform,500ms,ease-elastic-3;
     transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
@@ -1669,70 +1659,16 @@ h6:hover a.headerlink {
     transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
     transition-duration: 150ms;
   }
+
+  .motion-safe\:transition-\[transform\2c 250ms\2c ease-out-5\] {
+    transition-property: transform,250ms,ease-out-5;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 150ms;
+  }
 }
 
 .dark .dark\:translate-x-\[-7px\] {
   --tw-translate-x: -7px;
-  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
-}
-
-.dark .dark\:translate-x-\[-6px\] {
-  --tw-translate-x: -6px;
-  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
-}
-
-.dark .dark\:translate-x-\[-8px\] {
-  --tw-translate-x: -8px;
-  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
-}
-
-.dark .dark\:translate-y-\[-2px\] {
-  --tw-translate-y: -2px;
-  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
-}
-
-.dark .dark\:translate-x-\[-2px\] {
-  --tw-translate-x: -2px;
-  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
-}
-
-.dark .dark\:translate-y-\[2px\] {
-  --tw-translate-y: 2px;
-  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
-}
-
-.dark .dark\:translate-y-\[-1px\] {
-  --tw-translate-y: -1px;
-  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
-}
-
-.dark .dark\:translate-y-\[3px\] {
-  --tw-translate-y: 3px;
-  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
-}
-
-.dark .dark\:translate-y-\[4px\] {
-  --tw-translate-y: 4px;
-  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
-}
-
-.dark .dark\:translate-y-\[8px\] {
-  --tw-translate-y: 8px;
-  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
-}
-
-.dark .dark\:translate-y-\[5px\] {
-  --tw-translate-y: 5px;
-  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
-}
-
-.dark .dark\:translate-x-\[-9px\] {
-  --tw-translate-x: -9px;
-  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
-}
-
-.dark .dark\:translate-y-\[9px\] {
-  --tw-translate-y: 9px;
   transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
 }
 
@@ -1766,10 +1702,6 @@ h6:hover a.headerlink {
 
 .dark .dark\:fill-gray-400 {
   fill: #9ca3af;
-}
-
-.dark .dark\:stroke-gray-400 {
-  stroke: #9ca3af;
 }
 
 .dark .dark\:text-slate-400 {
@@ -1820,10 +1752,6 @@ h6:hover a.headerlink {
   fill: #e5e7eb;
 }
 
-.dark .group:hover .dark\:group-hover\:stroke-gray-200 {
-  stroke: #e5e7eb;
-}
-
 .dark .group:hover .dark\:group-hover\:text-slate-500 {
   --tw-text-opacity: 1;
   color: rgb(100 116 139 / var(--tw-text-opacity));
@@ -1835,22 +1763,22 @@ h6:hover a.headerlink {
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .dark .motion-safe\:dark\:transition-\[transform\2c 250ms\2c ease-3\] {
+  .dark .dark\:motion-safe\:transition-\[transform\2c 250ms\2c ease-3\] {
     transition-property: transform,250ms,ease-3;
     transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
     transition-duration: 150ms;
   }
 
-  .dark .motion-safe\:dark\:delay-\[250ms\] {
+  .dark .dark\:motion-safe\:delay-\[250ms\] {
     transition-delay: 250ms;
   }
 
-  .dark .motion-safe\:dark\:duration-500 {
-    transition-duration: 500ms;
+  .dark .dark\:motion-safe\:duration-150 {
+    transition-duration: 150ms;
   }
 
-  .dark .motion-safe\:dark\:duration-150 {
-    transition-duration: 150ms;
+  .dark .dark\:motion-safe\:duration-500 {
+    transition-duration: 500ms;
   }
 }
 
