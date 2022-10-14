@@ -1,0 +1,34 @@
+{#def curr, prev, next #}
+
+<div {{ attrs.render() }}>
+  <nav class="text-slate-700 font-semibold flex items-center dark:text-slate-200 z-20">
+    {% if prev -%}
+    <a
+      href="{{ prev.url }}"
+      class="group no-underline"
+    >
+      <div class="text-xs text-sky-500 uppercase font-semibold tracking-wide">
+        {{ prev.section if prev.section != curr.section else "&nbsp;" }}
+      </div>
+      <div class="flex items-center hover:text-slate-900 dark:hover:text-white">
+        <ArrowLeft class="mr-3 w-auto h-1.5 text-slate-400 overflow-visible group-hover:text-slate-600 dark:group-hover:text-slate-300" />
+        {{ prev.title }}
+      </div>
+    </a>
+    {%- endif %}
+    {% if next -%}
+    <a
+      href="{{ next.url }}"
+      class="group ml-auto no-underline"
+    >
+      <div class="text-xs text-sky-500 uppercase font-semibold tracking-wide">
+        {{ next.section if next.section != curr.section else "&nbsp;" }}
+      </div>
+      <div class="flex items-center hover:text-slate-900 dark:hover:text-white">
+        {{ next.title }}
+        <ArrowRight class="ml-3 w-auto h-1.5 text-slate-400 overflow-visible group-hover:text-slate-600 dark:group-hover:text-slate-300" />
+      </div>
+    </a>
+    {%- endif %}
+  </nav>
+</div>

@@ -56,33 +56,37 @@ class Nav:
         self,
         filepath: "TStrOrPath" = "",
         url: str = "",
-    ) -> tuple[str, str, str]:
+    ) -> dict:
         url = url or self._get_url(filepath)
         index = self.titles[url]["index"]
         if index <= 0:
-            return "", "", ""
+            return {
+                "url": "",
+                "title": "",
+                "section": "",
+                "index": None,
+            }
 
         prev_url = self._urls[index - 1]
-        prev_ = self.titles[prev_url]
-        prev_section = prev_["section"]
-        prev_title = prev_["title"]
-        return prev_section, prev_url, prev_title
+        return self.titles[prev_url]
 
     def get_next(
         self,
         filepath: "TStrOrPath" = "",
         url: str = "",
-    ) -> tuple[str, str, str]:
+    ) -> dict:
         url = url or self._get_url(filepath)
         index = self.titles[url]["index"]
         if index >= self._max_index:
-            return "", "", ""
+            return {
+                "url": "",
+                "title": "",
+                "section": "",
+                "index": None,
+            }
 
         next_url = self._urls[index + 1]
-        next_ = self.titles[next_url]
-        next_section = next_["section"]
-        next_title = next_["title"]
-        return next_section, next_url, next_title
+        return self.titles[next_url]
 
     def build_toc(
         self,
@@ -115,13 +119,13 @@ class Nav:
         ```
         # self.toc
         [
-            ["/index", "Home"],
-            ["Guide", [
+            ["/index", "Home", []],
+            ["", "Guide", [
                 ["/guide/index", "The Guide"],
                 ["/guide/arguments", "The Arguments"],
                 ["/guide/extra", "Extra arguments"],
             ]],
-            ["/faq", "FAQ"],
+            ["/faq", "FAQ", []],
         ]
 
         # self.titles
@@ -154,7 +158,7 @@ class Nav:
                 self.titles[url] = dict(
                     url=url, title=title, index=index, section=section_title
                 )
-                section.append([url, title])
+                section.append([url, title, None])
 
             elif isinstance(item, tuple_or_list) and len(item) == 2:
                 key, value = item
@@ -168,16 +172,16 @@ class Nav:
                         index=index,
                         section=section_title,
                     )
-                    section.append([url, value])
+                    section.append([url, value, None])
 
                 elif isinstance(item, tuple_or_list):
                     new_section_title = key.strip()
-                    new_section = [new_section_title, []]
+                    new_section = [None, new_section_title, []]
                     section.append(new_section)
                     self.build_toc(
                         nav_config=value,
                         section_title=new_section_title,
-                        section=new_section[1],
+                        section=new_section[-1],
                     )
 
                 else:

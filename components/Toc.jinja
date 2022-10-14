@@ -1,0 +1,39 @@
+{# def toc, page_url=None #}
+
+{% macro render_item(url, title) %}
+<li>
+  <a href="{{ url }}"
+    class="block border-l pl-4 -ml-px font-semibold
+    {%- if page_url == url %}
+    text-sky-500 border-current dark:text-sky-400
+    {%- else %}
+    border-transparent hover:border-slate-400 dark:hover:border-slate-500 first-letter:text-slate-700 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-300
+    {%- endif %}"
+  >
+    {{ title }}
+  </a>
+</li>
+{% endmacro %}
+
+{% macro render_section(url, title, children, depth=0) %}
+<li class="mt-12 lg:mt-8">
+  <h5 class="mb-8 lg:mb-3 font-semibold text-slate-900 dark:text-slate-200">
+    {{ title }}
+  </h5>
+  {{ render_children(children, depth) }}
+</li>
+{% endmacro %}
+
+{% macro render_children(children, depth=0) %}
+<ul>
+  {%- for url, title, children in children %}
+  {% if children -%}
+    {{ render_section(url, title, children, depth=depth+1) }}
+  {%- else -%}
+    {{ render_item(url, title) }}
+  {%- endif %}
+  {%- endfor %}
+</ul>
+{% endmacro %}
+
+{{ render_children(toc) }}

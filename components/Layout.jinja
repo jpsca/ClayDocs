@@ -5,23 +5,24 @@
 
 <!DOCTYPE html>
 <html lang="{{ lang }}">
-<head>
-	<meta charset="utf-8">
-	<title>{{ title }}</title>
-	<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-	<link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+	<head>
+		<meta charset="utf-8">
+		<title>{{ title }}</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+		<link rel="icon" type="image/x-icon" href="/static/favicon.ico">
 
-	<link rel="stylesheet" href="/static/docs.css">
-	<script src="/static/docs.js" defer></script>
-	{{ components_assets }}
+		<link rel="stylesheet" href="/static/docs.css">
+		<script src="/static/docs.js" defer></script>
+		{{ components_assets }}
 
-  <meta property="og:title" content="{{ title }}">
-	<meta property="generator" content="ClayDocs" />
-  {% if description -%}<meta property="og:description" content="{{ description }}">{% endif -%}
-	<meta property="og:type" content="profile" />
-</head>
-{% do attrs.add_classes("antialiased text-slate-800 dark:text-slate-400 bg-white dark:bg-slate-900") -%}
-<body {{ attrs.render() }}>
-	{{ content }}
-</body>
+		<meta property="og:title" content="{{ title }}">
+		<meta property="generator" content="ClayDocs" />
+		{% if description -%}<meta property="og:description" content="{{ description }}">{% endif -%}
+		<meta property="og:type" content="profile" />
+	</head>
+	<body class="antialiased text-slate-800 dark:text-slate-400 bg-white dark:bg-slate-900">
+		<Header />
+		{{ content }}
+		<Footer />
+	</body>
 </html>

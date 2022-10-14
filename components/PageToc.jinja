@@ -1,14 +1,48 @@
 {#def page_toc #}
 
 {% set max_depth = 2 %}
-{% set margins = ["ml-0", "ml-4", "ml-8"] %}
+{% set margins = ["ml-4", "ml-8"] %}
 
-{% macro render_sub_items(pages, depth=1) %}
+{% macro render_item(url, title, children) %}
+<li>
+  <a href="{{ url }}"
+    class="
+      block py-1 font-medium
+      hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-300
+    [&.active]:text-sky-500 [&.active]:hover:text-sky-500 [&.active]:dark:text-sky-400 [&.active]:dark:hover:text-sky-400
+    "
+  >{{ title }}</a>
+</li>
+{% endmacro %}
+
+{% macro render_sub_item(url, title, depth=0) %}
+<li class="{{ margins[depth] }}">
+  <a href="{{ url }}"
+    class="
+      group flex items-start py-1
+      hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-300
+    [&.active]:text-sky-500 [&.active]:hover:text-sky-500 [&.active]:dark:text-sky-400 [&.active]:dark:hover:text-sky-400
+    "
+  >
+    <ArrowRight class="w-auto h-1.5 mr-2 text-slate-400 overflow-visible group-hover:text-slate-600 dark:text-slate-600 dark:group-hover:text-slate-500" />
+    {{ title }}
+  </a>
+</li>
+{% endmacro %}
+
+{% macro render_sub_items(pages, depth=0) %}
 {%- for url, title, children in pages %}
-  <PageTocSubItem url={url} title={title} class={margins[depth]} />
+  {{ render_sub_item(url, title, depth) }}
   {% if depth < max_depth -%}
     {{ render_sub_items(children, depth=depth + 1) }}
   {%- endif %}
+{%- endfor %}
+{% endmacro %}
+
+{% macro render_items(page_toc) %}
+{%- for url, title, children in page_toc %}
+  {{ render_item(url, title, children) }}
+  {{ render_sub_items(children) }}
 {%- endfor %}
 {% endmacro %}
 
@@ -16,10 +50,7 @@
   <div class="px-8">
     <h5 class="text-slate-900 font-semibold mb-4 text-sm leading-6 dark:text-slate-100">On this page</h5>
     <ul class="text-slate-700 text-sm leading-6">
-      {%- for url, title, children in page_toc %}
-      <PageTocItem url={url} title={title} />
-      {{ render_sub_items(children) }}
-      {%- endfor %}
+      {{ render_items(page_toc) }}
     </ul>
   </div>
 </div>
