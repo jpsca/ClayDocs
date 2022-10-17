@@ -3,11 +3,24 @@
 {% macro render_item(url, title) %}
 <li>
   <a href="{{ url }}"
-    class="block border-l pl-4 -ml-px font-semibold
+    class="
+      block
+      border-l
+      pl-4
+      -ml-px
+      font-semibold
     {%- if page_url == url %}
-    text-sky-500 border-current dark:text-sky-400
+      text-sky-500
+      border-current
+      dark:text-sky-400
     {%- else %}
-    border-transparent hover:border-slate-400 dark:hover:border-slate-500 first-letter:text-slate-700 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-300
+      border-transparent
+      hover:border-slate-400
+      dark:hover:border-slate-500
+      first-letter:text-slate-700
+      hover:text-slate-900
+      dark:text-slate-400
+      dark:hover:text-slate-300
     {%- endif %}"
   >
     {{ title }}
@@ -29,6 +42,22 @@
   {%- for url, title, children in children %}
   {% if children -%}
     {{ render_section(url, title, children, depth=depth+1) }}
+  {%- elif url in ("/", "/index") -%}
+    <h5>
+      <a href="{{ url }}"
+        class="
+          block
+          font-semibold
+          text-slate-900
+          dark:text-slate-200
+          hover:text-sky-500
+          dark:hover:text-sky-400
+          border-current
+        "
+      >
+        {{ title }}
+      </a>
+    </h5>
   {%- else -%}
     {{ render_item(url, title) }}
   {%- endif %}

@@ -54,7 +54,7 @@ var livereload = function(epoch) {
         if (this.status === 200) {
             launchNext();
         } else {
-            setTimeout(launchNext, 3000);
+            setTimeout(launchNext, 5000);
         }
     };
     req.open("GET", "/livereload/" + epoch);

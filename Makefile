@@ -18,7 +18,3 @@ types:
 install:
 	pip install -e .[test,dev]
 	# pre-commit install
-
-.PHONY: tailwind
-tailwind:
-	npx tailwindcss -i ./static/_source.css -o ./static/docs.css --watch

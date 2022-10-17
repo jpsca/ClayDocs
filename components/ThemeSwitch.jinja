@@ -1,0 +1,129 @@
+{#js ThemeSwitch.js #}
+
+{% do attrs.setdefault("title", "Toggles light & dark mode") %}
+{% do attrs.add(
+  class="
+    ThemeSwitch
+    group
+    flex
+    justify-center
+    items-center
+    p-2
+    text-sm
+    font-semibold
+    rounded
+    hover:shadow-sm
+    appearance-none
+    cursor-pointer
+    touch-manipulation
+    whitespace-nowrap
+
+    disabled:cursor-default
+    disabled:outline-none
+    focus:outline-sky-500
+    focus:outline-offset-1
+
+    bg-transparent
+    hover:bg-slate-400/10
+    dark:hover:bg-white-400/10
+    active:bg-slate-200/10
+
+    border
+    border-transparent
+    hover:border-slate-200
+    active:border-slate-100
+    dark:hover:border-slate-600
+    dark:active:border-slate-700
+
+    text-slate-500
+    hover:text-slate-600
+    dark:text-slate-400
+    dark:hover:text-slate-300
+  "
+) %}
+
+<button
+  type="button"
+  aria-label="auto"
+  aria-live="polite"
+  style="-webkit-tap-highlight-color:transparent;"
+  {{ attrs.render() }}
+>
+  <svg
+    class="sun-and-moon"
+    aria-hidden="true"
+    stroke-linecap="round"
+    viewBox="0 0 24 24"
+    style="inline-size:1.5em; block-size:1.5em;"
+  >
+    <circle
+      class="sun
+        origin-center
+        transform-gpu
+        stroke-transparent
+        fill-slate-400
+        group-hover:fill-slate-500
+        group-focus-visible:fill-slate-500
+        dark:group-hover:fill-slate-300
+        dark:group-focus-visible:fill-slate-300
+        scale-100
+        dark:scale-[1.75]
+        motion-safe:transition-transform
+        motion-safe:duration-500
+        motion-safe:ease-elastic-3
+        dark:motion-safe:duration-[250ms]
+        dark:motion-safe:ease-io-3
+      "
+      cx="12" cy="12" r="6"
+      mask="url(#moon-mask)"
+    ></circle>
+    <g
+      class="sun-beams
+        origin-center
+        transform-gpu
+        stroke-2
+        stroke-slate-400
+        group-hover:stroke-slate-500
+        group-focus-visible:stroke-slate-500
+        dark:group-hover:stroke-slate-300
+        dark:group-focus-visible:stroke-slate-300
+        dark:opacity-0
+        dark:rotate-[-25deg]
+        motion-safe:transition-[transform,opacity]
+        motion-safe:duration-400
+        motion-safe:ease-elastic-4
+        dark:motion-safe:duration-150
+        "
+    >
+      <line x1="12" y1="1" x2="12" y2="3" />
+      <line x1="12" y1="21" x2="12" y2="23" />
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+      <line x1="1" y1="12" x2="3" y2="12" />
+      <line x1="21" y1="12" x2="23" y2="12" />
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+    </g>
+    <mask
+      class="moon
+        origin-center
+        fill-slate-600
+        group-hover:fill-slate-500
+      "
+      id="moon-mask"
+    >
+      <rect x="0" y="0" width="100%" height="100%" fill="white" />
+      <circle
+        class="
+          transform-gpu
+          dark:translate-x-[-7px]
+          motion-safe:transition-transform
+          motion-safe:duration-300
+          motion-safe:ease-out-5
+          dark:motion-safe:delay-300
+        "
+        cx="24" cy="10" r="6"
+      ></circle>
+    </mask>
+  </svg>
+</button>
