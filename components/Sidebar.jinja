@@ -1,38 +1,41 @@
-<div
-  class="
-    group
-    fixed
-    lg:block
-    z-20
-    inset-0
-    top-[3.8125rem]
-    -left-full
-    pb-10
-    px-8
-    overflow-y-auto
-    transition-all
-  "
-  open
->
+<div class="group fixed inset-0 z-50" open >
   <div
     class="
+      backdrop
       group-open:fixed
-      lg:hidden
       inset-0
       bg-black/20
       backdrop-blur-sm
-      dark:bg-slate-900/80
   "></div>
 
   <div class="
-    relative
+    px-4
+    py-6
+    w-96
+    max-w-full
+    fixed
+    top-0
+    bottom-0
+    left-0
+    justify-between
+    border-r
     bg-white
-    lg:left-[max(0px,calc(50%-45rem))]
-    right-auto w-[19.5rem]
-    p-6
-    dark:bg-slate-800
   ">
-    <nav id="nav" class="lg:text-sm lg:leading-6 relative">
+    <span class="logo block h-10 w-32 rounded-lg bg-gray-200"></span>
+
+    <nav aria-label="Main menu" class="mt-6 flex flex-col space-y-1">
+      <a
+        href="#"
+        class="
+          flex
+          items-center
+          rounded-lg
+          bg-gray-100
+          px-4
+          py-2
+          text-gray-700
+        "
+      >Home</a>
       <Toc toc={nav.toc} page_url={nav.page.url} />
     </nav>
   </div>
