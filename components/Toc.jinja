@@ -1,26 +1,24 @@
 {# def toc, page_url=None #}
 
-{% macro render_item(url, title) %}
+{% macro render_item(url, title, depth) %}
 <li>
   <a href="{{ url }}"
     class="
       block
-      border-l
-      pl-4
-      -ml-px
-      font-semibold
+      border-l-2
+      py-1 pl-4 -ml-px
     {%- if page_url == url %}
       text-sky-500
       border-current
       dark:text-sky-400
     {%- else %}
-      border-transparent
-      hover:border-slate-400
-      dark:hover:border-slate-500
-      first-letter:text-slate-700
-      hover:text-slate-900
-      dark:text-slate-400
-      dark:hover:text-slate-300
+      {{ 'border-zinc-200' if depth == 0 else 'border-transparent'}}
+      hover:border-zinc-200
+      dark:hover:border-zinc-500
+      first-letter:text-zinc-700
+      hover:text-zinc-900
+      dark:text-zinc-400
+      dark:hover:text-zinc-300
     {%- endif %}"
   >
     {{ title }}
@@ -29,8 +27,8 @@
 {% endmacro %}
 
 {% macro render_section(url, title, children, depth=0) %}
-<li class="mt-12 lg:mt-8">
-  <h5 class="mb-8 lg:mb-3 font-semibold text-slate-900 dark:text-slate-200">
+<li class="mt-8">
+  <h5 class="mb-3 font-semibold text-zinc-900 dark:text-zinc-200">
     {{ title }}
   </h5>
   {{ render_children(children, depth) }}
@@ -38,29 +36,17 @@
 {% endmacro %}
 
 {% macro render_children(children, depth=0) %}
-<ul>
+{% if depth -%}
+  <ul class="border-l-2 border-zinc-100 dark:border-zinc-800">
+{%- else -%}
+  <ul>
+{%- endif %}
   {%- for url, title, children in children %}
-  {% if children -%}
-    {{ render_section(url, title, children, depth=depth+1) }}
-  {%- elif url in ("/", "/index") -%}
-    <h5>
-      <a href="{{ url }}"
-        class="
-          block
-          font-semibold
-          text-slate-900
-          dark:text-slate-200
-          hover:text-sky-500
-          dark:hover:text-sky-400
-          border-current
-        "
-      >
-        {{ title }}
-      </a>
-    </h5>
-  {%- else -%}
-    {{ render_item(url, title) }}
-  {%- endif %}
+    {% if children -%}
+      {{ render_section(url, title, children, depth=depth+1) }}
+    {%- else -%}
+      {{ render_item(url, title, depth) }}
+    {%- endif %}
   {%- endfor %}
 </ul>
 {% endmacro %}

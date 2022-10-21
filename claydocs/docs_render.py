@@ -78,6 +78,7 @@ class DocsRender(THasPaths if t.TYPE_CHECKING else object):
         tests = tests or {}
         tests.setdefault("current_path", is_current_path)
         extensions = extensions or []
+        extensions += ["jinja2.ext.loopcontrols"]
 
         catalog = Catalog(
             globals=globals,

@@ -8,7 +8,7 @@
   <a href="{{ url }}"
     class="
       block py-1 font-medium
-      hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-300
+      hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-300
     [&.active]:text-sky-500 [&.active]:hover:text-sky-500 [&.active]:dark:text-sky-400 [&.active]:dark:hover:text-sky-400
     "
   >{{ title }}</a>
@@ -20,11 +20,11 @@
   <a href="{{ url }}"
     class="
       group flex items-start py-1
-      hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-300
+      hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-300
     [&.active]:text-sky-500 [&.active]:hover:text-sky-500 [&.active]:dark:text-sky-400 [&.active]:dark:hover:text-sky-400
     "
   >
-    <ArrowRight class="w-auto h-1.5 mr-2 text-slate-400 overflow-visible group-hover:text-slate-600 dark:text-slate-600 dark:group-hover:text-slate-500" />
+    <ArrowLeft class="rotate-180 w-auto h-1.5 mr-2 text-zinc-400 overflow-visible group-hover:text-zinc-600 dark:text-zinc-600 dark:group-hover:text-zinc-500" />
     {{ title }}
   </a>
 </li>
@@ -48,8 +48,8 @@
 
 <div class="fixed z-20 top-[3.8125rem] bottom-0 right-[max(0px,calc(50%-45rem))] w-[19.5rem] py-10 overflow-y-auto hidden xl:block">
   <div class="px-8">
-    <h5 class="text-slate-900 font-semibold mb-4 text-sm leading-6 dark:text-slate-100">On this page</h5>
-    <ul class="text-slate-700 text-sm leading-6">
+    <h5 class="text-zinc-900 font-semibold mb-4 text-sm leading-6 dark:text-zinc-100">On this page</h5>
+    <ul class="text-zinc-700 text-sm leading-6">
       {{ render_items(page_toc) }}
     </ul>
   </div>

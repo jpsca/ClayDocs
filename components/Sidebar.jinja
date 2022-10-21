@@ -1,4 +1,7 @@
-<div class="group fixed inset-0 z-50" open >
+{% do attrs.add(
+  class="group fixed inset-0 z-50 overflow-scroll overscroll-contain"
+) %}
+<div {{ attrs.render() }}>
   <div
     class="
       backdrop
@@ -9,8 +12,7 @@
   "></div>
 
   <div class="
-    px-4
-    py-6
+    p-6
     w-96
     max-w-full
     fixed
@@ -24,18 +26,6 @@
     <span class="logo block h-10 w-32 rounded-lg bg-gray-200"></span>
 
     <nav aria-label="Main menu" class="mt-6 flex flex-col space-y-1">
-      <a
-        href="#"
-        class="
-          flex
-          items-center
-          rounded-lg
-          bg-gray-100
-          px-4
-          py-2
-          text-gray-700
-        "
-      >Home</a>
       <Toc toc={nav.toc} page_url={nav.page.url} />
     </nav>
   </div>

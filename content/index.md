@@ -1,5 +1,5 @@
 ---
-title: Meh
+title: Home
 component: HomePage
 ---
 
