@@ -1,20 +1,24 @@
 {#def title="" #}
 
 <Layout title={title}>
-  <div class="max-w-8xl mx-auto px-4 sm:px-6 md:px-8">
-    <Sidebar open />
-    <div class="lg:pl-[19.5rem] z-20">
-      <main class="max-w-3xl mx-auto pt-10 xl:max-w-none xl:ml-0 xl:mr-[15.5rem] xl:pr-16">
-        <div class="z-20 prose prose-slate mt-8 dark:prose-dark max-w-3xl w-full">
-          {{ content }}
-        </div>
+  <div class="max-w-8xl mx-auto px-4 sm:px-6 md:px-8 flex">
+    <Menu class="lg:hidden" />
+    <div class="hidden lg:block">
+      <Sidebar />
+    </div>
+    <main class="z-20 mx-auto pt-10 max-w-3xl w-full mt-8">
+      <div class="prose prose-slate dark:prose-dark">
+        {{ content }}
+
         <PrevNext
           class="my-10"
           curr={nav.page}
           prev={nav.prev_page}
           next={nav.next_page}
         />
-      </main>
+      </div>
+    </main>
+    <div class="hidden xl:block">
       <PageToc page_toc={nav.page_toc} />
     </div>
   </div>

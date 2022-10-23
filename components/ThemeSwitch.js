@@ -1,8 +1,3 @@
-/** Based on https://github.com/argyleink/gui-challenges/
-Original license was:
-  Copyright 2022 Adam Argyle
-  Licensed under the Apache License, Version 2.0
-*/
 (function(){
 
 const SEL_SWITCH = '.ThemeSwitch'
@@ -38,7 +33,6 @@ function addEvents (root) {
   root.querySelectorAll(SEL_SWITCH)
     .forEach( (node) => {
       node.addEventListener('click', onClick)
-      node.setAttribute('aria-label', theme.value)
     })
 }
 
@@ -81,4 +75,5 @@ function getColorPreference () {
       ? DARK
       : LIGHT
 }
+
 })()

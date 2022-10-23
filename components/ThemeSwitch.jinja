@@ -1,7 +1,7 @@
 {#js ThemeSwitch.js #}
 
-{% do attrs.setdefault("title", "Toggles light & dark mode") %}
-{% do attrs.add(
+{% do attrs.setdefault(title="Toggles light & dark mode") %}
+{% do attrs.set(
   class="
     ThemeSwitch
     group

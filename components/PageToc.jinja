@@ -1,5 +1,8 @@
 {#def page_toc #}
 
+{% do attrs.set(
+  class="sticky z-20 top-2 w-60 py-8 overflow-y-auto scrollbar-hide"
+) %}
 {% set max_depth = 2 %}
 {% set margins = ["ml-4", "ml-8"] %}
 
@@ -24,7 +27,7 @@
     [&.active]:text-sky-500 [&.active]:hover:text-sky-500 [&.active]:dark:text-sky-400 [&.active]:dark:hover:text-sky-400
     "
   >
-    <ArrowLeft class="rotate-180 w-auto h-1.5 mr-2 text-zinc-400 overflow-visible group-hover:text-zinc-600 dark:text-zinc-600 dark:group-hover:text-zinc-500" />
+    <ArrowRight class="w-auto h-1.5 mt-[0.6em] mr-2 text-zinc-400 overflow-visible group-hover:text-zinc-600 dark:text-zinc-600 dark:group-hover:text-zinc-500" />
     {{ title }}
   </a>
 </li>
@@ -46,11 +49,11 @@
 {%- endfor %}
 {% endmacro %}
 
-<div class="fixed z-20 top-[3.8125rem] bottom-0 right-[max(0px,calc(50%-45rem))] w-[19.5rem] py-10 overflow-y-auto hidden xl:block">
+<div {{ attrs.render() }}>
   <div class="px-8">
-    <h5 class="text-zinc-900 font-semibold mb-4 text-sm leading-6 dark:text-zinc-100">On this page</h5>
+    <h5 class="text-zinc-900 font-semibold mb-4 text-sm leading-6 dark:text-zinc-100 uppercase">On this page</h5>
     <ul class="text-zinc-700 text-sm leading-6">
-      {{ render_items(page_toc) }}
+      {{ render_items(page_toc) }}
     </ul>
   </div>
 </div>

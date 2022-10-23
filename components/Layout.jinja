@@ -20,7 +20,13 @@
 		{% if description -%}<meta property="og:description" content="{{ description }}">{% endif -%}
 		<meta property="og:type" content="profile" />
 	</head>
-	<body class="antialiased text-zinc-800 dark:text-zinc-300 bg-white dark:bg-zinc-900">
+	<body class="
+		antialiased
+		text-light-text
+		dark:text-dark-text
+		bg-light-bg
+		dark:bg-dark-bg
+	">
 		<Header />
 		{{ content }}
 		<Footer />

@@ -65,3 +65,20 @@ h6:hover a.headerlink {
   content: attr(data-linenos);
 }
 /*! purgecss end ignore */
+
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: thin; /* Firefox */
+  }
+  .scrollbar-hide::-webkit-scrollbar { /* Safari and Chrome */
+    width: 2px;
+  }
+  .scrollbar-default {
+    -ms-overflow-style: auto; /* IE and Edge */
+    scrollbar-width: auto; /* Firefox */
+  }
+  .scrollbar-default::-webkit-scrollbar { /* Safari and Chrome */
+    width: auto;
+  }
+}

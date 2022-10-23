@@ -1,4 +1,6 @@
 /** @type {import('tailwindcss').Config} */
+const colors = require('tailwindcss/colors')
+
 module.exports = {
   content: [
     "./components/**/*.jinja",
@@ -7,6 +9,14 @@ module.exports = {
   darkMode: 'class',
   theme: {
     extend: {
+      colors: {
+        'light-text': colors.zinc['800'],
+        'light-accent': colors.sky['500'],
+        'light-bg': colors.white,
+        'dark-text': colors.zinc['200'],
+        'dark-accent': colors.sky['400'],
+        'dark-bg': colors.zinc['800'],
+      },
       transitionTimingFunction: {
         // https://github.com/argyleink/open-props/blob/main/src/props.easing.css
         'io-3': 'var(--ease-3)',
