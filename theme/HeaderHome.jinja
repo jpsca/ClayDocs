@@ -1,39 +1,24 @@
-<div
-  class="
-    backdrop-blur-sm
-    bg-clip-border
-    bg-white/60
-    dark:bg-transparent
-    active:bg-white/90
+<div class="
     content
-    flex
-    h-16
-    items-center
-    w-full
     z-20
-    "
-  >
+    flex items-center
+    w-full h-16
+    backdrop-blur-md bg-white/60 dark:bg-transparent
+    lg:sticky top-0
+    ">
   <Hamburger class="ml-[-5px] mr-4 lg:hidden" />
   <Logo class="mr-auto" />
-  <nav class="
-    hidden
-    lg:flex
-    mr-3
-    text-sm
-    [&>*]:p-3
-    [&>*]:mr-2
-    [&>*]:inline-block
-    [&>*]:font-medium
-    [&>*]:text-zinc-600
-    [&>*]:dark:text-zinc-300
-  ">
-    <a href="/guide"
-      class="hover:text-zinc-900 dark:hover:text-white"
-    >Documentation</a>
-    <a href="https://github.com/"
-      class="hover:text-zinc-900 dark:hover:text-white"
-    >Blog</a>
-  </nav>
-  <ThemeSwitch />
-  <GitHub class="ml-5" title="Source code" />
+
+  <div class="hidden md:flex items-center">
+    <nav>
+      <ul class="flex items-center space-x-8">
+        <li><a class="hover:text-accent dark:hover:text-accent-darker" href="/guide">Docs</a></li>
+        <li><a href="#" class="hover:text-accent dark:hover:text-accent-darker">Blog</a></li>
+      </ul>
+    </nav>
+    <div class="flex items-center border-l border-zinc-200 ml-6 pl-6 dark:border-zinc-800">
+      <ThemeSwitch />
+      <GitHub class="ml-5" title="Source code" />
+    </div>
+  </div>
 </div>
