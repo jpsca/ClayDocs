@@ -13,6 +13,7 @@ if t.TYPE_CHECKING:
 
 
 class Docs(DocsRender, DocsServer, DocsBuilder):
+    THEME_FOLDER = "theme"
     COMPONENTS_FOLDER = "components"
     CONTENT_FOLDER = "content"
     STATIC_FOLDER = "static"
@@ -36,6 +37,7 @@ class Docs(DocsRender, DocsServer, DocsBuilder):
         if root.is_file():
             root = root.parent
         self.root = root
+        self.theme_folder = root / self.THEME_FOLDER
         self.components_folder = root / self.COMPONENTS_FOLDER
         self.content_folder = root / self.CONTENT_FOLDER
         self.static_folder = root / self.STATIC_FOLDER

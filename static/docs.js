@@ -8,13 +8,7 @@ function setTheme () {
   const PREFERS_DARK_MEDIA = '(prefers-color-scheme: dark)'
 
   function getColorPreference () {
-    const value = localStorage.getItem(STORAGE_KEY)
-    if (value)
-      return value
-    else
-      return window.matchMedia(PREFERS_DARK_MEDIA).matches
-        ? DARK
-        : LIGHT
+    return localStorage.getItem(STORAGE_KEY)
   }
 
   function reflectPreference () {

@@ -1,0 +1,58 @@
+{#js toggle.js #}
+
+{% do attrs.set(
+  id="menu",
+  class="
+    group
+    fixed
+    inset
+    z-30
+    hidden
+    open:block
+  ",
+) %}
+
+<div {{ attrs.render() }}>
+  <div
+    class="
+      backdrop
+      fixed
+      inset-0
+      transition-all
+      bg-black/0
+      group-open:bg-black/20
+      dark:bg-white/0
+      group-open:dark:bg-white/20
+      backdrop-blur-none
+      group-open:backdrop-blur-sm
+    "
+    data-toggle="#menu|[open]"
+  ></div>
+
+  <div class="
+    bg-white
+    border-r
+    bottom-0
+    dark:bg-zinc-900
+    dark:border-r-zinc-600
+    fixed
+    justify-between
+    top-0
+    left-0
+    max-w-md
+    overflow-auto
+    overscroll-contain
+    pb-12
+    text-sm
+    w-full
+  ">
+    <div class="content flex items-center h-16">
+      <CloseBtn class="ml-[-5px] mr-4" aria-label="Close" data-toggle="#menu|[open]" />
+      <Logo />
+    </div>
+
+    <nav class="content flex flex-col pt-5 pb-5 text-base">
+      <Toc toc={nav.toc} page={nav.page} />
+    </nav>
+  </div>
+</div>

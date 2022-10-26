@@ -15,8 +15,9 @@ class DocsServer(THasRender if t.TYPE_CHECKING else object):
         print_random_messages()
         try:
             server = self.get_server()
-            server.watch(self.components_folder)
             server.watch(self.content_folder)
+            server.watch(self.components_folder)
+            server.watch(self.theme_folder)
             server.watch(self.static_folder)
 
             try:

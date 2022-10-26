@@ -1,0 +1,63 @@
+{# def toc, page #}
+
+{% macro render_item(url, title) %}
+{% if url != "/index" -%}
+<li class="border-l-2 border-zinc-100 dark:border-zinc-700/50 py-1">
+  <a href="{{ url }}"
+    class="
+      block
+      py-1
+      pl-4
+      ml-[-2px]
+      border-l-2
+      border-transparent
+      hover:border-zinc-300
+      dark:hover:border-zinc-400
+      [&.active]:border-accent
+      [&.active]:hover:border-accent
+      [&.active]:dark:border-accent-darker
+      [&.active]:dark:hover:border-accent-darker
+
+      text-zinc-700
+      hover:text-zinc-900
+      dark:text-zinc-400
+      dark:hover:text-zinc-100
+      [&.active]:text-accent
+      [&.active]:dark:text-accent-darker
+      [&.active]:font-semibold
+      {{ 'active' if page.url == url else '' }}
+    "
+  >
+    {{ title }}
+  </a>
+</li>
+{%- endif %}
+{% endmacro %}
+
+
+{% macro render_section(url, title, children, depth) %}
+<li class="[&::not(first-child)]:mt-8">
+  {% if title -%}
+  <h2 class="font-bold text-zinc-900 dark:text-white mb-2">
+    {{ title }}
+  </h2>
+  {%- endif %}
+  {{ render_children(children, depth) }}
+</li>
+{% endmacro %}
+
+
+{% macro render_children(children, depth=0) %}
+<ul>
+  {%- for url, title, children in children %}
+    {% if children -%}
+      {{ render_section(url, title, children, depth=depth+1) }}
+    {%- else -%}
+      {{ render_item(url, title) }}
+    {%- endif %}
+  {%- endfor %}
+</ul>
+{% endmacro %}
+
+
+{{ render_children(toc) }}

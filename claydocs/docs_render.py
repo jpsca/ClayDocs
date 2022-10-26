@@ -86,8 +86,9 @@ class DocsRender(THasPaths if t.TYPE_CHECKING else object):
             tests=tests,
             extensions=extensions,
         )
-        catalog.add_folder(self.components_folder)
         catalog.add_folder(self.content_folder)
+        catalog.add_folder(self.components_folder)
+        catalog.add_folder(self.theme_folder)
         self.catalog = catalog
 
     def render(self, name: str, **kw) -> str:

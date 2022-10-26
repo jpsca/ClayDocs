@@ -1,0 +1,47 @@
+{#def curr, prev, next #}
+
+{% do attrs.set(
+  class="
+    content
+    bg-zinc-700
+    flex
+    font-semibold
+    items-center
+    py-5
+  ",
+) %}
+
+<nav {{ attrs.render() }}>
+  {% if prev.url -%}
+  <a
+    href="{{ prev.url }}"
+    class="group no-underline"
+  >
+    <div class="text-xs text-accent group-hover:text-accent-darker font-medium pl-4">
+      {{ prev.section or "Previous" if prev.section != curr.section else "Previous" }}
+    </div>
+    <div class="flex items-center text-zinc-300 group-hover:text-white">
+      <div class="w-4">
+        <ArrowRight class="rotate-180" />
+      </div>
+      {{ prev.title }}
+    </div>
+  </a>
+  {%- endif %}
+  {% if next.url -%}
+  <a
+    href="{{ next.url }}"
+    class="group ml-auto no-underline"
+  >
+    <div class="text-xs text-accent group-hover:text-accent-darker font-medium">
+      {{ next.section or "Next" if next.section != curr.section else "Next" }}
+    </div>
+    <div class="flex items-center text-zinc-300 group-hover:text-white">
+      {{ next.title }}
+      <div class="w-4">
+        <ArrowRight class="float-right" />
+      </div>
+    </div>
+  </a>
+  {%- endif %}
+</nav>

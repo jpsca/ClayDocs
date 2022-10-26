@@ -1,7 +1,7 @@
 (function(){
 
 const ATTR = 'data-toggle'
-const SEL = `[${ATTR}]`
+const SEL_TARGET = `[${ATTR}]`
 
 new MutationObserver( (mutationList) => {
   mutationList.forEach( (mutation) => {
@@ -22,7 +22,7 @@ new MutationObserver( (mutationList) => {
   })
 
 function addEvents (root) {
-  root.querySelectorAll(SEL)
+  root.querySelectorAll(SEL_TARGET)
     .forEach( (node) => {
       node.addEventListener('click', onClick)
     })
@@ -31,7 +31,7 @@ function addEvents (root) {
 addEvents(document)
 
 function onClick (event) {
-  const target = event.target
+  const target = event.target.closest(SEL_TARGET)
   const [ sel, value ] = (target.getAttribute(ATTR) || "").split("|")
   if (!!sel && !!value) { toggle(sel, value) }
 }

@@ -1,6 +1,6 @@
 ---
 title: Home
-component: HomePage
+component: PageHome
 ---
 
 # T1

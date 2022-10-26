@@ -1,6 +1,6 @@
 (function(){
 
-const SEL_SWITCH = '.ThemeSwitch'
+const SEL_TARGET = '.ThemeSwitch'
 const STORAGE_KEY = 'theme'
 const DARK = 'dark'
 const LIGHT = 'light'
@@ -30,7 +30,7 @@ new MutationObserver( (mutationList) => {
   })
 
 function addEvents (root) {
-  root.querySelectorAll(SEL_SWITCH)
+  root.querySelectorAll(SEL_TARGET)
     .forEach( (node) => {
       node.addEventListener('click', onClick)
     })
@@ -48,7 +48,7 @@ window
   })
 
 function onClick (event) {
-  const target = event.target
+  const target = event.target.closest(SEL_TARGET)
   if (target.getAttribute(DISABLED)) return
   theme.value = theme.value === LIGHT ? DARK : LIGHT
   setPreference()
@@ -67,13 +67,7 @@ function reflectPreference () {
 }
 
 function getColorPreference () {
-  const value = localStorage.getItem(STORAGE_KEY)
-  if (value)
-    return value
-  else
-    return window.matchMedia(PREFERS_DARK_MEDIA).matches
-      ? DARK
-      : LIGHT
+  return localStorage.getItem(STORAGE_KEY)
 }
 
 })()

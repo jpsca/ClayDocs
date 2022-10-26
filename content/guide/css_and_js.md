@@ -1,6 +1,10 @@
-# Adding CSS and JS
+---
+title: Adding CSS and JS
+---
 
+<Header>
 Your components might need custom styles or custom JavaScript for many reasons. Instead of using global stylesheet or scripts files, writing assets per individual component has several advantages:
+</Header>
 
 - **Portability**: You can copy a component from one project to another kmowing it will keep working as expected.
 - **Performance**: On each page, only load the css and js that you need. Also, the browser will already have cached the assets of the components for other pages that use them.

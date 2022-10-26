@@ -1,0 +1,21 @@
+{#def title="" #}
+{#css Page.css #}
+
+<Layout title={title}>
+  <HeaderMain />
+  <div class="max-w-8xl min-h-[80vh] mx-auto flex justify-between content pr-0 mb-16 z-10">
+    <GlobalSidebar class="hidden lg:block" />
+    <main class="pt-10 mx-auto max-w-3xl w-full mt-[-1.2em]">
+      <div class="content prose prose-zinc dark:prose-invert">
+        {{ content }}
+      </div>
+    </main>
+    <LocalSidebar class="hidden xl:block" />
+  </div>
+  <PrevNext
+    curr={nav.page}
+    prev={nav.prev_page}
+    next={nav.next_page}
+  />
+  <Menu class="lg:hidden" />
+</Layout>

@@ -1,13 +1,10 @@
-{#js toggle.js #}
-
-{% do attrs.setdefault(title="Show table of contents") %}
 {% do attrs.set(
   class="
     group
     flex
+    p-1
     justify-center
     items-center
-    p-2
     text-sm
     font-semibold
     rounded
@@ -19,7 +16,8 @@
 
     disabled:cursor-default
     disabled:outline-none
-    focus:outline-sky-500
+    focus:outline-accent
+    dark:focus:outline-accent-darker
     focus:outline-offset-1
 
     bg-transparent
@@ -40,14 +38,5 @@
     dark:hover:text-zinc-300
   ",
   type="button",
-  data_toggle="#menu|[open]",
 ) %}
-
-<button {{ attrs.render() }}>
-  <svg width="24" height="24" class="mr-1 pointer-events-none">
-    <path d="M5 6h14M5 12h14M5 18h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
-  </svg>
-  <span class="hidden sm:inline-block pointer-events-none">
-    Menu
-  </span>
-</button>
+<button {{ attrs.render() }}>{{ content }}</button>

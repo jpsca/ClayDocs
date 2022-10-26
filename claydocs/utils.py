@@ -39,6 +39,7 @@ logger.addHandler(ch)
 
 
 class THasPaths:
+    THEME_FOLDER: str
     COMPONENTS_FOLDER: str
     CONTENT_FOLDER: str
     STATIC_FOLDER: str
@@ -46,6 +47,7 @@ class THasPaths:
     STATIC_URL: str
     DEFAULT_COMPONENT: str
 
+    theme_folder: "Path"
     components_folder: "Path"
     content_folder: "Path"
     static_folder: "Path"

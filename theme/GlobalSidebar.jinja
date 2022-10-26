@@ -1,0 +1,17 @@
+{% do attrs.set(
+  class="
+    h-screen
+    overflow-y-auto
+    scrollbar-thin
+    sticky
+    text-sm
+    top-0
+    w-60
+  ",
+) %}
+
+<div {{ attrs.render() }}>
+  <nav class="flex flex-col pt-10 pb-20">
+    <Toc toc={nav.toc} page={nav.page} />
+  </nav>
+</div>

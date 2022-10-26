@@ -1,0 +1,25 @@
+{% do attrs.set(
+  class="
+    h-screen
+    overflow-y-auto
+    overscroll-contain
+    scrollbar-thin
+    sticky
+    top-0
+    w-60
+  ",
+) %}
+
+<div {{ attrs.render() }}>
+  <div class="pl-4 pr-8 pt-10 pb-20">
+    <h5 class="
+      text-zinc-700
+      hover:text-zinc-900
+      dark:text-zinc-400
+      font-bold
+      mb-2
+      text-sm"
+    >On this page</h5>
+    <PageToc page-toc={nav.page_toc} />
+  </div>
+</div>

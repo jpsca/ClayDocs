@@ -1,6 +1,12 @@
-# Component Arguments
+---
+title: Component Arguments
+---
 
-More often than not, a component takes one or more arguments to render. Every argument must be declared at the beginning of the component with `{#def arguments #}`. The syntax is very similar to how you declare the arguments of a python function:
+<Header>
+More often than not, a component takes one or more arguments to render.
+</Header>
+
+Every argument must be declared at the beginning of the component with `{#def arguments #}`. The syntax is very similar to how you declare the arguments of a python function:
 
 ```html+jinja title="components/Form.jinja"
 {#def action, method='post', multipart=False #}

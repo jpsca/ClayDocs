@@ -1,0 +1,36 @@
+{#def title="", section="" #}
+
+{% set section = section or nav.page.section %}
+{% set title = title or nav.page.title %}
+
+<header>
+  <div class>
+    {% if section -%}
+    <p class="
+      mb-1
+      text-sm
+      leading-0
+      font-semibold
+      text-accent
+      dark:text-accent-darker
+    "">{{ section }}</p>
+    {%- endif %}
+    <div class="flex items-center">
+      <h1 class="
+        inline-block
+        text-2xl
+        sm:text-3xl
+        font-extrabold
+        text-zinc-900
+        tracking-tight
+        dark:text-zinc-200
+      "">{{ title }}</h1>
+    </div>
+  </div>
+  <p class="
+    mt-1
+    text-lg
+    text-zinc-700
+    dark:text-zinc-400
+  ">{{ content }}</p>
+</header>
