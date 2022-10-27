@@ -14,6 +14,9 @@ module.exports = {
         'accent': 'var(--accent)',
         'accent-darker': 'var(--accent-darker)',
       },
+      screens: {
+        'tall': { 'raw': '(min-height: 768px)' },
+      },
       transitionTimingFunction: {
         '3': 'var(--ease-3)',
         'out-5': 'var(--ease-out-5)',

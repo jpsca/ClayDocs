@@ -1,18 +1,12 @@
-{% do attrs.set(
+<footer {{ attrs.render(
   class="
-    content
-    bg-zinc-900
-    py-5
-    text-xs
-    text-zinc-400
-    sm:flex
-    justify-center
+    content py-5 text-xs
+    sm:flex justify-center
+    bg-zinc-900 text-zinc-400
   ",
-) %}
-
-<footer {{ attrs.render() }}>
+) }}>
   <div class="mb-4 sm:mb-0 text-center">
-    <p class="mb-1">Copyright © 2022 or whatever</p>
+    <p class="mb-1"><Copyright /></p>
     <p>Created with
       <a
         href="https://github.com/jpsca/ClayDocs"

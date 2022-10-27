@@ -1,26 +1,23 @@
 {#def curr, prev, next #}
 
-{% do attrs.set(
-  class="
-    content
-    bg-zinc-700
-    flex
-    font-semibold
-    items-center
-    py-5
-  ",
-) %}
-
-<nav {{ attrs.render() }}>
+<nav {{ attrs.render(class="flex items-center py-5 font-semibold") }}>
   {% if prev.url -%}
   <a
     href="{{ prev.url }}"
     class="group no-underline"
   >
-    <div class="text-xs text-accent group-hover:text-accent-darker font-medium pl-4">
+    <div class="
+      text-xs font-medium pl-4
+      text-accent-darker group-hover:text-accent
+      dark:text-accent dark:group-hover:text-accent-darker
+    ">
       {{ prev.section or "Previous" if prev.section != curr.section else "Previous" }}
     </div>
-    <div class="flex items-center text-zinc-300 group-hover:text-white">
+    <div class="
+      flex items-center
+      text-zinc-600 group-hover:text-zinc-900
+      dark:text-zinc-300 dark:group-hover:text-white
+    ">
       <div class="w-4">
         <ArrowRight class="rotate-180" />
       </div>
@@ -33,10 +30,18 @@
     href="{{ next.url }}"
     class="group ml-auto no-underline"
   >
-    <div class="text-xs text-accent group-hover:text-accent-darker font-medium">
+    <div class="
+      text-xs font-medium
+      text-accent-darker group-hover:text-accent
+      dark:text-accent dark:group-hover:text-accent-darker
+    ">
       {{ next.section or "Next" if next.section != curr.section else "Next" }}
     </div>
-    <div class="flex items-center text-zinc-300 group-hover:text-white">
+    <div class="
+      flex items-center
+      text-zinc-600 group-hover:text-zinc-900
+      dark:text-zinc-300 dark:group-hover:text-white
+    ">
       {{ next.title }}
       <div class="w-4">
         <ArrowRight class="float-right" />

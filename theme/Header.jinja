@@ -3,34 +3,20 @@
 {% set section = section or nav.page.section %}
 {% set title = title or nav.page.title %}
 
-<header>
+<header {{ attrs.render(class="not-prose mb-8") }}>
   <div class>
     {% if section -%}
     <p class="
-      mb-1
-      text-sm
-      leading-0
-      font-semibold
-      text-accent
-      dark:text-accent-darker
+      mb-1 text-sm leading-none font-semibold
+      text-accent dark:text-accent-darker
     "">{{ section }}</p>
     {%- endif %}
-    <div class="flex items-center">
-      <h1 class="
+    <h1 class="
         inline-block
-        text-2xl
-        sm:text-3xl
-        font-extrabold
-        text-zinc-900
-        tracking-tight
-        dark:text-zinc-200
+        text-2xl sm:text-3xl leading-tight font-extrabold
+        text-zinc-900 dark:text-zinc-200
       "">{{ title }}</h1>
-    </div>
   </div>
-  <p class="
-    mt-1
-    text-lg
-    text-zinc-700
-    dark:text-zinc-400
+  <p class="mt-1 text-lg text-zinc-700 dark:text-zinc-400
   ">{{ content }}</p>
 </header>

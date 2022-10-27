@@ -3,19 +3,24 @@
 
 <Layout title={title}>
   <HeaderMain />
-  <div class="max-w-[88rem] min-h-screen mx-auto flex justify-between content pr-0 mb-16 z-10">
+  <div class="
+    content md:pr-0 pb-16 z-10
+    max-w-[88rem] min-h-screen mx-auto
+    flex justify-between
+  ">
     <GlobalSidebar class="hidden lg:block" />
-    <main class="pt-10 mx-auto max-w-3xl w-full mt-[-1.2em]">
-      <div class="content prose prose-zinc dark:prose-invert">
+    <main class="pt-10 mx-auto w-full max-w-[65ch]">
+      <div class="prose prose-zinc dark:prose-invert">
         {{ content }}
       </div>
+      <PrevNext
+        class="mt-16 w-full"
+        curr={nav.page}
+        prev={nav.prev_page}
+        next={nav.next_page}
+      />
     </main>
     <LocalSidebar class="hidden xl:block" />
   </div>
-  <PrevNext
-    curr={nav.page}
-    prev={nav.prev_page}
-    next={nav.next_page}
-  />
   <Menu class="lg:hidden" />
 </Layout>

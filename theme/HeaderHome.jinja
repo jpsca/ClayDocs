@@ -1,10 +1,8 @@
 <div class="
-    content
-    z-20
-    flex items-center
-    w-full h-16
-    backdrop-blur-md bg-white/60 dark:bg-transparent
-    lg:sticky top-0
+    content z-20
+    flex items-center w-full h-16
+    backdrop-blur-sm bg-white/60 dark:bg-transparent
+    tall:sticky top-0
     ">
   <Hamburger class="ml-[-5px] mr-4 lg:hidden" />
   <Logo class="mr-auto" />
@@ -16,9 +14,13 @@
         <li><a href="#" class="hover:text-accent dark:hover:text-accent-darker">Blog</a></li>
       </ul>
     </nav>
-    <div class="flex items-center border-l border-zinc-200 ml-6 pl-6 dark:border-zinc-800">
-      <ThemeSwitch />
-      <GitHub class="ml-5" title="Source code" />
+    <div class="
+      flex items-center
+      border-l border-zinc-200 dark:border-zinc-700
+      ml-6 pl-6
+    ">
+      <ThemeSwitch class="mr-5" />
+      <SourceLink />
     </div>
   </div>
 </div>
