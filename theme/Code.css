@@ -1,16 +1,48 @@
+.prose code {
+  white-space: nowrap;
+  font-feature-settings: "kern";
+}
+
+.highlight {
+  --border-color: #ccc;
+  background-color: #eee;
+  color: #222;
+}
+html.dark .highlight {
+  --border-color: #333;
+  background-color: #111;
+  color: #eee;
+}
+.highlight {
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+.highlight .filename {
+  display: block;
+  padding: 0.5em 1.2em;
+  font-weight: 500;
+  font-size: 0.9rem;
+  border-bottom: 1px solid var(--border-color);
+}
 .highlight a {
   text-decoration: none;
 }
-[data-linenos]:before {
+.highlight pre {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  background: transparent;
+  padding: 1.2em;
+  display: flow-root;
+  line-height: 1.4;
+  position: relative;
+  overflow: auto;
+}
+.highlight pre [data-linenos]:before {
   content: attr(data-linenos);
 }
-html:not(.dark) .prose .highlight pre {
-  background-color: #f5f5f5;
-  color: #222;
-}
-html.dark .prose .highlight pre {
-  background-color: #000;
-  color: #f8f8f2;
+.highlight pre code {
+  white-space: pre;
 }
 html:not(.dark) .highlight .hll { background-color: #ffffcc }
 html:not(.dark) .highlight .c { color: #808080 } /* Comment */
@@ -144,4 +176,3 @@ html.dark .highlight .vg { color: #f8f8f2 } /* Name.Variable.Global */
 html.dark .highlight .vi { color: #f8f8f2 } /* Name.Variable.Instance */
 html.dark .highlight .vm { color: #f8f8f2 } /* Name.Variable.Magic */
 html.dark .highlight .il { color: #ae81ff } /* Literal.Number.Integer.Long */
-

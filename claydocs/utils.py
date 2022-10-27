@@ -92,13 +92,11 @@ def current_path(
     return ""
 
 
-def is_current_path(
-    path,
-    *url_patterns,
-    partial: bool = False,
-    classes: str = "active",
-) -> bool:
-    return bool(current_path(path, *url_patterns, partial=partial, classes=classes))
+def is_(func: t.Callable) -> t.Callable:
+    def test_is(*args, **kw):
+        return bool(func(*args, **kw))
+
+    return test_is
 
 
 RANDOM_MESSAGES = [

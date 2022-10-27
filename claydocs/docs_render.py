@@ -1,12 +1,13 @@
 import textwrap
 import typing as t
 
+import inflection
 import markdown
 from markupsafe import Markup
 from markdown.extensions.toc import slugify_unicode  # type: ignore
 from tcom.catalog import Catalog
 
-from .utils import current_path, is_current_path, load_markdown_metadata, logger
+from .utils import current_path, is_, load_markdown_metadata, logger
 
 if t.TYPE_CHECKING:
     from .utils import THasPaths
@@ -25,7 +26,6 @@ DEFAULT_MD_EXTENSIONS = [
     "pymdownx.emoji",
     "pymdownx.highlight",
     "pymdownx.inlinehilite",
-    "pymdownx.keys",
     "pymdownx.magiclink",
     "pymdownx.mark",
     "pymdownx.saneheaders",
@@ -49,8 +49,29 @@ DEFAULT_MD_EXT_CONFIG = {
     "pymdownx.highlight": {
         "linenums_style": "pymdownx-inline",
         "anchor_linenums": True,
+        "css_class": "highlight not-prose"
     },
 }
+
+DEFAULT_GLOBALS = {
+    "camelize": inflection.camelize,
+    "humanize": inflection.humanize,
+    "ordinal": inflection.ordinal,
+    "ordinalize": inflection.ordinalize,
+    "parameterize": inflection.parameterize,
+    "pluralize": inflection.pluralize,
+    "singularize": inflection.singularize,
+    "titleize": inflection.titleize,
+    "underscore": inflection.underscore,
+    "current_path": current_path,
+}
+DEFAULT_FILTERS = DEFAULT_GLOBALS.copy()
+DEFAULT_TESTS = {
+    "current_path": is_(current_path),
+}
+DEFAULT_EXTENSIONS = [
+    "jinja2.ext.loopcontrols",
+]
 
 
 class DocsRender(THasPaths if t.TYPE_CHECKING else object):
@@ -71,20 +92,23 @@ class DocsRender(THasPaths if t.TYPE_CHECKING else object):
             tab_length=2,
         )
 
-        globals = globals or {}
-        globals.setdefault("current_path", current_path)
-        filters = filters or {}
-        filters.setdefault("current_path", current_path)
-        tests = tests or {}
-        tests.setdefault("current_path", is_current_path)
-        extensions = extensions or []
-        extensions += ["jinja2.ext.loopcontrols"]
+        _globals = DEFAULT_GLOBALS.copy()
+        _globals.update(globals or {})
+
+        _filters = DEFAULT_FILTERS.copy()
+        _filters.update(filters or {})
+
+        _tests = DEFAULT_TESTS.copy()
+        _tests.update(tests or {})
+
+        _extensions = extensions or []
+        _extensions += DEFAULT_EXTENSIONS
 
         catalog = Catalog(
-            globals=globals,
-            filters=filters,
-            tests=tests,
-            extensions=extensions,
+            globals=_globals,
+            filters=_filters,
+            tests=_tests,
+            extensions=_extensions,
         )
         catalog.add_folder(self.content_folder)
         catalog.add_folder(self.components_folder)

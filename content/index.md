@@ -3,4 +3,4 @@ title: Home
 component: PageHome
 ---
 
-meh
+meh <Keys>Ctrl+c</Keys> jeje
