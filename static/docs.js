@@ -5,7 +5,6 @@ function setTheme () {
   const STORAGE_KEY = 'theme'
   const DARK = 'dark'
   const LIGHT = 'light'
-  const PREFERS_DARK_MEDIA = '(prefers-color-scheme: dark)'
 
   function getColorPreference () {
     return localStorage.getItem(STORAGE_KEY)
@@ -13,10 +12,13 @@ function setTheme () {
 
   function reflectPreference () {
     const value = getColorPreference ()
-    if (value === DARK)
+    if (value === DARK) {
       document.documentElement.classList.add(DARK)
-    else
+      document.documentElement.classList.remove(LIGHT)
+    } else {
+      document.documentElement.classList.add(LIGHT)
       document.documentElement.classList.remove(DARK)
+    }
   }
 
   reflectPreference()

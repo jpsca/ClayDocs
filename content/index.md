@@ -3,4 +3,4 @@ title: Home
 component: PageHome
 ---
 
-meh <Keys>Ctrl+c</Keys> jeje
+meh :+1: lorem ipsum <Keys>Alt+F4</Keys> jaja

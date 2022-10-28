@@ -13,14 +13,7 @@
     --ease-elastic-3: cubic-bezier(.5,1.25,.75,1.25);
     --ease-elastic-4: cubic-bezier(.5,1.5,.75,1.25);
   }
-}
 
-@layer components {
-  .content {
-    @apply px-4 sm:px-6 lg:px-8;
-  }
-
-  /*! purgecss start ignore */
   .prose a.headerlink {
     @apply opacity-0 transition-opacity inline-block ml-1 no-underline;
   }
@@ -34,7 +27,12 @@
   .prose h6:hover a.headerlink {
     @apply opacity-50;
   }
-  /*! purgecss end ignore */
+}
+
+@layer components {
+  .content {
+    @apply px-4 sm:px-6 lg:px-8;
+  }
 }
 
 @layer utilities {

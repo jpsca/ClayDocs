@@ -1,22 +1,17 @@
-{#def page_toc #}
+{#def toc #}
 
 {% set max_depth = 3 %}
-{% set margins = ["ml-0", "ml-2", "ml-3", "ml-4"] %}
+{% set margins = ["ml-0", "ml-4", "ml-8", "ml-12"] %}
 
 {% macro render_item(url, title, depth=0) %}
 <li class="{{ margins[depth] }}">
   <a href="{{ url }}"
     class="
-      flex
-      items-center
-      py-2
-      leading-snug
-      text-zinc-600
-      hover:text-zinc-900
-      dark:text-zinc-500
-      dark:hover:text-zinc-100
-      [&.active]:text-accent
-      [&.active]:dark:text-accent-darker
+      flex items-center
+      py-1 leading-snug
+      text-zinc-600 hover:text-black hover:font-medium
+      dark:text-zinc-500 dark:hover:text-zinc-100
+      [&.active]:text-accent [&.active]:dark:text-accent-darker
     "
   >
     {{ title }}
@@ -33,8 +28,8 @@
 {%- endfor %}
 {% endmacro %}
 
-<ul class="text-sm leading-6">
-{%- for url, title, children in page_toc %}
+<ul {{ attrs.render() }}>
+{%- for url, title, children in toc %}
   {{ render_item(url, title) }}
   {{ render_sub_items(children, depth=1) }}
 {%- endfor %}

@@ -3,11 +3,12 @@ import typing as t
 
 import inflection
 import markdown
+from pymdownx import emoji
 from markupsafe import Markup
 from markdown.extensions.toc import slugify_unicode  # type: ignore
 from tcom.catalog import Catalog
 
-from .utils import current_path, is_, load_markdown_metadata, logger
+from .utils import load_markdown_metadata, logger
 
 if t.TYPE_CHECKING:
     from .utils import THasPaths
@@ -22,7 +23,6 @@ DEFAULT_MD_EXTENSIONS = [
     "toc",
     "pymdownx.betterem",
     "pymdownx.caret",
-    "pymdownx.critic",
     "pymdownx.emoji",
     "pymdownx.highlight",
     "pymdownx.inlinehilite",
@@ -47,13 +47,17 @@ DEFAULT_MD_EXT_CONFIG = {
         "slugify": slugify_unicode,
     },
     "pymdownx.highlight": {
+        "linenums": True,
         "linenums_style": "pymdownx-inline",
         "anchor_linenums": True,
         "css_class": "highlight not-prose"
     },
+    "pymdownx.emoji": {
+        "emoji_generator": emoji.to_alt,
+    },
 }
 
-DEFAULT_GLOBALS = {
+UTILS = {
     "camelize": inflection.camelize,
     "humanize": inflection.humanize,
     "ordinal": inflection.ordinal,
@@ -63,11 +67,6 @@ DEFAULT_GLOBALS = {
     "singularize": inflection.singularize,
     "titleize": inflection.titleize,
     "underscore": inflection.underscore,
-    "current_path": current_path,
-}
-DEFAULT_FILTERS = DEFAULT_GLOBALS.copy()
-DEFAULT_TESTS = {
-    "current_path": is_(current_path),
 }
 DEFAULT_EXTENSIONS = [
     "jinja2.ext.loopcontrols",
@@ -92,14 +91,13 @@ class DocsRender(THasPaths if t.TYPE_CHECKING else object):
             tab_length=2,
         )
 
-        _globals = DEFAULT_GLOBALS.copy()
-        _globals.update(globals or {})
+        _globals = globals or {}
+        _globals.setdefault("utils", UTILS)
 
-        _filters = DEFAULT_FILTERS.copy()
-        _filters.update(filters or {})
+        _filters = filters or {}
+        _filters.setdefault("utils", UTILS)
 
-        _tests = DEFAULT_TESTS.copy()
-        _tests.update(tests or {})
+        _tests = tests or {}
 
         _extensions = extensions or []
         _extensions += DEFAULT_EXTENSIONS

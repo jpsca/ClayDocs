@@ -2,51 +2,51 @@
 
 {% set symbol_map = {
   "alt": "⎇",
-  "command": "⌘",
-  "cmd": "⌘",
-  "control": "⌃",
-  "ctrl": "⌃",
-  "meta": "◆",
-  "option": "⌥",
-  "opt": "⌥",
-  "shift": "⇧",
-  "super" :"❖",
-  "windows": "⊞",
-  "win": "⊞",
-  "down": "↓",
-  "left": "←",
-  "right": "→",
-  "up": "↑",
   "arrow_down": "↓",
   "arrow_left": "←",
   "arrow_right": "→",
   "arrow_up": "↑",
-  "backspace": "⌫",
   "back": "⌫",
+  "backspace": "⌫",
   "bksp": "⌫",
   "caps_lock": "⇪",
-  "menu": "☰",
-  "delete": "⌦",
-  "del": "⌦",
-  "escape": "⎋",
+  "cmd": "⌘",
+  "command": "⌘",
+  "control": "⌃",
+  "ctrl": "⌃",
+  "down": "↓",
+  "enter": "⏎",
   "esc": "⎋",
+  "escape": "⎋",
+  "left": "←",
+  "menu": "☰",
+  "meta": "◆",
+  "opt": "⌥",
+  "option": "⌥",
   "print_screen": "⎙",
   "print": "⎙",
   "prtsc": "⎙",
-  "tab": "⇥",
-  "enter": "⏎",
   "return": "⏎",
+  "right": "→",
+  "shift": "⇧",
+  "super" :"❖",
+  "tab": "⇥",
+  "up": "↑",
+  "win": "⊞",
+  "windows": "⊞",
 } %}
 
 <span class="not-prose inline-flex items-center text-sm font-mono font-medium leading-0">
 {% for key in content.split(sep) -%}
-  {% set symbol = symbol_map.get(underscore(key)) -%}
+  {% set symbol = symbol_map.get(utils.underscore(key)) -%}
 
-  <kbd class="border border-zinc-400 rounded flex items-center bg-zinc-100 dark:bg-zinc-500 py-[0.1em] px-2">
-    {%- if symbols and symbol %}<span class="block mr-1 align-text-bottom">{{ symbol }}</span>{% endif -%}
+  <kbd class="flex items-center border rounded border-white dark:border-black bg-zinc-100 dark:bg-zinc-900 py-[0.1em] px-1 shadow-[0_0_2px_0_#000]">
+    {%- if symbols and symbol -%}
+      <span class="block mr-1 align-text-bottom">{{ symbol }}</span>
+    {%- endif -%}
+
     {{ key|trim }}
   </kbd>
-
-  {%- if not loop.last %}+{% endif %}
+  {% if not loop.last %}+{% endif %}
 {%- endfor %}
 </span>

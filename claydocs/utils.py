@@ -2,7 +2,6 @@ import logging
 import random
 import re
 import typing as t
-from fnmatch import fnmatch
 
 import yaml
 
@@ -76,27 +75,6 @@ def load_markdown_metadata(filepath: "Path") -> tuple[str, dict]:
         raise InvalidFrontMatter(str(filepath), *err.args)
 
     return source.lstrip(" -"), meta
-
-
-def current_path(
-    path,
-    *url_patterns,
-    partial: bool = False,
-    classes: str = "active",
-) -> str:
-    curr_path = re.sub("index.html$", "", path).strip("/")
-    for urlp in url_patterns:
-        urlp = re.sub("index.html$", "", urlp.strip("/")).strip("/")
-        if fnmatch(curr_path, urlp) or (partial and curr_path.startswith(urlp)):
-            return classes
-    return ""
-
-
-def is_(func: t.Callable) -> t.Callable:
-    def test_is(*args, **kw):
-        return bool(func(*args, **kw))
-
-    return test_is
 
 
 RANDOM_MESSAGES = [

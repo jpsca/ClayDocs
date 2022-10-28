@@ -1,13 +1,13 @@
 {#def curr, prev, next #}
 
-<nav {{ attrs.render(class="flex items-center py-5 font-semibold") }}>
+<nav {{ attrs.render(class="flex items-center justify-evenly font-semibold") }}>
   {% if prev.url -%}
   <a
     href="{{ prev.url }}"
-    class="group no-underline"
+    class="group no-underline flex flex-col py-3 w-1/2 mr-5"
   >
     <div class="
-      text-xs font-medium pl-4
+      text-xs font-medium ml-4
       text-accent-darker group-hover:text-accent
       dark:text-accent dark:group-hover:text-accent-darker
     ">
@@ -28,10 +28,10 @@
   {% if next.url -%}
   <a
     href="{{ next.url }}"
-    class="group ml-auto no-underline"
+    class="group ml-auto no-underline flex flex-col items-end py-3 w-1/2 mr-5"
   >
     <div class="
-      text-xs font-medium
+      text-xs font-medium mr-4
       text-accent-darker group-hover:text-accent
       dark:text-accent dark:group-hover:text-accent-darker
     ">

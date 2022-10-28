@@ -60,10 +60,14 @@ function setPreference () {
 }
 
 function reflectPreference () {
-  if (theme.value === DARK)
+  const value = getColorPreference ()
+  if (value === DARK) {
     document.documentElement.classList.add(DARK)
-  else
+    document.documentElement.classList.remove(LIGHT)
+  } else {
+    document.documentElement.classList.add(LIGHT)
     document.documentElement.classList.remove(DARK)
+  }
 }
 
 function getColorPreference () {

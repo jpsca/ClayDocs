@@ -67,13 +67,7 @@ So far we have seen self-closing components, but there is another, much more use
 <Name arguments />
 
 {# Component with content #}
-<Name arguments> ...content here... </Name>
-```
-
-A great use case is to make layout components:
-
-```html+jinja title="components/PageLayout.jinja"
-{#def title #}
+<Name arguments> ...o far we have seen self-closing components here... </Name>
 
 <!DOCTYPE html>
 <html lang="en">
