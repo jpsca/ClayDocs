@@ -28,8 +28,8 @@
 {% macro render_section(url, title, children, depth) %}
 <li class="[&::not(first-child)]:mt-8">
   {% if title -%}
-  <h2 class="font-bold text-zinc-900 dark:text-white mb-2">
-    {{ title }}
+  <h2 class="text-medium text-zinc-800 dark:text-zinc-100 mb-2">
+    <a href="{{ url }}">{{ title }}</a>
   </h2>
   {%- endif %}
   {{ render_children(children, depth) }}
@@ -39,9 +39,9 @@
 
 {% macro render_children(children, depth=0) %}
 <ul>
-  {%- for url, title, children in children %}
-    {% if children -%}
-      {{ render_section(url, title, children, depth=depth+1) }}
+  {%- for url, title, sub_children in children %}
+    {% if sub_children -%}
+      {{ render_section(url, title, sub_children, depth=depth+1) }}
     {%- else -%}
       {{ render_item(url, title) }}
     {%- endif %}
