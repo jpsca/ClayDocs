@@ -1,7 +1,9 @@
+import shutil
 import sys
+import tempfile
+import typing as t
 from pathlib import Path
 from signal import SIGTERM, signal
-import typing as t
 
 from .docs_builder import DocsBuilder
 from .docs_render import DocsRender
@@ -19,6 +21,7 @@ class Docs(DocsRender, DocsServer, DocsBuilder):
     STATIC_FOLDER = "static"
     BUILD_FOLDER = "build"
     STATIC_URL = "static"
+    THUMBNAILS_URL = "thumbnails"
     DEFAULT_COMPONENT = "Page"
 
     def __init__(
@@ -42,6 +45,7 @@ class Docs(DocsRender, DocsServer, DocsBuilder):
         self.content_folder = root / self.CONTENT_FOLDER
         self.static_folder = root / self.STATIC_FOLDER
         self.build_folder = root / self.BUILD_FOLDER
+        self.temp_folder = Path(tempfile.mkdtemp())
 
         self.nav = Nav(self.content_folder, nav_config)
         super().__init__(
@@ -75,5 +79,6 @@ Valid commands:
 """
                 )
         finally:
+            shutil.rmtree(self.temp_folder, ignore_errors=True)
             sys.stderr.write("\n")
             exit(1)

@@ -1,6 +1,5 @@
 import logging
 import random
-import re
 import typing as t
 
 import yaml
@@ -44,6 +43,7 @@ class THasPaths:
     STATIC_FOLDER: str
     BUILD_FOLDER: str
     STATIC_URL: str
+    THUMBNAILS_URL: str
     DEFAULT_COMPONENT: str
 
     theme_folder: "Path"
@@ -51,6 +51,7 @@ class THasPaths:
     content_folder: "Path"
     static_folder: "Path"
     build_folder: "Path"
+    temp_folder: "Path"
 
     nav: "Nav"
 

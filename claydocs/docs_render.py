@@ -1,6 +1,9 @@
+import os
 import textwrap
 import typing as t
+from hashlib import md5
 
+from image_processing import ImageProcessing
 import inflection
 import markdown
 from pymdownx import emoji
@@ -50,7 +53,7 @@ DEFAULT_MD_EXT_CONFIG = {
         "linenums": True,
         "linenums_style": "pymdownx-inline",
         "anchor_linenums": True,
-        "css_class": "highlight not-prose"
+        "css_class": "highlight not-prose",
     },
     "pymdownx.emoji": {
         "emoji_generator": emoji.to_alt,
@@ -90,12 +93,38 @@ class DocsRender(THasPaths if t.TYPE_CHECKING else object):
             output_format="html",
             tab_length=2,
         )
+        self.__init_thumbnailer__()
+        self.__init_catalog__(globals, filters, tests, extensions)
 
+    def __init_thumbnailer__(self) -> None:
+        this = self
+
+        class Thumbnailer(ImageProcessing):
+            def __init__(self, source: str) -> None:
+                super().__init__(this.static_folder / source)
+
+            def __str__(self) -> str:
+                ops = str(self.options).encode("utf8", errors="ignore")
+                filename = md5(ops).hexdigest()
+                dest = this.temp_folder / filename
+                self.save(dest)
+                return f"/{self.THUMBNAILS_URL}/{filename}"
+
+        self.Thumbnailer = Thumbnailer
+
+    def __init_catalog__(
+        self,
+        globals: "t.Optional[dict[str,t.Any]]" = None,
+        filters: "t.Optional[dict[str,t.Any]]" = None,
+        tests: "t.Optional[dict[str,t.Any]]" = None,
+        extensions: "t.Optional[list]" = None,
+    ) -> None:
         _globals = globals or {}
-        _globals.setdefault("utils", UTILS)
+        _globals["utils"] = UTILS.copy()
+        _globals["utils"]["thumb"] = self.Thumbnailer
 
         _filters = filters or {}
-        _filters.setdefault("utils", UTILS)
+        _filters["utils"] = UTILS.copy()
 
         _tests = tests or {}
 

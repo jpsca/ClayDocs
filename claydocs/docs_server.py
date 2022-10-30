@@ -42,5 +42,6 @@ class DocsServer(THasRender if t.TYPE_CHECKING else object):
             autorefresh=True,
         )
         middleware.add_files(self.static_folder, self.STATIC_URL)
+        middleware.add_files(self.temp_folder, self.THUMBNAILS_URL)
         server.application = middleware  # type: ignore
         return server
