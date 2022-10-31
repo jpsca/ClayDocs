@@ -1,5 +1,5 @@
 /*
-! tailwindcss v3.1.8 | MIT License | https://tailwindcss.com
+! tailwindcss v3.2.1 | MIT License | https://tailwindcss.com
 */
 
 /*
@@ -410,6 +410,12 @@ video {
   height: auto;
 }
 
+/* Make elements with the HTML hidden attribute stay hidden by default */
+
+[hidden] {
+  display: none;
+}
+
 :root {
   --accent: #0ea5e9;
   --accent-darker: #38bdf8;
@@ -423,8 +429,7 @@ video {
 .prose a.headerlink {
   margin-left: 0.25rem;
   display: inline-block;
-  -webkit-text-decoration-line: none;
-          text-decoration-line: none;
+  text-decoration-line: none;
   opacity: 0;
   transition-property: opacity;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
@@ -435,10 +440,10 @@ video {
   display: none;
 }
 
-.prose h2:hover a.headerlink, 
-  .prose h3:hover a.headerlink, 
-  .prose h4:hover a.headerlink, 
-  .prose h5:hover a.headerlink, 
+.prose h2:hover a.headerlink,
+  .prose h3:hover a.headerlink,
+  .prose h4:hover a.headerlink,
+  .prose h5:hover a.headerlink,
   .prose h6:hover a.headerlink {
   opacity: 0.5;
 }
@@ -1258,7 +1263,6 @@ video {
 }
 
 .sticky {
-  position: -webkit-sticky;
   position: sticky;
 }
 
@@ -1305,14 +1309,14 @@ video {
   float: right;
 }
 
-.mx-1 {
-  margin-left: 0.25rem;
-  margin-right: 0.25rem;
-}
-
 .mx-auto {
   margin-left: auto;
   margin-right: auto;
+}
+
+.mx-1 {
+  margin-left: 0.25rem;
+  margin-right: 0.25rem;
 }
 
 .mb-10 {
@@ -1455,6 +1459,10 @@ video {
   min-height: 100vh;
 }
 
+.w-\[800px\] {
+  width: 800px;
+}
+
 .w-8 {
   width: 2rem;
 }
@@ -1483,6 +1491,10 @@ video {
   width: 1rem;
 }
 
+.w-80 {
+  width: 20rem;
+}
+
 .max-w-md {
   max-width: 28rem;
 }
@@ -1497,6 +1509,10 @@ video {
 
 .max-w-full {
   max-width: 100%;
+}
+
+.max-w-\[84ch\] {
+  max-width: 84ch;
 }
 
 .origin-center {
@@ -1601,6 +1617,10 @@ video {
 
 .rounded {
   border-radius: 0.25rem;
+}
+
+.rounded-md {
+  border-radius: 0.375rem;
 }
 
 .border {
@@ -1744,6 +1764,11 @@ video {
   padding-bottom: 0.25rem;
 }
 
+.px-2 {
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+}
+
 .pb-14 {
   padding-bottom: 3.5rem;
 }
@@ -1794,6 +1819,26 @@ video {
 
 .pl-4 {
   padding-left: 1rem;
+}
+
+.pl-0 {
+  padding-left: 0px;
+}
+
+.pl-8 {
+  padding-left: 2rem;
+}
+
+.pl-12 {
+  padding-left: 3rem;
+}
+
+.pl-1 {
+  padding-left: 0.25rem;
+}
+
+.pl-2 {
+  padding-left: 0.5rem;
 }
 
 .text-center {
@@ -1904,8 +1949,7 @@ video {
 }
 
 .no-underline {
-  -webkit-text-decoration-line: none;
-          text-decoration-line: none;
+  text-decoration-line: none;
 }
 
 .antialiased {
@@ -1974,6 +2018,10 @@ body.dark .scrollbar-thin::-webkit-scrollbar-thumb {
   display: block;
 }
 
+.hover\:border-l:hover {
+  border-left-width: 1px;
+}
+
 .hover\:border-zinc-200:hover {
   --tw-border-opacity: 1;
   border-color: rgb(228 228 231 / var(--tw-border-opacity));
@@ -1984,8 +2032,32 @@ body.dark .scrollbar-thin::-webkit-scrollbar-thumb {
   border-color: rgb(212 212 216 / var(--tw-border-opacity));
 }
 
+.hover\:border-current:hover {
+  border-color: currentColor;
+}
+
+.hover\:border-zinc-600:hover {
+  --tw-border-opacity: 1;
+  border-color: rgb(82 82 91 / var(--tw-border-opacity));
+}
+
+.hover\:border-zinc-400:hover {
+  --tw-border-opacity: 1;
+  border-color: rgb(161 161 170 / var(--tw-border-opacity));
+}
+
 .hover\:bg-zinc-400\/10:hover {
   background-color: rgb(161 161 170 / 0.1);
+}
+
+.hover\:bg-zinc-200:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(228 228 231 / var(--tw-bg-opacity));
+}
+
+.hover\:bg-zinc-100:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(244 244 245 / var(--tw-bg-opacity));
 }
 
 .hover\:font-medium:hover {
@@ -2121,25 +2193,6 @@ body.dark .scrollbar-thin::-webkit-scrollbar-thumb {
   }
 }
 
-.dark .dark\:prose-invert {
-  --tw-prose-body: var(--tw-prose-invert-body);
-  --tw-prose-headings: var(--tw-prose-invert-headings);
-  --tw-prose-lead: var(--tw-prose-invert-lead);
-  --tw-prose-links: var(--tw-prose-invert-links);
-  --tw-prose-bold: var(--tw-prose-invert-bold);
-  --tw-prose-counters: var(--tw-prose-invert-counters);
-  --tw-prose-bullets: var(--tw-prose-invert-bullets);
-  --tw-prose-hr: var(--tw-prose-invert-hr);
-  --tw-prose-quotes: var(--tw-prose-invert-quotes);
-  --tw-prose-quote-borders: var(--tw-prose-invert-quote-borders);
-  --tw-prose-captions: var(--tw-prose-invert-captions);
-  --tw-prose-code: var(--tw-prose-invert-code);
-  --tw-prose-pre-code: var(--tw-prose-invert-pre-code);
-  --tw-prose-pre-bg: var(--tw-prose-invert-pre-bg);
-  --tw-prose-th-borders: var(--tw-prose-invert-th-borders);
-  --tw-prose-td-borders: var(--tw-prose-invert-td-borders);
-}
-
 .dark .dark\:translate-x-\[-7px\] {
   --tw-translate-x: -7px;
   transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
@@ -2195,6 +2248,25 @@ body.dark .scrollbar-thin::-webkit-scrollbar-thumb {
 
 .dark .dark\:bg-white\/0 {
   background-color: rgb(255 255 255 / 0);
+}
+
+.dark .dark\:prose-invert {
+  --tw-prose-body: var(--tw-prose-invert-body);
+  --tw-prose-headings: var(--tw-prose-invert-headings);
+  --tw-prose-lead: var(--tw-prose-invert-lead);
+  --tw-prose-links: var(--tw-prose-invert-links);
+  --tw-prose-bold: var(--tw-prose-invert-bold);
+  --tw-prose-counters: var(--tw-prose-invert-counters);
+  --tw-prose-bullets: var(--tw-prose-invert-bullets);
+  --tw-prose-hr: var(--tw-prose-invert-hr);
+  --tw-prose-quotes: var(--tw-prose-invert-quotes);
+  --tw-prose-quote-borders: var(--tw-prose-invert-quote-borders);
+  --tw-prose-captions: var(--tw-prose-invert-captions);
+  --tw-prose-code: var(--tw-prose-invert-code);
+  --tw-prose-pre-code: var(--tw-prose-invert-pre-code);
+  --tw-prose-pre-bg: var(--tw-prose-invert-pre-bg);
+  --tw-prose-th-borders: var(--tw-prose-invert-th-borders);
+  --tw-prose-td-borders: var(--tw-prose-invert-td-borders);
 }
 
 .dark .dark\:text-accent-darker {
@@ -2357,7 +2429,6 @@ body.dark .scrollbar-thin::-webkit-scrollbar-thumb {
 
 @media (min-height: 768px) {
   .tall\:sticky {
-    position: -webkit-sticky;
     position: sticky;
   }
 

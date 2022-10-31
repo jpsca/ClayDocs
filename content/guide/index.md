@@ -1,5 +1,11 @@
 # Getting started
 
+<Image
+  src={utils.thumb('/static/falls.jpg').resize_to_limit(800,600)}
+  class="mx-auto w-[800px]"
+  alt="A fall falling with gravity"
+/>
+
 ## Installation
 
 Install the package using `pip`.

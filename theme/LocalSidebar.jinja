@@ -1,13 +1,9 @@
-{% do attrs.set(
-  class="
-    w-60 h-screen
-    overflow-y-auto overscroll-contain scrollbar-thin
+<div {{ attrs.render(class="
+    w-80 h-screen
+    overflow-x-hidden overflow-y-auto overscroll-contain scrollbar-thin
     sticky top-0 tall:top-16
-  ",
-) %}
-
-<div {{ attrs.render() }}>
-  <div class="mt-10 pb-14 pl-5 border-l border-zinc-900/10 dark:border-zinc-50/10 text-sm">
+  ",) }}>
+  <div class="mt-10 pb-14 px-5 border-l border-zinc-900/10 dark:border-zinc-50/10 text-sm">
     <h5 class="text-zinc-500 font-bold text-sm mb-3">☰ On this page</h5>
     <TocPage class="text-xs" toc={nav.page_toc} />
   </div>

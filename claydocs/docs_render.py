@@ -1,7 +1,5 @@
-import os
 import textwrap
 import typing as t
-from hashlib import md5
 
 from image_processing import ImageProcessing
 import inflection
@@ -101,14 +99,18 @@ class DocsRender(THasPaths if t.TYPE_CHECKING else object):
 
         class Thumbnailer(ImageProcessing):
             def __init__(self, source: str) -> None:
+                source = source.strip(" /").removeprefix(this.STATIC_URL).strip("/")
                 super().__init__(this.static_folder / source)
 
             def __str__(self) -> str:
                 ops = str(self.options).encode("utf8", errors="ignore")
-                filename = md5(ops).hexdigest()
+                filename = self.get_temp_filename()
                 dest = this.temp_folder / filename
-                self.save(dest)
-                return f"/{self.THUMBNAILS_URL}/{filename}"
+                if not dest.is_file():
+                    self.save(dest)
+                return f"/{this.THUMBNAILS_URL}/{filename}"
+
+            repr = __str__
 
         self.Thumbnailer = Thumbnailer
 

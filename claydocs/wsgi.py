@@ -20,11 +20,11 @@ if t.TYPE_CHECKING:
     from watchdog.observers import ObservedWatch  # type: ignore
 
 
-DEFAULT_HOST = "127.0.0.1"
+DEFAULT_HOST = "0.0.0.0"
 DEFAULT_PORT = 8080
 START_MESSAGE = """
 ─────────────────────────────────────────────────
- Running at {addr}
+ Running on {addr}
  Press [Ctrl]+[C] to quit
 ─────────────────────────────────────────────────
 """
@@ -38,7 +38,7 @@ HTTP_ERROR = "500 Internal Server Error"
 ERROR_BODY = """<body>
 <title>{title}</title>
 <h1>{title}</h1>
-<h2>{error}</h2>
+<h2><pre>{error}</pre></h2>
 <pre>{traceback}</pre>
 </body>
 """
