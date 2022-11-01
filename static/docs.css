@@ -1395,18 +1395,6 @@ video {
   margin-bottom: 0.5rem;
 }
 
-.ml-0 {
-  margin-left: 0px;
-}
-
-.ml-8 {
-  margin-left: 2rem;
-}
-
-.ml-12 {
-  margin-left: 3rem;
-}
-
 .block {
   display: block;
 }
@@ -1479,6 +1467,10 @@ video {
   width: 15rem;
 }
 
+.w-80 {
+  width: 20rem;
+}
+
 .w-7 {
   width: 1.75rem;
 }
@@ -1491,10 +1483,6 @@ video {
   width: 1rem;
 }
 
-.w-80 {
-  width: 20rem;
-}
-
 .max-w-md {
   max-width: 28rem;
 }
@@ -1503,16 +1491,12 @@ video {
   max-width: 88rem;
 }
 
-.max-w-\[88ch\] {
-  max-width: 88ch;
+.max-w-\[84ch\] {
+  max-width: 84ch;
 }
 
 .max-w-full {
   max-width: 100%;
-}
-
-.max-w-\[84ch\] {
-  max-width: 84ch;
 }
 
 .origin-center {
@@ -1617,10 +1601,6 @@ video {
 
 .rounded {
   border-radius: 0.25rem;
-}
-
-.rounded-md {
-  border-radius: 0.375rem;
 }
 
 .border {
@@ -1744,14 +1724,14 @@ video {
   padding-right: 0.25rem;
 }
 
-.py-2 {
-  padding-top: 0.5rem;
-  padding-bottom: 0.5rem;
-}
-
 .px-5 {
   padding-left: 1.25rem;
   padding-right: 1.25rem;
+}
+
+.py-2 {
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
 }
 
 .py-3 {
@@ -1779,10 +1759,6 @@ video {
 
 .pl-6 {
   padding-left: 1.5rem;
-}
-
-.pl-5 {
-  padding-left: 1.25rem;
 }
 
 .pb-12 {
@@ -1821,8 +1797,8 @@ video {
   padding-left: 1rem;
 }
 
-.pl-0 {
-  padding-left: 0px;
+.pl-2 {
+  padding-left: 0.5rem;
 }
 
 .pl-8 {
@@ -1831,14 +1807,6 @@ video {
 
 .pl-12 {
   padding-left: 3rem;
-}
-
-.pl-1 {
-  padding-left: 0.25rem;
-}
-
-.pl-2 {
-  padding-left: 0.5rem;
 }
 
 .text-center {
@@ -2018,10 +1986,6 @@ body.dark .scrollbar-thin::-webkit-scrollbar-thumb {
   display: block;
 }
 
-.hover\:border-l:hover {
-  border-left-width: 1px;
-}
-
 .hover\:border-zinc-200:hover {
   --tw-border-opacity: 1;
   border-color: rgb(228 228 231 / var(--tw-border-opacity));
@@ -2032,15 +1996,6 @@ body.dark .scrollbar-thin::-webkit-scrollbar-thumb {
   border-color: rgb(212 212 216 / var(--tw-border-opacity));
 }
 
-.hover\:border-current:hover {
-  border-color: currentColor;
-}
-
-.hover\:border-zinc-600:hover {
-  --tw-border-opacity: 1;
-  border-color: rgb(82 82 91 / var(--tw-border-opacity));
-}
-
 .hover\:border-zinc-400:hover {
   --tw-border-opacity: 1;
   border-color: rgb(161 161 170 / var(--tw-border-opacity));
@@ -2048,16 +2003,6 @@ body.dark .scrollbar-thin::-webkit-scrollbar-thumb {
 
 .hover\:bg-zinc-400\/10:hover {
   background-color: rgb(161 161 170 / 0.1);
-}
-
-.hover\:bg-zinc-200:hover {
-  --tw-bg-opacity: 1;
-  background-color: rgb(228 228 231 / var(--tw-bg-opacity));
-}
-
-.hover\:bg-zinc-100:hover {
-  --tw-bg-opacity: 1;
-  background-color: rgb(244 244 245 / var(--tw-bg-opacity));
 }
 
 .hover\:font-medium:hover {
