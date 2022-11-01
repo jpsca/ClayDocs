@@ -9,7 +9,7 @@ from markupsafe import Markup
 from markdown.extensions.toc import slugify_unicode  # type: ignore
 from tcom.catalog import Catalog
 
-from .utils import load_markdown_metadata, logger
+from .utils import load_markdown_metadata, logger, timestamp
 
 if t.TYPE_CHECKING:
     from .utils import THasPaths
@@ -179,6 +179,7 @@ class DocsRender(THasPaths if t.TYPE_CHECKING else object):
             "next_page": self.nav.get_next(url=page["url"]),
             "toc": self.nav.toc,
         }
+        self.catalog.jinja_env.globals["utils"]["timestamp"] = timestamp()
         return self.catalog.render(component, source=source, **meta)
 
     def render_markdown(self, source: str) -> Markup:

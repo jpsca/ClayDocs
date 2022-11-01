@@ -1,5 +1,6 @@
 import logging
 import random
+import time
 import typing as t
 
 import yaml
@@ -61,6 +62,10 @@ class THasRender(THasPaths):
 
     def render(self, name: str, **kw) -> str:  # type: ignore
         ...
+
+
+def timestamp() -> int:
+    return round(time.monotonic() * 1000)
 
 
 def load_markdown_metadata(filepath: "Path") -> tuple[str, dict]:

@@ -3,7 +3,7 @@ import typing as t
 
 from .exceptions import Abort
 from .utils import logger, print_random_messages
-from .wsgi import LiveReloadServer
+from .server import LiveReloadServer
 
 if t.TYPE_CHECKING:
     from .utils import THasRender

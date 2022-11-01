@@ -2,7 +2,6 @@ import logging
 import re
 import socketserver
 import string
-import time
 import traceback
 import threading
 import typing as t
@@ -13,7 +12,7 @@ from sys import exc_info
 import watchdog.events
 import watchdog.observers.polling
 
-from .utils import logger
+from .utils import logger, timestamp
 
 if t.TYPE_CHECKING:
     from pathlib import Path
@@ -47,14 +46,14 @@ var livereload = function(epoch) {
     var req = new XMLHttpRequest();
     req.onloadend = function() {
         if (parseFloat(this.responseText) > epoch) {
-            location.reload();
+            location.reload()
             return;
         }
         var launchNext = livereload.bind(this, epoch);
         if (this.status === 200) {
             launchNext();
         } else {
-            setTimeout(launchNext, 5000);
+            setTimeout(launchNext, 2000);
         }
     };
     req.open("GET", "/livereload/" + epoch);
@@ -65,10 +64,6 @@ var livereload = function(epoch) {
 livereload(${epoch});
 """
 SCRIPT_TEMPLATE = string.Template(SCRIPT_TEMPLATE_STR)
-
-
-def _timestamp() -> int:
-    return round(time.monotonic() * 1000)
 
 
 class LiveReloadServer(socketserver.ThreadingMixIn, wsgiref.simple_server.WSGIServer):
@@ -90,7 +85,7 @@ class LiveReloadServer(socketserver.ThreadingMixIn, wsgiref.simple_server.WSGISe
         self.shutdown_delay = shutdown_delay
 
         # This version of the docs
-        self.epoch = _timestamp()
+        self.epoch = timestamp()
         # Must be held when accessing epoch
         self.epoch_cond = threading.Condition()
 
@@ -228,7 +223,7 @@ class LiveReloadServer(socketserver.ThreadingMixIn, wsgiref.simple_server.WSGISe
 
             with self.epoch_cond:
                 logger.info("Reloading page...")
-                self.epoch = _timestamp()
+                self.epoch = timestamp()
                 self.epoch_cond.notify_all()
 
     def shutdown(self) -> None:
