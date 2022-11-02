@@ -1,22 +1,22 @@
 {#def title="", type="", open=True #}
 
 {% set colors = {
-  "note": "bg-sky-100 border-sky-200 text-sky-900 shadow-sky-100",
-  "info": "bg-sky-100 border-sky-200 text-sky-900 shadow-sky-100",
-  "tip": "bg-yellow-100 border-yellow-200 text-yellow-800 shadow-yellow-100",
-  "alert": "bg-amber-100 border-amber-200 text-amber-800 shadow-amber-100",
-  "warning": "bg-amber-100 border-amber-200 text-amber-800 shadow-amber-100",
-  "danger": "bg-rose-100 border-rose-200 text-rose-900 shadow-rose-100",
-  "error": "bg-rose-100 border-rose-200 text-rose-800 shadow-rose-100",
-  "internal": "bg-stone-200 border-stone-300 text-stone-900 shadow-stone-100",
-  "todo": "bg-zinc-100 border-zinc-300 text-zinc-800 shadow-zinc-100",
+  "note": "bg-sky-100 border-sky-200 text-sky-900",
+  "info": "bg-sky-100 border-sky-200 text-sky-900",
+  "tip": "bg-yellow-100 border-yellow-200 text-yellow-800",
+  "alert": "bg-orange-100 border-orange-200 text-orange-800",
+  "warning": "bg-orange-100 border-orange-200 text-orange-800",
+  "danger": "bg-rose-100 border-rose-200 text-rose-900",
+  "error": "bg-rose-100 border-rose-200 text-rose-800",
+  "internal": "bg-stone-200 border-stone-300 text-stone-900",
+  "todo": "bg-zinc-100 border-zinc-300 text-zinc-800",
 } %}
 
 {% set type = type if type in colors else "" %}
-{% do attrs.set(class=colors.get(type, "bg-zinc-100 border-zinc-300 text-zinc-800 shadow-zinc-100")) %}
+{% do attrs.set(class=colors.get(type, "bg-zinc-100 border-zinc-300 text-zinc-800")) %}
 
 <details {{ attrs.render(
-  class="not-prose group relative border rounded overflow-hidden text-base bg-opacity-90 shadow",
+  class="group relative border rounded overflow-hidden text-base bg-opacity-90 shadow-sm shadow-zinc-400",
   open=open,
 ) }}>
   <summary class="flex items-center font-bold h-12 px-6 cursor-pointer group-open:pt-2
@@ -32,7 +32,7 @@
     {{ title or type.upper() or "Note" }}
     <ArrowRight class="ml-auto rotate-90 group-open:-rotate-90 transition-transform" />
   </summary>
-  <div class="prose prose-zinc dark:prose-invert pb-5 px-6
+  <div class="pb-5 px-6
     {% if type -%}
       sm:pl-[4.7rem]
     {%- endif -%}

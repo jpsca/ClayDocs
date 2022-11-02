@@ -8,12 +8,10 @@ More often than not, a component takes one or more arguments to render.
 
 Every argument must be declared at the beginning of the component with `{#def arguments #}`. The syntax is very similar to how you declare the arguments of a python function:
 
-```html+jinja title="components/Form.jinja"
+``` html+jinja title="components/Form.jinja" linenums="1"
 {#def action, method='post', multipart=False #}
 
-<form method="{{ method }}" action="{{ action }}"
-  {%- if multipart %} enctype="multipart/form-data"{% endif %}
->
+<form method="{{ method }}" action="{{ action }}"{%- if multipart %} enctype="multipart/form-data"{% endif %}>
   {{ content }}
 </form>
 ```
@@ -22,7 +20,7 @@ In this example, the component takes three arguments: "action", "method", and "m
 
 So all of these are valid forms to use this component:
 
-```html+jinja
+``` html+jinja linenums="1"
 <Form action="/new">...</Form>
 <Form action="/new" method="PATCH">...</Form>
 <Form multipart={False} action="/new">...</Form>

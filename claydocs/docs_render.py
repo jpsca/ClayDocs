@@ -48,7 +48,6 @@ DEFAULT_MD_EXT_CONFIG = {
         "slugify": slugify_unicode,
     },
     "pymdownx.highlight": {
-        "linenums": True,
         "linenums_style": "pymdownx-inline",
         "anchor_linenums": True,
         "css_class": "highlight not-prose",

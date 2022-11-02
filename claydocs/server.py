@@ -1,3 +1,4 @@
+import html
 import logging
 import re
 import socketserver
@@ -193,9 +194,9 @@ class LiveReloadServer(socketserver.ThreadingMixIn, wsgiref.simple_server.WSGISe
 
     def render_error_page(self, exception: Exception) -> tuple[str, str]:
         body = ERROR_BODY.format(
-            title=exception.__class__.__name__,
-            error=str(exception),
-            traceback="".join(traceback.format_exception(*exc_info())),
+            title=html.escape(exception.__class__.__name__),
+            error=html.escape(str(exception)),
+            traceback=html.escape("".join(traceback.format_exception(*exc_info()))),
         )
         return body, HTTP_ERROR
 

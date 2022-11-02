@@ -4,9 +4,9 @@
 
 <picture {{ attrs.render() }}>
   {% for format in formats.split(",") -%}
-  {% if not curr_format.endswith(format) -%}
-  <source srcset="{{ src.convert(format) }}" type="image/{{ format }}" />
-  {%- endif %}
+    {% if not curr_format.endswith(format) -%}
+      <source srcset="{{ src.convert(format) }}" type="image/{{ format }}" />
+    {%- endif %}
   {% endfor -%}
   <img src="{{ src }}" alt="{{ alt }}" />
 </picture>

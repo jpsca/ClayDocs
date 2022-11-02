@@ -22,6 +22,31 @@
 .Page code {
   white-space: nowrap;
   font-feature-settings: "kern";
+  font-size: 0.98em;
+  font-weight: 600;
+}
+.Page code::before, .Page code::after {
+  content: "`";
+}
+
+.Page pre code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+               "Noto Sans Mono", "Courier New", monospace;
+  background: transparent;
+  display: flow-root;
+  line-height: 1.4;
+  position: relative;
+  overflow: auto;
+  overscroll-behavior-x: contain;
+  font-size: 1em;
+  padding: 1rem 1.5rem;
+  white-space: pre;
+  display: block;
+  position: relative;
+  font-weight: normal;
+}
+.Page pre code::before, .Page pre code::after {
+  content: none;
 }
 
 .light .Page .highlight {
@@ -44,7 +69,7 @@
 }
 .Page .highlight .filename {
   display: block;
-  padding: 0.5rem 1rem;
+  padding: 0.4rem 1.5rem;
   font-weight: 500;
   font-size: 0.9rem;
   border-bottom: 1px solid rgb(var(--border-color));
@@ -52,36 +77,28 @@
 .Page .highlight a {
   text-decoration: none;
 }
-.Page .highlight pre code {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
-               "Noto Sans Mono", "Courier New", monospace;
-  background: transparent;
-  display: flow-root;
-  line-height: 1.4;
-  position: relative;
-  overflow: auto;
-  overscroll-behavior-x: contain;
-  font-size: 0.9rem;
-  padding: 1rem 1rem 1rem 3.5rem;
-  white-space: pre;
-  display: block;
-  position: relative;
-}
+
 .Page .highlight pre [data-linenos]:before {
   display: inline-block;
   content: attr(data-linenos);
   background-color: rgb(var(--bg-color));
+  outline: 2px 0 2px 0;
+  outline-style: solid;
+  outline-color: rgb(var(--bg-color));
   color: rgba(var(--color), 0.3);
   box-shadow: -.05rem 0 rgba(var(--border-color), 0.3) inset;
-  position: absolute;
-  left: 0;
-  padding: 0 .25rem 0 0;
   user-select: none;
   font-weight: 300;
   font-size: 0.8em;
+
+  padding: 0;
+  margin: 0;
   width: 2.5rem;
   text-align: right;
-  vertical-align: middle;
+  position: sticky;
+  left: -1.9rem;
+  margin-left: -1.9rem;
+  margin-right: 1em;
 }
 
 .light .Page .highlight .hll { background-color: #ffffcc }
