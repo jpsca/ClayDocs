@@ -76,7 +76,7 @@ class LiveReloadServer(socketserver.ThreadingMixIn, wsgiref.simple_server.WSGISe
         *,
         host: str = DEFAULT_HOST,
         port: int = DEFAULT_PORT,
-        shutdown_delay: float = 0.25,
+        shutdown_delay: float = 1,
         **kwargs,
     ) -> None:
         self._render = render

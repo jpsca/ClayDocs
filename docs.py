@@ -25,5 +25,7 @@ if __name__ == "__main__":
         "-o", "./static/docs.css",
         "--watch",
     ])
-    docs.run()
-    proc.terminate()
+    try:
+        docs.run()
+    finally:
+        proc.terminate()

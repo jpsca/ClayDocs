@@ -126,23 +126,24 @@ To provide consistent output, the attributes and properties are sorted by name a
 </button>
 ```
 
-!!! warning
-    Using `<Component {{ attrs.render() }}>` to pass the extra arguments to other components **WILL NOT WORK**. That is because the components are translated to macros before the page render.
+<Note type="alert" title="Beware">
+Using `<Component {{ attrs.render() }}>` to pass the extra arguments to other components **WILL NOT WORK**. That is because the components are translated to macros before the page render.
 
-    You must pass them as the special argument `__attrs`.
+You must pass them as the special argument `__attrs`.
 
-    ```html+jinja
-    {#--- WRONG 😵 ---#}
-    <MyButton {{ attrs.render() }} />
+```html+jinja
+{#--- WRONG 😵 ---#}
+<MyButton {{ attrs.render() }} />
 
-    {#--- GOOD 👍 ---#}
-    <MyButton __attrs={attrs} />
-    ```
+{#--- GOOD 👍 ---#}
+<MyButton __attrs={attrs} />
+```
 
-    Another options is to explicity define which arguments are needed for the sub-components:
+Another options is to explicity define which arguments are needed for the sub-components:
 
-    ```html+jinja
-    {#def btn_class='' #}
+```html+jinja
+{#def btn_class='' #}
 
-    <MyButton class={btn_class} />
-    ```
+<MyButton class={btn_class} />
+```
+</Note>

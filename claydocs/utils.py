@@ -18,8 +18,9 @@ if t.TYPE_CHECKING:
     from .nav import Nav
 
 
-LOGGER_LEVEL = logging.INFO
 LOGGER_NAME = "claydocs"
+LOGGER_LEVEL = logging.INFO
+
 META_START = "---"
 META_END = "\n---"
 

@@ -1,3 +1,20 @@
+.Page .prose, .Page .prose-zinc {
+  --tw-prose-body: inherit;
+  --tw-prose-links: inherit;
+  --tw-prose-bold: inherit;
+  --tw-prose-code: inherit;
+  --tw-prose-pre-code: inherit;
+  --tw-prose-pre-bg: inherit;
+  --tw-prose-invert-body: inherit;
+  --tw-prose-invert-links: inherit;
+  --tw-prose-invert-bold: inherit;
+  --tw-prose-invert-code: inherit;
+  --tw-prose-invert-pre-code: inherit;
+  --tw-prose-invert-pre-bg: inherit;
+  color: inherit;
+  max-width: none;
+}
+
 .Page ul.task-list ul.task-list {
   padding-left: 1em;
 }
@@ -35,7 +52,7 @@
 .Page .highlight a {
   text-decoration: none;
 }
-.Page .highlight pre {
+.Page .highlight pre code {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
                "Noto Sans Mono", "Courier New", monospace;
   background: transparent;
@@ -45,27 +62,26 @@
   overflow: auto;
   overscroll-behavior-x: contain;
   font-size: 0.9rem;
-  padding: 1rem;
-}
-.Page .highlight pre code {
+  padding: 1rem 1rem 1rem 3.5rem;
   white-space: pre;
   display: block;
+  position: relative;
 }
 .Page .highlight pre [data-linenos]:before {
-  display: block;
+  display: inline-block;
   content: attr(data-linenos);
   background-color: rgb(var(--bg-color));
   color: rgba(var(--color), 0.3);
   box-shadow: -.05rem 0 rgba(var(--border-color), 0.3) inset;
-  position: sticky;
-  left: -1rem;
-  float: left;
-  margin-left: -1rem;
-  margin-right: 1.4rem;
+  position: absolute;
+  left: 0;
+  padding: 0 .25rem 0 0;
   user-select: none;
   font-weight: 300;
   font-size: 0.8em;
-  padding: 0.1em 0 0.1em 1.1em
+  width: 2.5rem;
+  text-align: right;
+  vertical-align: middle;
 }
 
 .light .Page .highlight .hll { background-color: #ffffcc }

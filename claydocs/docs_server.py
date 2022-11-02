@@ -31,6 +31,7 @@ class DocsServer(THasRender if t.TYPE_CHECKING else object):
             raise
         except OSError as err:  # pragma: no cover
             # Avoid ugly, unhelpful traceback
+            print(f"{type(err).__name__}: {err}")
             raise Abort(f"{type(err).__name__}: {err}")
 
     def get_server(self) -> "LiveReloadServer":

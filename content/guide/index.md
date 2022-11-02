@@ -14,20 +14,19 @@ Install the package using `pip`.
 pip install tcom
 ```
 
-<Note>The first thing you must do in your app is to create a "catalog" of components. This is the object that manage the components and its global settings. Then, you add to the catalog the folder(s) with your components.</Note>
-
 <Note title="Wat?">The first thing you must do in your app is to create a "catalog" of components. This is the object that manage the components and its global settings. Then, you add to the catalog the folder(s) with your components.</Note>
 
-<Note type="info">The first thing you must do in your app is to create a "catalog" of components. This is the object that manage the components and its global settings. Then, you add to the catalog the folder(s) with your components.</Note>
-
+<Note type="note">The first thing you must do in your app is to create a "catalog" of components. This is the object that manage the components and its global settings. Then, you add to the catalog the folder(s) with your components.</Note>
 
 <Note type="tip">The first thing you must do in your app is to create a "catalog" of components. This is the object that manage the components and its global settings. Then, you add to the catalog the folder(s) with your components.</Note>
 
-
 <Note type="warning">The first thing you must do in your app is to create a "catalog" of components. This is the object that manage the components and its global settings. Then, you add to the catalog the folder(s) with your components.</Note>
 
+<Note type="error">The first thing you must do in your app is to create a "catalog" of components. This is the object that manage the components and its global settings. Then, you add to the catalog the folder(s) with your components.</Note>
 
 <Note type="internal">The first thing you must do in your app is to create a "catalog" of components. This is the object that manage the components and its global settings. Then, you add to the catalog the folder(s) with your components.</Note>
+
+<Note type="todo">The first thing you must do in your app is to create a "catalog" of components. This is the object that manage the components and its global settings. Then, you add to the catalog the folder(s) with your components.</Note>
 
 ## Usage
 
