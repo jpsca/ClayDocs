@@ -9,8 +9,14 @@ from .utils import load_markdown_metadata, logger
 
 
 TNavConfig = t.Sequence[t.Union[str, t.Sequence]]
-TLanguages = dict[str, str]
 TStrOrPath = t.Union[str, Path]
+
+
+@dataclass
+class Language:
+    code: str
+    root: str = ""
+    name: str = ""
 
 
 @dataclass
@@ -29,7 +35,7 @@ class PageNav:
     next_page: Page
     toc: list
     page_toc: list
-    languages: TLanguages
+    languages: list[tuple[str,str,str]]
     lang: str
     base_url: str = ""
 
@@ -44,22 +50,22 @@ class Nav:
         content_folder: "TStrOrPath",
         nav_config: "dict[str,TNavConfig]",
         site_url: str,
-        languages: "TLanguages",
+        languages: "dict[str, str]",
         default: str
     ) -> None:
-        self._content_folder = Path(content_folder)
         self.titles: dict[str, dict[str, Page]] = {}
         self.toc: dict[str, list] = {}
-        self.languages = languages
-        self.default = default.strip('/')
+        self._urls: dict[str, tuple[str, ...]] = {}
+        self._max_index: dict[str, int] = {}
 
+        self._content_folder = Path(content_folder)
         site_url = site_url.strip() or "/"
         if site_url != "/":
             site_url = f"/{site_url.strip('/')}/"
         self.site_url = site_url
 
-        self._urls: dict[str, tuple[str, ...]] = {}
-        self._max_index: dict[str, int] = {}
+        self.default = default.strip('/')
+        self.languages = self.build_languages(languages)
 
         if languages:
             for lang in languages:
@@ -90,17 +96,15 @@ class Nav:
             for lang in languages
         }
 
-        log_titles = json.dumps(
-            {
-                key: {url: str(page) for url, page in titles.items()}
-                for key, titles in self.titles.items()
-            },
-            indent=2,
-        )
-        logger.debug(f"Titles\n{log_titles}")
+        self._log_initial_status()
 
-        log_toc = json.dumps(self.toc, indent=2)
-        logger.debug(f"TOC\n{log_toc}")
+    def build_languages(self, languages: "dict[str, str]") -> "list[Language]":
+        langs = []
+        for code, name in languages.items():
+            root = "" if code == self.default else code
+            langs.append(Language(code=code, root=root, name=name))
+
+        return langs
 
     def build_toc(
         self,
@@ -174,7 +178,11 @@ class Nav:
                 url = f"{base_url}{self._get_url(item)}"
                 index = len(self.titles[lang].keys())
                 self.titles[lang][url] = Page(
-                    url=url, title=title, index=index, section=section_title
+                    lang=lang,
+                    url=url,
+                    title=title,
+                    index=index,
+                    section=section_title,
                 )
                 section.append([url, title, None])
 
@@ -185,7 +193,11 @@ class Nav:
                     url = f"{base_url}/{self._get_url(key)}"
                     index = len(self.titles[lang].keys())
                     self.titles[lang][url] = Page(
-                        url=url, title=value, index=index, section=section_title
+                        lang=lang,
+                        url=url,
+                        title=value,
+                        index=index,
+                        section=section_title,
                     )
                     section.append([url, value, None])
 
@@ -206,19 +218,19 @@ class Nav:
             else:
                 raise InvalidNav(item)
 
-    def get_lang(self, url: str) -> "tuple[str,str,str]":
+    def get_lang(self, url: str) -> "Language":
         url = self._get_url(url)
         if not self.languages:
-            return self.default, self.site_url, ""
+            return Language(code=self.default)
 
-        for code in self.languages:
-            if code == self.default:
+        for lang in self.languages:
+            if lang.code == self.default:
                 continue
-            prefix = f"{code.strip('/')}/"
+            prefix = f"{lang}/"
             if url.startswith(prefix):
-                return code, f"{self.site_url}{prefix}", code
+                return lang
 
-        return self.default, self.site_url, self.default
+        return Language(code=self.default, root=self.default)
 
     def get_prev(
         self,
@@ -311,15 +323,15 @@ class Nav:
         prev_page = self.get_prev(lang, url=url)
         next_page = self.get_next(lang, url=url)
         toc = self.toc[lang]
-        page_toc = self.get_page_toc(self.markdowner.toc_tokens)  # type: ignore
+        languages = [(lang.code, lang.root, lang.name) for lang in self.languages]
 
         return PageNav(
             page=page,
-            page_toc=page_toc,
             prev_page=prev_page,
             next_page=next_page,
             toc=toc,
-            languages=self.languages,
+            page_toc=[],
+            languages=languages,
             lang=lang,
         )
 
@@ -345,3 +357,19 @@ class Nav:
             return match.group("h1")
 
         return filename.name
+
+    def _log_initial_status(self) -> None:
+        log_titles = json.dumps(
+            {
+                key: {url: str(page) for url, page in titles.items()}
+                for key, titles in self.titles.items()
+            },
+            indent=2,
+        )
+        logger.debug(f"==== Titles:\n{log_titles}")
+
+        log_toc = json.dumps(self.toc, indent=2)
+        logger.debug(f"==== TOC:\n{log_toc}")
+
+        log_languages = json.dumps([str(lang) for lang in self.languages], indent=2)
+        logger.debug(f"==== Languages:\n{log_languages}")

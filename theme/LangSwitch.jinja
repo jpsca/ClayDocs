@@ -37,7 +37,7 @@
           w-full block p-2 pl-3 pr-4 text-sm
           border-l-2 border-transparent [.active]:border-accent-darker
         text-zinc-100 hover:text-accent-darker
-          {% if name == lang %}active{% endif %}
+          {% if code == lang %}active{% endif %}
       ">{{ name }}</a>
       {% endfor -%}
     </div>
