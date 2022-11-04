@@ -206,7 +206,7 @@ class Nav:
             else:
                 raise InvalidNav(item)
 
-    def get_lang(self, url: str) -> "tuple[str,str, str]":
+    def get_lang(self, url: str) -> "tuple[str,str,str]":
         url = self._get_url(url)
         if not self.languages:
             return self.default, self.site_url, ""
@@ -216,10 +216,9 @@ class Nav:
                 continue
             prefix = f"{code.strip('/')}/"
             if url.startswith(prefix):
-                return code, f"{self.site_url}{prefix}", prefix
+                return code, f"{self.site_url}{prefix}", code
 
-        root = f"{self.default}/"
-        return self.default, self.site_url, root
+        return self.default, self.site_url, self.default
 
     def get_prev(
         self,
