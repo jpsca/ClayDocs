@@ -1,0 +1,46 @@
+{#def languages, lang="" #}
+
+{% if languages %}
+<div {{ attrs.render(
+  tabindex="0",
+  title="Choose language",
+  class="
+    group relative p-2 touch-manipulation rounded
+    text-zinc-400 bg-white bg-opacity-[0.001]
+  ")
+}}>
+  <svg
+    xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+    stroke-width="2" stroke="currentColor"
+    class="w-6 h-6 group-hover:text-accent dark:group-hover:text-accent-darker"
+  >
+    <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 21l5.25-11.25L21 21m-9-3h7.5M3 5.621a48.474 48.474 0 016-.371m0 0c1.12 0 2.233.038 3.334.114M9 5.25V3m3.334 2.364C11.176 10.658 7.69 15.08 3 17.502m9.334-12.138c.896.061 1.785.147 2.666.257m-4.589 8.495a18.023 18.023 0 01-3.827-5.802" />
+  </svg>
+
+  <div class="
+    hidden group-hover:block group-focus:block
+    absolute top-full -left-full ml-3 -mt-2
+  ">
+    <div class="
+      absolute top-0 left-1/2 -ml-1 w-0 h-0
+      border-t-0 border-l-4 border-r-4 border-b-8
+      border-transparent border-b-zinc-600
+    "></div>
+
+    <div class="mt-2
+      bg-zinc-600 rounded p-1
+      shadow-md shadow-zinc-300 dark:shadow-zinc-900"
+    >
+      {% for code, url, name in languages -%}
+      <a href="{{ url }}"
+        class="
+          w-full block p-2 pl-3 pr-4 text-sm
+          border-l-2 border-transparent [.active]:border-accent-darker
+        text-zinc-100 hover:text-accent-darker
+          {% if name == lang %}active{% endif %}
+      ">{{ name }}</a>
+      {% endfor -%}
+    </div>
+  </div>
+</div>
+{% endif %}

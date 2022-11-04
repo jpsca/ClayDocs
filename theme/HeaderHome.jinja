@@ -1,26 +1,26 @@
 <div class="
-    content z-20
+    content relative z-20
     flex items-center w-full h-16
     backdrop-blur-sm bg-white/60 dark:bg-zinc-800/60
     tall:sticky tall:top-0
     ">
   <Hamburger class="ml-[-5px] mr-4 lg:hidden" />
-  <Logo class="mr-auto" />
+  <Logo class="mr-auto" base_url={nav.base_url} />
 
-  <div class="hidden md:flex items-center">
+  <div class="hidden md:flex items-center mr-5 pr-6
+    border-r border-zinc-200 dark:border-zinc-700"
+  >
     <nav>
       <ul class="flex items-center space-x-8">
         <li><a class="hover:text-accent dark:hover:text-accent-darker" href="/guide">Docs</a></li>
         <li><a href="#" class="hover:text-accent dark:hover:text-accent-darker">Blog</a></li>
       </ul>
     </nav>
-    <div class="
-      flex items-center
-      border-l border-zinc-200 dark:border-zinc-700
-      ml-6 pl-6
-    ">
-      <ThemeSwitch class="mr-5" />
-      <SourceLink />
-    </div>
+  </div>
+
+  <div class="flex items-center">
+    <LangSwitch class="mr-5" languages={nav.languages} lang="{nav.lang}" />
+    <ThemeSwitch class="mr-5" />
+    <SourceLink />
   </div>
 </div>

@@ -19,7 +19,7 @@ if t.TYPE_CHECKING:
 
 
 LOGGER_NAME = "claydocs"
-LOGGER_LEVEL = logging.INFO
+LOGGER_LEVEL = logging.DEBUG
 
 META_START = "---"
 META_END = "\n---"

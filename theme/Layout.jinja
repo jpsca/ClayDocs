@@ -1,10 +1,10 @@
-{#def title="", description="", lang="en" #}
+{#def title="", description="" #}
 
 {% set DEFAULT_TITLE = "Documentation" %}
 {% set title = (title + " | " + DEFAULT_TITLE) if title else DEFAULT_TITLE %}
 
 <!DOCTYPE html>
-<html lang="{{ lang }}" class="light">
+<html lang="{{ nav.lang }}" class="light">
 	<head>
 		<meta charset="utf-8">
 		<title>{{ title }}</title>

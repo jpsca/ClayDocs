@@ -182,7 +182,7 @@ class LiveReloadServer(socketserver.ThreadingMixIn, wsgiref.simple_server.WSGISe
     def render_page(self) -> tuple[str, str]:
         path = self.request.path
         try:
-            body = self._render(path[1:])
+            body = self._render(path.rstrip("/"))
         except Exception as exception:
             logger.exception(path)
             return self.render_error_page(exception)

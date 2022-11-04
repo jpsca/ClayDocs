@@ -1,10 +1,12 @@
+{#def base_url="/" #}
+
 <a
   {{ attrs.render(
     class="
       group flex items-center text-zinc-400
       opacity-90 hover:opacity-100
     ",
-    href="/"
+    href=base_url
 ) }}>
   <span class="block w-8 h-8 rounded-lg border border-current"></span>
   {% if nav.page.url != "/index" -%}

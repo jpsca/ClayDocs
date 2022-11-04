@@ -2,7 +2,7 @@
 
 {% macro render_item(url, title) %}
 {% if url != "/index" -%}
-<li class="border-l-2 border-zinc-100 dark:border-zinc-700/50 pb-1">
+<div class="border-l-2 border-zinc-100 dark:border-zinc-700/50 pb-1">
   <a href="{{ url }}"
     class="
       block
@@ -12,7 +12,7 @@
       [&.active]:border-accent [&.active]:hover:border-accent
       [&.active]:dark:border-accent-darker [&.active]:dark:hover:border-accent-darker
 
-      text-zinc-700 hover:text-black hover:font-medium
+      text-zinc-700 hover:text-black
       dark:text-zinc-400 dark:hover:text-zinc-100
       [&.active]:text-accent [&.active]:dark:text-accent-darker
       [&.active]:font-semibold {{ 'active' if page.url == url else '' }}
@@ -20,34 +20,31 @@
   >
     {{ title }}
   </a>
-</li>
+</div>
 {%- endif %}
 {% endmacro %}
 
 
-{% macro render_section(url, title, children, depth) %}
-<li class="[&::not(first-child)]:mt-8">
+{% macro render_section(url, title, children) %}
+<details class="[&::not(first-child)]:mt-8" open>
   {% if title -%}
-  <h2 class="text-medium text-zinc-800 dark:text-zinc-100 mb-2">
-    <a href="{{ url }}">{{ title }}</a>
-  </h2>
+  <summary class="text-medium text-zinc-800 dark:text-zinc-100 mb-2">
+    {{ title }}
+  </summary>
   {%- endif %}
-  {{ render_children(children, depth) }}
-</li>
+  {{ render_children(children) }}
+</details>
 {% endmacro %}
 
 
-{% macro render_children(children, depth=0) %}
-<ul>
+{% macro render_children(children) %}
   {%- for url, title, sub_children in children %}
     {% if sub_children -%}
-      {{ render_section(url, title, sub_children, depth=depth+1) }}
+      {{ render_section(url, title, sub_children) }}
     {%- else -%}
       {{ render_item(url, title) }}
     {%- endif %}
   {%- endfor %}
-</ul>
 {% endmacro %}
-
 
 {{ render_children(toc) }}

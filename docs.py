@@ -2,30 +2,42 @@ import subprocess
 from claydocs import Docs
 
 
-nav = [
-    "index.md",
-    [
-        "Guide",
+nav = {
+    "en": [
+        "index.md",
         [
-            "guide/index.md",
-            "guide/arguments.md",
-            "guide/extra.md",
-            "guide/css_and_js.md",
+            "Guide",
+            [
+                "guide/index.md",
+                "guide/arguments.md",
+                "guide/extra.md",
+                "guide/css_and_js.md",
+            ],
         ],
     ],
-]
+    "es": [
+        "index.md",
+    ],
+}
 
-docs = Docs(nav)
+# `code: name` dict of available languages
+languages = {
+    "en": "English",
+    "es": "Español",
+}
+
+docs = Docs(nav, languages, default="en")
 
 
 if __name__ == "__main__":
-    proc = subprocess.Popen([
-        "npx", "tailwindcss",
-        "-i", "./static/_source.css",
-        "-o", "./static/docs.css",
-        "--watch",
-    ])
-    try:
-        docs.run()
-    finally:
-        proc.terminate()
+    docs.run()
+    # proc = subprocess.Popen([
+    #     "npx", "tailwindcss",
+    #     "-i", "./static/_source.css",
+    #     "-o", "./static/docs.css",
+    #     "--watch",
+    # ])
+    # try:
+    #     docs.run()
+    # finally:
+    #     proc.terminate()

@@ -1,14 +1,16 @@
 <div
   class="
-    content z-20
+    content relative z-20
     flex items-center w-full h-16
     backdrop-blur-sm bg-white/60 dark:bg-zinc-800/60
     tall:sticky tall:top-0
     border-b border-zinc-900/10 dark:border-zinc-50/10
+    focus:outline-accent dark:focus:outline-accent-darker
     "
   >
   <Hamburger class="ml-[-5px] mr-4 lg:hidden" />
-  <Logo class="mr-auto"/>
+  <Logo class="mr-auto" base_url={nav.base_url} />
+  <LangSwitch class="mr-5" languages={nav.languages} lang="{nav.lang}" />
   <ThemeSwitch class="mr-5" />
   <SourceLink />
 </div>

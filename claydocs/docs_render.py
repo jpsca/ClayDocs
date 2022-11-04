@@ -143,13 +143,16 @@ class DocsRender(THasPaths if t.TYPE_CHECKING else object):
         catalog.add_folder(self.theme_folder)
         self.catalog = catalog
 
-    def render(self, name: str, **kw) -> str:
-        filename = f"{name}.md"
-        logger.debug(f"Trying to render `{name}`...")
+    def render(self, url: str, **kw) -> str:
+        breakpoint()
+        lang, base_url, root = self.nav.get_lang(url)
+
+        filename = f"{root}{url}.md"
+        logger.debug(f"Trying to render `{url}`...")
         filepath = self.content_folder / filename
         logger.debug(f"Looking for `{filepath}`...")
         if not filepath.exists():
-            filename = f"{name}/index.md"
+            filename = f"{url}/index.md"
             filepath = self.content_folder / filename
             logger.debug(f"Looking for `{filepath}`...")
             if not filepath.exists():
@@ -158,10 +161,12 @@ class DocsRender(THasPaths if t.TYPE_CHECKING else object):
         logger.debug(f"Rendering `{filepath}`")
         md_source, meta = load_markdown_metadata(filepath)
         meta.update(kw)
-        page = self.nav.get_page(filename)
+
+        nav = self.nav.get_page_nav(lang, filename)
+        nav.base_url = base_url
         meta.setdefault("component", self.DEFAULT_COMPONENT)
-        meta.setdefault("title", page["title"])
-        meta.setdefault("section", page["section"])
+        meta.setdefault("title", nav.page.title)
+        meta.setdefault("section", nav.page.section)
 
         component = meta["component"]
         content = self.render_markdown(md_source)
@@ -170,14 +175,7 @@ class DocsRender(THasPaths if t.TYPE_CHECKING else object):
             "content": content,
         }
 
-        page_toc = self.nav.get_page_toc(self.markdowner.toc_tokens)  # type: ignore
-        self.catalog.jinja_env.globals["nav"] = {
-            "page": page,
-            "page_toc": page_toc,
-            "prev_page": self.nav.get_prev(url=page["url"]),
-            "next_page": self.nav.get_next(url=page["url"]),
-            "toc": self.nav.toc,
-        }
+        self.catalog.jinja_env.globals["nav"] = nav
         self.catalog.jinja_env.globals["utils"]["timestamp"] = timestamp()
         return self.catalog.render(component, source=source, **meta)
 

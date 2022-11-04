@@ -1,97 +1,113 @@
 import json
 import re
 import typing as t
+from dataclasses import dataclass
 from pathlib import Path
 
 from .exceptions import InvalidNav
 from .utils import load_markdown_metadata, logger
 
-if t.TYPE_CHECKING:
-    TNavConfig = t.Sequence[t.Union[str, t.Sequence]]
-    TStrOrPath = t.Union[str, Path]
+
+TNavConfig = t.Sequence[t.Union[str, t.Sequence]]
+TLanguages = dict[str, str]
+TStrOrPath = t.Union[str, Path]
+
+
+@dataclass
+class Page:
+    lang: str = ""
+    url: str = ""
+    title: str = ""
+    index: int = 0
+    section: str = ""
+
+
+@dataclass
+class PageNav:
+    page: Page
+    prev_page:  Page
+    next_page: Page
+    toc: list
+    page_toc: list
+    languages: TLanguages
+    lang: str
+    base_url: str = ""
+
 
 rx_markdwown_h1 = re.compile(r"(^|\n)#\s+(?P<h1>[^\n]+)(\n|$)")
 rx_html_h1 = re.compile(r"<h1>(?P<h1>.+)</h1>", re.IGNORECASE)
 
 
 class Nav:
-    __slots__ = (
-        "titles",
-        "sections",
-        "toc",
-        "page_toc",
-        "_content_folder",
-        "_urls",
-        "_max_index",
-    )
-
     def __init__(
         self,
         content_folder: "TStrOrPath",
-        nav_config: "TNavConfig",
+        nav_config: "dict[str,TNavConfig]",
+        site_url: str,
+        languages: "TLanguages",
+        default: str
     ) -> None:
         self._content_folder = Path(content_folder)
-        self.titles: dict[str, dict] = {}
-        self.sections: list[str] = []
-        self.toc = []
-        self.build_toc(nav_config, section=self.toc)
-        self._urls = tuple(self.titles.keys())
-        self._max_index = len(self._urls) - 1
+        self.titles: dict[str, dict[str, Page]] = {}
+        self.toc: dict[str, list] = {}
+        self.languages = languages
+        self.default = default.strip('/')
 
-        logger.debug(f"Sections\n{self.sections}")
-        log_titles = json.dumps(self.titles, indent=2)
-        logger.debug(f"Titles\n{log_titles}")
-        logger.debug(f"TOC\n{self.toc}")
+        site_url = site_url.strip() or "/"
+        if site_url != "/":
+            site_url = f"/{site_url.strip('/')}/"
+        self.site_url = site_url
 
-    def get_page(self, filepath: "TStrOrPath") -> dict:
-        url = self._get_url(filepath)
-        return self.titles.get(url) or {
-            "url": url,
-            "title": "",
-            "section": "",
-            "index": None,
+        self._urls: dict[str, tuple[str, ...]] = {}
+        self._max_index: dict[str, int] = {}
+
+        if languages:
+            for lang in languages:
+                self.titles[lang] = {}
+                self.toc[lang] = []
+                self.build_toc(
+                    nav_config[lang],
+                    lang=lang,
+                    root=lang,
+                    section=self.toc[lang],
+                )
+        else:
+            self.titles[default] = {}
+            self.toc[default] = []
+            self.build_toc(
+                nav_config[default],
+                lang=default,
+                root="",
+                section=self.toc[default],
+            )
+
+        self._urls = {
+            lang: tuple(self.titles[lang].keys())
+            for lang in languages
+        }
+        self._max_index = {
+            lang: len(self._urls[lang]) - 1
+            for lang in languages
         }
 
-    def get_prev(
-        self,
-        filepath: "TStrOrPath" = "",
-        url: str = "",
-    ) -> dict:
-        url = url or self._get_url(filepath)
-        index = self.titles[url]["index"]
-        if index <= 0:
-            return {
-                "url": "",
-                "title": "",
-                "section": "",
-                "index": None,
-            }
+        log_titles = json.dumps(
+            {
+                key: {url: str(page) for url, page in titles.items()}
+                for key, titles in self.titles.items()
+            },
+            indent=2,
+        )
+        logger.debug(f"Titles\n{log_titles}")
 
-        prev_url = self._urls[index - 1]
-        return self.titles[prev_url]
-
-    def get_next(
-        self,
-        filepath: "TStrOrPath" = "",
-        url: str = "",
-    ) -> dict:
-        url = url or self._get_url(filepath)
-        index = self.titles[url]["index"]
-        if index >= self._max_index:
-            return {
-                "url": "",
-                "title": "",
-                "section": "",
-                "index": None,
-            }
-
-        next_url = self._urls[index + 1]
-        return self.titles[next_url]
+        log_toc = json.dumps(self.toc, indent=2)
+        logger.debug(f"TOC\n{log_toc}")
 
     def build_toc(
         self,
         nav_config: "TNavConfig",
         *,
+        lang: str,
+        root: str,
         section_title: str = "",
         section: "list",
     ) -> None:
@@ -118,44 +134,46 @@ class Nav:
         Example output:
         ```
         # self.toc
-        [
-            ["/index", "Home", []],
-            ["", "Guide", [
-                ["/guide/index", "The Guide"],
-                ["/guide/arguments", "The Arguments"],
-                ["/guide/extra", "Extra arguments"],
-            ]],
-            ["/faq", "FAQ", []],
-        ]
+        {
+            LANG: [
+                ["/index", "Home", []],
+                ["", "Guide", [
+                    ["/guide/index", "The Guide"],
+                    ["/guide/arguments", "The Arguments"],
+                    ["/guide/extra", "Extra arguments"],
+                ]],
+                ["/faq", "FAQ", []],
+            ],
+            ...
+        }
 
         # self.titles
         {
-            "/index": {
-                "url": "/index", "title": "Home", "index": 0, "section": ""
+            LANG: {
+                "/index":
+                    <Page url="/index", title="Home", index=0, section="">,
+                "/guide/index":
+                    <Page url="/guide/index", title="The Guide", index=1, section="Guide">,
+                "/guide/arguments":
+                    <Page url="/guide/arguments", title="The Arguments", index=2, section="Guide">,
+                "/guide/extra":
+                    <Page url="/guide/extra", title="Extra arguments", index=3, section="Guide">,
+                "/faq":
+                    <Page url="/faq", title="FAQ", index=4, section="">,
             },
-            "/guide/index": {
-                "url": "/guide/index", "title": "The Guide", "index": 1, "section": "Guide"
-            },
-            "/guide/arguments": {
-                "url": "/guide/arguments", "title": "The Arguments", "index": 2, "section": "Guide"
-            },
-            "/guide/extra": {
-                "url": "/guide/extra", "title": "Extra arguments", "index": 3, "section": "Guide"
-            },
-            "/faq": {
-                "url": "/faq", "title": "FAQ", "index": 4, "section": ""
-            },
+            ...
         }
         ```
         """
         tuple_or_list = (tuple, list)
+        base_url = f"/{root}" if root else root
 
         for item in nav_config:
             if isinstance(item, str):
-                title = self._extract_page_title(item)
-                url = self._get_url(item)
-                index = len(self.titles.keys())
-                self.titles[url] = dict(
+                title = self._extract_page_title(root, item)
+                url = f"{base_url}{self._get_url(item)}"
+                index = len(self.titles[lang].keys())
+                self.titles[lang][url] = Page(
                     url=url, title=title, index=index, section=section_title
                 )
                 section.append([url, title, None])
@@ -164,13 +182,10 @@ class Nav:
                 key, value = item
                 if isinstance(value, str):
                     value = value.strip()
-                    url = self._get_url(key)
-                    index = len(self.titles.keys())
-                    self.titles[url] = dict(
-                        url=url,
-                        title=value,
-                        index=index,
-                        section=section_title,
+                    url = f"{base_url}/{self._get_url(key)}"
+                    index = len(self.titles[lang].keys())
+                    self.titles[lang][url] = Page(
+                        url=url, title=value, index=index, section=section_title
                     )
                     section.append([url, value, None])
 
@@ -180,6 +195,8 @@ class Nav:
                     section.append(new_section)
                     self.build_toc(
                         nav_config=value,
+                        lang=lang,
+                        root=root,
                         section_title=new_section_title,
                         section=new_section[-1],
                     )
@@ -188,6 +205,51 @@ class Nav:
                     raise InvalidNav(item)
             else:
                 raise InvalidNav(item)
+
+    def get_lang(self, url: str) -> "tuple[str,str, str]":
+        url = self._get_url(url)
+        if not self.languages:
+            return self.default, self.site_url, ""
+
+        for code in self.languages:
+            if code == self.default:
+                continue
+            prefix = f"{code.strip('/')}/"
+            if url.startswith(prefix):
+                return code, f"{self.site_url}{prefix}", prefix
+
+        root = f"{self.default}/"
+        return self.default, self.site_url, root
+
+    def get_prev(
+        self,
+        lang: str,
+        *,
+        filename: "TStrOrPath" = "",
+        url: str = "",
+    ) -> "Page":
+        url = url or self._get_url(filename)
+        index = self.titles[lang][url].index
+        if index <= 0:
+            return Page()
+
+        prev_url = self._urls[lang][index - 1]
+        return self.titles[lang][prev_url]
+
+    def get_next(
+        self,
+        lang: str,
+        *,
+        filename: "TStrOrPath" = "",
+        url: str = "",
+    ) -> "Page":
+        url = url or self._get_url(filename)
+        index = self.titles[lang][url].index
+        if index >= self._max_index[lang]:
+            return Page()
+
+        next_url = self._urls[lang][index + 1]
+        return self.titles[lang][next_url]
 
     def get_page_toc(self, toc_tokens: dict) -> list:
         """Takes the `toc_tokens` attribute from the "toc" markdown extension,
@@ -243,15 +305,34 @@ class Nav:
         parse_level(toc_tokens, page_toc)
         return page_toc
 
+    def get_page_nav(self, lang: str, filename: str) -> "PageNav":
+        url = self._get_url(filename)
+        page = self.titles[lang].get(url) or Page()
+
+        prev_page = self.get_prev(lang, url=url)
+        next_page = self.get_next(lang, url=url)
+        toc = self.toc[lang]
+        page_toc = self.get_page_toc(self.markdowner.toc_tokens)  # type: ignore
+
+        return PageNav(
+            page=page,
+            page_toc=page_toc,
+            prev_page=prev_page,
+            next_page=next_page,
+            toc=toc,
+            languages=self.languages,
+            lang=lang,
+        )
+
     # Private
 
-    def _get_url(self, filepath: "TStrOrPath") -> str:
-        filepath = str(filepath).strip(" /").removesuffix(".md")
-        return f"/{filepath}"
+    def _get_url(self, filename: "TStrOrPath") -> str:
+        filename = str(filename).strip(" /").removesuffix(".md")
+        return f"/{filename}"
 
-    def _extract_page_title(self, path: str) -> str:
-        filepath = self._content_folder / path
-        source, meta = load_markdown_metadata(filepath)
+    def _extract_page_title(self, root, path: str) -> str:
+        filename = self._content_folder / root / path
+        source, meta = load_markdown_metadata(filename)
         title = meta.get("title")
         if title:
             return title
@@ -264,4 +345,4 @@ class Nav:
         if match:
             return match.group("h1")
 
-        return filepath.name
+        return filename.name

@@ -11,7 +11,10 @@ from .docs_server import DocsServer
 from .nav import Nav
 
 if t.TYPE_CHECKING:
-    from .nav import TNavConfig
+    from .nav import TNavConfig, TLanguages
+
+
+DEFAULT_LANGUAGE = "en"
 
 
 class Docs(DocsRender, DocsServer, DocsBuilder):
@@ -26,9 +29,12 @@ class Docs(DocsRender, DocsServer, DocsBuilder):
 
     def __init__(
         self,
-        nav_config: "TNavConfig",
+        nav_config: "t.Union[TNavConfig, dict[str,TNavConfig]]",
+        languages: "t.Optional[TLanguages]" = None,
         *,
         root: "t.Union[str,Path]" = ".",
+        site_url: str = "/",
+        default: str = DEFAULT_LANGUAGE,
         globals: "t.Optional[dict[str,t.Any]]" = None,
         filters: "t.Optional[dict[str,t.Any]]" = None,
         tests: "t.Optional[dict[str,t.Any]]" = None,
@@ -47,7 +53,16 @@ class Docs(DocsRender, DocsServer, DocsBuilder):
         self.build_folder = root / self.BUILD_FOLDER
         self.temp_folder = Path(tempfile.mkdtemp())
 
-        self.nav = Nav(self.content_folder, nav_config)
+        if not isinstance(nav_config, dict):
+            nav_config = {default: nav_config}
+
+        self.nav = Nav(
+            self.content_folder,
+            nav_config,
+            site_url=site_url,
+            languages=languages or {},
+            default=default,
+        )
         super().__init__(
             globals=globals,
             filters=filters,

@@ -1,16 +1,18 @@
 {#def toc #}
 
 {% set max_depth = 3 %}
-{% set indent = ["pl-2", "pl-4", "pl-8", "pl-12"] %}
+{% set indent = ["ml-0", "ml-2", "ml-4", "ml-8"] %}
 
 {% macro render_item(url, title, depth=0) %}
 <li>
   <a href="{{ url }}"
     class="
       flex items-center
-      py-1 px-2 leading-snug
-      text-zinc-600 hover:text-black border-l border-transparent hover:border-zinc-400
-      dark:text-zinc-500 dark:hover:text-zinc-100
+      py-1 pl-3 pr-2 leading-snug
+      text-zinc-600 dark:text-zinc-500
+      hover:text-black dark:hover:text-zinc-100
+      border-l border-zinc-100 dark:border-zinc-700/50
+      hover:border-zinc-300 dark:hover:border-zinc-400
       [&.active]:text-accent [&.active]:dark:text-accent-darker
       {{ indent[depth] }}
     "
