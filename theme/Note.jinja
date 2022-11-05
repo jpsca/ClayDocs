@@ -21,20 +21,20 @@
 ) }}>
   <summary class="flex items-center font-bold h-12 px-6 cursor-pointer group-open:pt-2
     {% if type -%}
-      pl-14 group-open:pl-[4.7rem] group-open:h-20 group-open:sm:h-12
+      pl-14 group-open:pl-16 group-open:h-20 group-open:sm:h-12
     {%- endif -%}
   ">
     {% if type -%}
     <Icon type={type}
       class="absolute pointer-events-none opacity-70
-      top-3 left-4 w-7 h-7 group-open:w-11 group-open:h-11" />
+      top-2 left-4 w-7 h-7 group-open:top-4 group-open:w-9 group-open:h-9" />
     {%- endif %}
     {{ title or type.upper() or "Note" }}
     <ArrowRight class="ml-auto rotate-90 group-open:-rotate-90 transition-transform" />
   </summary>
   <div class="pb-5 px-6
     {% if type -%}
-      sm:pl-[4.7rem]
+      sm:pl-16
     {%- endif -%}
   ">{{content}}</div>
 </details>
