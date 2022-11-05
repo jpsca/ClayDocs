@@ -58,12 +58,12 @@ def test_next():
         ["6.md", "Six"],
     ])
 
-    assert nav.get_next("1") == ("a", "/2", "Two")
-    assert nav.get_next("2") == ("a", "/3", "Three")
-    assert nav.get_next("3") == ("b", "/4", "Four")
-    assert nav.get_next("4") == ("c", "/5", "Five")
-    assert nav.get_next("5") == ("", "/6", "Six")
-    assert nav.get_next("6") == ("", "", "")
+    assert nav._get_next("1") == ("a", "/2", "Two")
+    assert nav._get_next("2") == ("a", "/3", "Three")
+    assert nav._get_next("3") == ("b", "/4", "Four")
+    assert nav._get_next("4") == ("c", "/5", "Five")
+    assert nav._get_next("5") == ("", "/6", "Six")
+    assert nav._get_next("6") == ("", "", "")
 
 
 def test_prev():
@@ -82,9 +82,9 @@ def test_prev():
         ["6.md", "Six"],
     ])
 
-    assert nav.get_prev("6") == ("c", "/5", "Five")
-    assert nav.get_prev("5") == ("b", "/4", "Four")
-    assert nav.get_prev("4") == ("a", "/3", "Three")
-    assert nav.get_prev("3") == ("a", "/2", "Two")
-    assert nav.get_prev("2") == ("", "/1", "One")
-    assert nav.get_prev("1") == ("", "", "")
+    assert nav._get_prev("6") == ("c", "/5", "Five")
+    assert nav._get_prev("5") == ("b", "/4", "Four")
+    assert nav._get_prev("4") == ("a", "/3", "Three")
+    assert nav._get_prev("3") == ("a", "/2", "Two")
+    assert nav._get_prev("2") == ("", "/1", "One")
+    assert nav._get_prev("1") == ("", "", "")

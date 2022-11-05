@@ -1,6 +1,6 @@
 {#def curr, prev, next #}
 
-<nav {{ attrs.render(class="flex items-center justify-evenly font-semibold") }}>
+<nav {{ attrs.render(class="flex items-center font-semibold") }}>
   {% if prev.url -%}
   <a
     href="{{ prev.url }}"

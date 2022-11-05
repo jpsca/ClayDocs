@@ -144,31 +144,22 @@ class DocsRender(THasPaths if t.TYPE_CHECKING else object):
         self.catalog = catalog
 
     def render(self, url: str, **kw) -> str:
-        lang = self.nav.get_lang(url)
+        page = self.nav.get_page(url)
+        if not page:
+            return ""
 
-        filename = f"{lang.root}{url}.md"
-        logger.debug(f"Trying to render `{url}`...")
-        filepath = self.content_folder / filename
-        logger.debug(f"Looking for `{filepath}`...")
-        if not filepath.exists():
-            filename = f"{url}/index.md"
-            filepath = self.content_folder / filename
-            logger.debug(f"Looking for `{filepath}`...")
-            if not filepath.exists():
-                return ""
-
+        filepath = self.content_folder / page.filename
         logger.debug(f"Rendering `{filepath}`")
         md_source, meta = load_markdown_metadata(filepath)
         meta.update(kw)
 
-        nav = self.nav.get_page_nav(lang.code, filename)
-        nav.base_url = lang.root
+        nav = self.nav.get_page_nav(page)
         meta.setdefault("component", self.DEFAULT_COMPONENT)
         meta.setdefault("title", nav.page.title)
         meta.setdefault("section", nav.page.section)
 
         content = self.render_markdown(md_source)
-        nav.page_toc = self.nav.get_page_toc(self.markdowner.toc_tokens)  # type: ignore
+        nav.page_toc = self.nav._get_page_toc(self.markdowner.toc_tokens)  # type: ignore
 
         component = meta["component"]
         source = "<%(component)s __attrs={attrs}>%(content)s</%(component)s>" % {
