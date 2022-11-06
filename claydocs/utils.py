@@ -19,7 +19,7 @@ if t.TYPE_CHECKING:
 
 
 LOGGER_NAME = "claydocs"
-LOGGER_LEVEL = logging.INFO
+LOGGER_LEVEL = logging.DEBUG
 
 META_START = "---"
 META_END = "\n---"
@@ -98,6 +98,6 @@ RANDOM_MESSAGES = [
 ]
 
 
-def print_random_messages(num=2) -> None:
+def print_random_messages(num=3) -> None:
     for message in random.sample(RANDOM_MESSAGES, num):
         logger.info(f"{message}...")

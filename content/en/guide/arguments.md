@@ -36,8 +36,9 @@ because that will make it a string that evaluates as `True`, which is the opposi
 
 Instead, you must use curly brackets: `multipart={False}`, instead of quotes: `multipart="False"`.
 
-!!! info
-    Using lowercase booleans (`true` or `false`) is also valid.
+<Note type="note" title="">
+  Using lowercase booleans (`true` or `false`) is also valid.
+</Note>
 
 Between the brackets, you can use datetimes, objects, lists, or any Python expressions.
 

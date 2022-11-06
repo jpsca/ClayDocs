@@ -14,9 +14,6 @@ if t.TYPE_CHECKING:
     from .nav import TPages
 
 
-DEFAULT_LANGUAGE = "en"
-
-
 class Docs(DocsRender, DocsServer, DocsBuilder):
     THEME_FOLDER = "theme"
     COMPONENTS_FOLDER = "components"
@@ -34,7 +31,7 @@ class Docs(DocsRender, DocsServer, DocsBuilder):
         *,
         root: "t.Union[str,Path]" = ".",
         site_url: str = "/",
-        default: str = DEFAULT_LANGUAGE,
+        default: str = "",
         globals: "t.Optional[dict[str,t.Any]]" = None,
         filters: "t.Optional[dict[str,t.Any]]" = None,
         tests: "t.Optional[dict[str,t.Any]]" = None,

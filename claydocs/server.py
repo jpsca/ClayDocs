@@ -7,6 +7,7 @@ import traceback
 import threading
 import typing as t
 import wsgiref.simple_server
+from pathlib import Path
 from urllib.parse import quote
 from sys import exc_info
 
@@ -42,29 +43,11 @@ ERROR_BODY = """<body>
 <pre>{traceback}</pre>
 </body>
 """
-SCRIPT_TEMPLATE_STR = """
-var livereload = function(epoch) {
-    var req = new XMLHttpRequest();
-    req.onloadend = function() {
-        if (parseFloat(this.responseText) > epoch) {
-            location.reload()
-            return;
-        }
-        var launchNext = livereload.bind(this, epoch);
-        if (this.status === 200) {
-            launchNext();
-        } else {
-            setTimeout(launchNext, 2000);
-        }
-    };
-    req.open("GET", "/livereload/" + epoch);
-    req.send();
 
-    console.log('Enabled live reload');
-}
-livereload(${epoch});
-"""
-SCRIPT_TEMPLATE = string.Template(SCRIPT_TEMPLATE_STR)
+HERE = Path(__file__).parent
+SCRIPT_TEMPLATE = (HERE / "livereload.js").read_text()
+
+rx_index = re.compile(r"/index$", re.IGNORECASE)
 
 
 class LiveReloadServer(socketserver.ThreadingMixIn, wsgiref.simple_server.WSGIServer):
@@ -164,6 +147,10 @@ class LiveReloadServer(socketserver.ThreadingMixIn, wsgiref.simple_server.WSGISe
         if self.request.path in STATIC_FILES:
             return self.redirect_to(f"/static{self.request.path}")
 
+        if self.request.path.endswith("/index"):
+            url = rx_index.sub("/", self.request.path)
+            return self.redirect_to(url)
+
         status = HTTP_OK
         if self.request.method == "HEAD":
             body = ""
@@ -189,8 +176,10 @@ class LiveReloadServer(socketserver.ThreadingMixIn, wsgiref.simple_server.WSGISe
 
         if body:
             return body, HTTP_OK
-        else:
-            return f"{path}.md not found", HTTP_NOT_FOUND
+
+        if path.endswith("/"):
+            path = f"{path}index"
+        return f"{path}.md not found", HTTP_NOT_FOUND
 
     def render_error_page(self, exception: Exception) -> tuple[str, str]:
         body = ERROR_BODY.format(
@@ -242,7 +231,7 @@ class LiveReloadServer(socketserver.ThreadingMixIn, wsgiref.simple_server.WSGISe
             body_end = len(content)
         # The page will reload if the livereload poller returns a newer epoch than what it knows.
         with self.epoch_cond:
-            script = SCRIPT_TEMPLATE.substitute(epoch=self.epoch)
+            script = SCRIPT_TEMPLATE.replace("__EPOCH__", str(self.epoch))
 
         return b"%b<script>%b</script>%b" % (
             content[:body_end],
@@ -289,6 +278,4 @@ class Request:
         if not path_info:
             return "/"
         path = path_info.encode("iso-8859-1", "replace").decode("utf-8", "replace")
-        if path.endswith("/"):
-            return path + "index"
         return path

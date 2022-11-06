@@ -17,9 +17,9 @@ if t.TYPE_CHECKING:
 
 DEFAULT_MD_EXTENSIONS = [
     "attr_list",
+    "def_list",
     "meta",
     "sane_lists",
-    "smarty",
     "tables",
     "toc",
     "pymdownx.betterem",

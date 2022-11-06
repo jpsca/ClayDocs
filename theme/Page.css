@@ -19,6 +19,17 @@
   padding-left: 1em;
 }
 
+.Page dl {
+  margin-top: 1.25em;
+  margin-bottom: 1.25em;
+}
+.Page dt {
+  font-weight: bold;
+}
+.Page dd {
+  padding-left: 1em;
+}
+
 .Page code {
   white-space: nowrap;
   font-feature-settings: "kern";

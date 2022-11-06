@@ -26,7 +26,7 @@
 
 
 {% macro render_section(url, title, children) %}
-<details class="[&::not(first-child)]:mt-8" open>
+<details class="mt-6" open>
   {% if title -%}
   <summary class="text-medium text-zinc-800 dark:text-zinc-100 mb-2">
     {{ title }}

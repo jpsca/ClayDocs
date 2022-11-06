@@ -66,15 +66,11 @@ class Nav:
         if site_url != "/":
             site_url = f"/{site_url.strip('/')}/"
         self.site_url = site_url
-
-        default = default.strip('/')
         self.default = default
 
-        if languages:
-            assert isinstance(pages, dict)
+        if isinstance(pages, dict):
             self._init_multi_language(pages, languages)
         else:
-            assert not isinstance(pages, dict)
             self._init_single_language(pages, default)
 
         self._log_initial_status()
@@ -121,7 +117,7 @@ class Nav:
 
     def get_page(self, url: str) -> "t.Optional[Page]":
         return self.pages.get(url) \
-            or self.pages.get(f"{url}/index") \
+            or self.pages.get(f"{url}/") \
                 or None
 
     def get_page_nav(self, page: "Page") -> "PageNav":
@@ -258,7 +254,8 @@ class Nav:
 
         for item in pages:
             if isinstance(item, str):
-                title = self._extract_page_title(root, item)
+                filepath = self._content_folder / root / item
+                title = self._extract_page_title(filepath)
                 url = f"{base_url}{self._get_url(item)}"
 
                 index = len(self.urls[lang])
@@ -308,6 +305,22 @@ class Nav:
                     raise InvalidNav(item)
             else:
                 raise InvalidNav(item)
+
+    def _extract_page_title(self, filepath: Path) -> str:
+        source, meta = load_markdown_metadata(filepath)
+        title = meta.get("title")
+        if title:
+            return title
+
+        match = rx_markdwown_h1.search(source)
+        if match:
+            return match.group("h1")
+
+        match = rx_html_h1.search(source)
+        if match:
+            return match.group("h1")
+
+        return filepath.name
 
     def _get_prev(self, url: str, lang: str = "") -> "Page":
         index = self.pages[url].index
@@ -381,25 +394,8 @@ class Nav:
         return page_toc
 
     def _get_url(self, filename: str) -> str:
-        return filename.strip(" /").removesuffix(".md")
+        return filename.strip(" /").removesuffix(".md").removesuffix("index")
         return f"/{filename}"
-
-    def _extract_page_title(self, root, path: str) -> str:
-        filename = self._content_folder / root / path
-        source, meta = load_markdown_metadata(filename)
-        title = meta.get("title")
-        if title:
-            return title
-
-        match = rx_markdwown_h1.search(source)
-        if match:
-            return match.group("h1")
-
-        match = rx_html_h1.search(source)
-        if match:
-            return match.group("h1")
-
-        return filename.name
 
     def _log_initial_status(self) -> None:
         for name in "pages,toc,languages".split(","):

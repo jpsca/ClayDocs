@@ -1,5 +1,7 @@
 import subprocess
+
 from claydocs import Docs
+from markupsafe import Markup
 
 
 pages = {
@@ -31,13 +33,14 @@ docs = Docs(pages, languages=languages, default="en")
 
 
 if __name__ == "__main__":
-    proc = subprocess.Popen([
-        "npx", "tailwindcss",
-        "-i", "./static/_source.css",
-        "-o", "./static/docs.css",
-        "--watch",
-    ])
-    try:
-        docs.run()
-    finally:
-        proc.terminate()
+    docs.run()
+    # proc = subprocess.Popen([
+    #     "npx", "tailwindcss",
+    #     "-i", "./static/_source.css",
+    #     "-o", "./static/docs.css",
+    #     "--watch",
+    # ])
+    # try:
+    #     docs.run()
+    # finally:
+    #     proc.terminate()
