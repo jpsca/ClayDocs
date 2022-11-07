@@ -33,14 +33,13 @@ docs = Docs(pages, languages=languages, default="en")
 
 
 if __name__ == "__main__":
-    docs.run()
-    # proc = subprocess.Popen([
-    #     "npx", "tailwindcss",
-    #     "-i", "./static/_source.css",
-    #     "-o", "./static/docs.css",
-    #     "--watch",
-    # ])
-    # try:
-    #     docs.run()
-    # finally:
-    #     proc.terminate()
+    proc = subprocess.Popen([
+        "npx", "tailwindcss",
+        "-i", "./static/_source.css",
+        "-o", "./static/docs.css",
+        "--watch",
+    ])
+    try:
+        docs.run()
+    finally:
+        proc.terminate()
