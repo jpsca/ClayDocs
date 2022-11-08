@@ -152,13 +152,10 @@ class DocsRender(THasPaths if t.TYPE_CHECKING else object):
         logger.debug(f"Rendering `{filepath}`")
 
         md_source, meta = load_markdown_metadata(filepath)
-        meta.update(kw)
-        meta.setdefault("component", self.DEFAULT_COMPONENT)
         nav = self.nav.get_page_nav(page)
         content = self.render_markdown(md_source)
         nav.page_toc = self.nav._get_page_toc(self.markdowner.toc_tokens)  # type: ignore
-
-        component = meta["component"]
+        component = meta.get("component", self.DEFAULT_COMPONENT)
         source = (
             '<%(component)s title="%(title)s">%(content)s</%(component)s>'
          ) % {
@@ -168,9 +165,9 @@ class DocsRender(THasPaths if t.TYPE_CHECKING else object):
         }
 
         self.catalog.jinja_env.globals["nav"] = nav
-        self.catalog.jinja_env.globals["meta"] = meta
+        self.catalog.jinja_env.globals["meta"] = nav.page.meta
         self.catalog.jinja_env.globals["utils"]["timestamp"] = timestamp()
-        return self.catalog.render(component, source=source, **meta)
+        return self.catalog.render(component, source=source, **kw)
 
     def render_markdown(self, source: str) -> Markup:
         source = textwrap.dedent(source.strip("\n"))

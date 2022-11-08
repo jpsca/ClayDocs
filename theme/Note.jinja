@@ -1,4 +1,4 @@
-{#def title="", type="", open=True #}
+{#def title="", type="", icon=True, open=True #}
 
 {% set colors = {
   "note": "bg-sky-100 border-sky-200 text-sky-900",
@@ -13,27 +13,29 @@
 } %}
 
 {% set type = type if type in colors else "" %}
+{% set show_icon = icon and type %}
+
 {% set color_classes = colors.get(type, "bg-zinc-100 border-zinc-300 text-zinc-800") %}
 {% do attrs.set(class=color_classes) %}
 
 <details {{ attrs.render(
-  class="group relative border rounded overflow-hidden text-sm bg-opacity-90",
+  class="group relative border rounded overflow-hidden bg-opacity-90",
   open=open,
 ) }}>
-  <summary class="flex items-center font-bold h-12 px-5 cursor-pointer group-open:pt-1
-    {% if type %}group-open:pl-14 group-open:h-20 group-open:sm:h-12{% endif %}
+  <summary class="flex items-center font-bold h-12 px-5 cursor-pointer group-open:md:pt-1
+    {% if show_icon %}group-open:md:pl-14{% endif %}
   ">
-    {% if type -%}
+    {% if show_icon -%}
     <Icon type={type}
-      class=" w-7 h-7 pointer-events-none opacity-70 mr-2 group-open:absolute
-       group-open:left-3 group-open:top-3 group-open:w-9 group-open:h-9" />
+      class=" w-7 h-7 pointer-events-none opacity-70 mr-2 group-open:md:absolute
+       group-open:md:left-3 group-open:md:top-3 group-open:md:w-9 group-open:md:h-9" />
     {%- endif %}
     {{ title or type.upper() or "Note" }}
     <ArrowRight class="ml-auto rotate-90 group-open:-rotate-90 transition-transform" />
   </summary>
   <div class="pb-6 px-6
-    {% if type -%}
-      sm:pl-14
+    {% if show_icon -%}
+      md:pl-14
     {%- endif -%}
   ">{{content}}</div>
 </details>

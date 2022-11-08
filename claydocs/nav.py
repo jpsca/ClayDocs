@@ -1,7 +1,7 @@
 import json
 import re
 import typing as t
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
 from slugify import slugify
@@ -30,6 +30,7 @@ class Page:
     title: str = ""
     index: int = 0
     section: str = ""
+    meta: dict = field(default_factory=dict)
 
 
 @dataclass
@@ -173,11 +174,11 @@ class Nav:
                 "Guide",
                 [
                     "guide/index.md",
-                    ["guide/arguments.md", "The Arguments"],
+                    "guide/arguments.md",
                     "guide/extra.md",
                 ],
             ],
-            ["faq.md", "FAQ"],
+            "faq.md",
         ]
         ```
 
@@ -186,13 +187,13 @@ class Nav:
         # self.toc
         {
             LANG: [
-                ["/index", "Home", []],
-                ["", "Guide", [
-                    ["/guide/index", "The Guide"],
-                    ["/guide/arguments", "The Arguments"],
-                    ["/guide/extra", "Extra arguments"],
+                ["/index", "Home", null],
+                [null, "Guide", [
+                    ["/guide/index", "The Guide", null],
+                    ["/guide/arguments", "The Arguments", null],
+                    ["/guide/extra", "Extra arguments", null],
                 ]],
-                ["/faq", "FAQ", []],
+                ["/faq", "FAQ", null],
             ],
             ...
         }
@@ -201,40 +202,15 @@ class Nav:
         {
             en: {
                 "/index":
-                    <Page
-                        url="/index",
-                        root="en/index.md",
-                        title="Home",
-                        index=0,
-                        section="">,
+                    <Page url="/index", root="en/index.md", title="Home", index=0, section="", meta={...}>,
                 "/guide/index":
-                    <Page
-                        url="/guide/index",
-                        root="en/guide/index.md",
-                        title="The Guide",
-                        index=1,
-                        section="Guide">,
+                    <Page url="/guide/index", root="en/guide/index.md", title="The Guide", index=1, section="Guide", meta={...}>,
                 "/guide/arguments":
-                    <Page
-                        url="/guide/arguments",
-                        root="en/guide/arguments.md",
-                        title="The Arguments",
-                        index=2,
-                        section="Guide">,
+                    <Page url="/guide/arguments", root="en/guide/arguments.md", title="The Arguments", index=2, section="Guide", meta={...}>,
                 "/guide/extra":
-                    <Page
-                        url="/guide/extra",
-                        root="en/guide/extra.md",
-                        title="Extra arguments",
-                        index=3,
-                        section="Guide">,
+                    <Page url="/guide/extra", root="en/guide/extra.md", title="Extra arguments", index=3, section="Guide", meta={...}>,
                 "/faq":
-                    <Page
-                        url="/faq",
-                        root="en/faq.md",
-                        title="FAQ",
-                        index=4,
-                        section="">,
+                    <Page url="/faq", root="en/faq.md", title="FAQ", index=4, section="", meta={...}>,
             },
             ...
         }
@@ -289,7 +265,7 @@ class Nav:
         filepath = self._content_folder / root / item
         source, meta = load_markdown_metadata(filepath)
         title = (
-            meta.get("title")
+            meta.pop("title", None)
             or self._extract_page_title(source)
             or filepath.name
         )
@@ -304,6 +280,7 @@ class Nav:
             title=title,
             index=index,
             section=section_title,
+            meta=meta,
         )
         self.urls[lang].append(url)
         section.append([url, title, None])
