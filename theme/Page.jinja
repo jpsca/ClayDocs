@@ -8,7 +8,7 @@
     max-w-[88rem] min-h-screen mx-auto
     flex justify-between
   ">
-    <GlobalSidebar class="hidden lg:block" />
+    <SidebarGlobal class="hidden lg:block" />
     <main class="Page px-0 md:px-6 pt-10 mx-auto w-full max-w-[78ch]">
       <div class="prose prose-zinc dark:prose-invert max-w-full">
         {{ content }}
@@ -20,7 +20,7 @@
         next={nav.next_page}
       />
     </main>
-    <LocalSidebar class="hidden xl:block" />
+    <SidebarLocal class="hidden xl:block" />
   </div>
   <Menu class="lg:hidden" />
 </Layout>
