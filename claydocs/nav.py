@@ -4,9 +4,10 @@ import typing as t
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
+from slugify import slugify
+
 from .exceptions import InvalidNav
 from .utils import load_markdown_metadata, logger
-
 
 TPagesBranch = t.Sequence[t.Union[str, t.Sequence]]
 TPagesMultiLang = dict[str,TPagesBranch]
@@ -254,64 +255,83 @@ class Nav:
 
         for item in pages:
             if isinstance(item, str):
-                filepath = self._content_folder / root / item
-                title = self._extract_page_title(filepath)
-                url = f"{base_url}{self._get_url(item)}"
-
-                index = len(self.urls[lang])
-                self.pages[url] = Page(
+                self._index_page(
+                    item,
                     lang=lang,
-                    url=url,
-                    filename=f"{root}/{item}",
-                    title=title,
-                    index=index,
-                    section=section_title,
+                    base_url=base_url,
+                    root=root,
+                    section_title=section_title,
+                    section=section,
                 )
-                self.urls[lang].append(url)
-                section.append([url, title, None])
 
             elif isinstance(item, tuple_or_list) and len(item) == 2:
-                key, value = item
-                if isinstance(value, str):
-                    value = value.strip()
-                    url = f"{base_url}/{self._get_url(key)}"
+                self._index_section(
+                    tuple(item),
+                    lang=lang,
+                    base_url=base_url,
+                    root=root,
+                    section=section,
+                )
 
-                    index = len(self.urls[lang])
-                    self.pages[url] = Page(
-                        lang=lang,
-                        url=url,
-                        filename=f"{root}/{key}",
-                        title=value,
-                        index=index,
-                        section=section_title,
-                    )
-                    self.urls[lang].append(url)
-                    section.append([url, value, None])
-
-                elif isinstance(item, tuple_or_list):
-                    new_section_title = key.strip()
-                    new_section = [None, new_section_title, []]
-                    section.append(new_section)
-                    self._index_pages(
-                        pages=value,
-                        lang=lang,
-                        base_url=base_url,
-                        root=root,
-                        section_title=new_section_title,
-                        section=new_section[-1],
-                    )
-
-                else:
-                    raise InvalidNav(item)
             else:
                 raise InvalidNav(item)
 
-    def _extract_page_title(self, filepath: Path) -> str:
+    def _index_page(
+        self,
+        item: str,
+        *,
+        lang: str,
+        base_url: str,
+        root: str,
+        section_title: str,
+        section: "list",
+    ) -> None:
+        filepath = self._content_folder / root / item
         source, meta = load_markdown_metadata(filepath)
-        title = meta.get("title")
-        if title:
-            return title
+        title = (
+            meta.get("title")
+            or self._extract_page_title(source)
+            or filepath.name
+        )
+        slug = meta.get("slug") or item
+        url = f"{base_url}{self._get_url(slug)}"
 
+        index = len(self.urls[lang])
+        self.pages[url] = Page(
+            lang=lang,
+            url=url,
+            filename=f"{root}/{item}",
+            title=title,
+            index=index,
+            section=section_title,
+        )
+        self.urls[lang].append(url)
+        section.append([url, title, None])
+
+    def _index_section(
+        self,
+        item: "tuple[str, TPagesBranch]",
+        *,
+        lang: str,
+        base_url: str,
+        root: str,
+        section: "list",
+    ) -> None:
+        section_title, subpages = item
+
+        section_title = section_title.strip()
+        new_section = [None, section_title, []]
+        section.append(new_section)
+        self._index_pages(
+            pages=subpages,
+            lang=lang,
+            base_url=base_url,
+            root=root,
+            section_title=section_title,
+            section=new_section[-1],
+        )
+
+    def _extract_page_title(self, source: str) -> str:
         match = rx_markdwown_h1.search(source)
         if match:
             return match.group("h1")
@@ -320,7 +340,7 @@ class Nav:
         if match:
             return match.group("h1")
 
-        return filepath.name
+        return ""
 
     def _get_prev(self, url: str, lang: str = "") -> "Page":
         index = self.pages[url].index
@@ -394,8 +414,8 @@ class Nav:
         return page_toc
 
     def _get_url(self, filename: str) -> str:
-        return filename.strip(" /").removesuffix(".md").removesuffix("index")
-        return f"/{filename}"
+        url = filename.strip(" /").removesuffix(".md").removesuffix("index")
+        return "/".join([slugify(part) for part in url.split("/")])
 
     def _log_initial_status(self) -> None:
         for name in "pages,toc,languages".split(","):

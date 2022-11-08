@@ -27,15 +27,16 @@
     absolute top-full -left-1/2 -mt-1
   ">
     <div class="
-      absolute top-0 left-1/2 w-0 h-0
+      absolute top-0 left-1/2 w-0 h-0 -ml-1
       border-t-0 border-l-4 border-r-4 border-b-8
-      border-transparent border-b-zinc-100
+      border-transparent border-b-zinc-200 dark:border-b-black
     "></div>
 
     <div class="
-      mt-2
-      bg-zinc-100 rounded-md p-1 text-sm shadow-xl shadow-zinc-300
-      dark:bg-black dark:text-zinc-200 dark:shadow-zinc-900"
+      mt-2 p-1 text-sm font-medium rounded-md
+      bg-zinc-200 dark:bg-black
+      shadow-lg shadow-zinc-400 dark:shadow-zinc-900
+      text-zinc-900 dark:text-zinc-200"
     >
       {% for lang in nav.languages -%}
         <a href="{{ lang.root if lang.code != nav.page.lang else '' }}"
@@ -43,8 +44,9 @@
           {% if lang.code == nav.page.lang -%}
             text-accent dark:text-accent-darker
           {%- endif %}
-          hover:text-white hover:bg-accent
-          dark:hover:text-black dark:hover:bg-accent-darker
+          first:rounded-t-md last:rounded-b-md
+          hover:text-zinc-200 dark:hover:text-zinc-900
+          hover:bg-accent dark:hover:bg-accent-darker
           "
         >
           {{ lang.name }}

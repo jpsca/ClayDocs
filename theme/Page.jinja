@@ -1,8 +1,8 @@
 {#def title="" #}
 {#css Page.css #}
 
-<Layout title={title}>
-  <HeaderMain />
+<Layout title={title} description={meta.get('description', '')}>
+  <NavBar />
   <div class="
     content md:pr-0 pb-16 z-10
     max-w-[88rem] min-h-screen mx-auto
