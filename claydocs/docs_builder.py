@@ -18,7 +18,7 @@ class DocsBuilder(THasRender if t.TYPE_CHECKING else object):
     def build(self) -> None:
         logger.info("Rendering pages...")
 
-        for url in self.nav.titles:
+        for url in self.nav.pages:
             name = url.strip("/")
             if name.endswith("/index") or name == "index":
                 filename = f"{name}.html"

@@ -14,11 +14,12 @@ TPagesMultiLang = dict[str,TPagesBranch]
 TPages = t.Union[TPagesBranch, TPagesMultiLang]
 TStrOrPath = t.Union[str, Path]
 
+DEFAULT_LANG = "en"
 
 @dataclass
 class Language:
     code: str
-    root: str = ""
+    url: str = ""
     name: str = ""
 
 
@@ -55,7 +56,7 @@ class Nav:
         pages: "TPages",
         site_url: str,
         languages: "dict[str, str]",
-        default: str
+        default: str = DEFAULT_LANG,
     ) -> None:
         self.pages: dict[str, Page] = {}
         self.toc: dict[str, list] = {}
@@ -126,7 +127,7 @@ class Nav:
         prev_page = self._get_prev(page.url, lang=page.lang)
         next_page = self._get_next(page.url, lang=page.lang)
         toc = self.toc[page.lang]
-        base_url = self.languages[page.lang].root
+        base_url = self.languages[page.lang].url
         languages = list(self.languages.values())
 
         return PageNav(
@@ -142,13 +143,35 @@ class Nav:
     # Private
 
     def _build_languages(self, languages: "dict[str, str]") -> "dict[str, Language]":
+        """
+        Takes a dict of `code: Name` pairs and improves it with the
+        root of the language content.
+
+        Example input:
+
+        ```python
+        {
+            "en": "English",
+            "es": "Español",
+        }
+        ```
+
+        Example output:
+
+        ```python
+        {
+            "en": Language(code="en", url="/", name="English"),
+            "es": Language(code="es", url="/es/", name="Español"),
+        }
+        ```
+        """
         langs = {}
         for code, name in languages.items():
             if code == self.default:
-                root = self.site_url
+                url = self.site_url
             else:
-                root = f"{self.site_url}{code}/"
-            langs[code] = Language(code=code, root=root, name=name)
+                url = f"{self.site_url}{code}/"
+            langs[code] = Language(code=code, url=url, name=name)
 
         return langs
 
@@ -162,12 +185,15 @@ class Nav:
         section_title: str = "",
         section: "list",
     ) -> None:
-        """Takes a pages and recursively builds the table of contents.
-        The titles not specified are extracted from the contents of each file.
+        """
+        Recursively process the pages list to build the table of contents
+        and extract the pages metadata.
+
+        The titles are extracted from the contents of each file.
 
         Example input:
 
-        ```
+        ```python
         [
             "index.md",
             [
@@ -183,7 +209,8 @@ class Nav:
         ```
 
         Example output:
-        ```
+
+        ```python
         # self.toc
         {
             LANG: [

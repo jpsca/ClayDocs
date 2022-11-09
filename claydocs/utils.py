@@ -44,6 +44,7 @@ class THasPaths:
     CONTENT_FOLDER: str
     STATIC_FOLDER: str
     BUILD_FOLDER: str
+
     STATIC_URL: str
     THUMBNAILS_URL: str
     DEFAULT_COMPONENT: str

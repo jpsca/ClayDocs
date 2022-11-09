@@ -7,6 +7,7 @@ from signal import SIGTERM, signal
 
 from .docs_builder import DocsBuilder
 from .docs_render import DocsRender
+from .docs_search import DocsSearch
 from .docs_server import DocsServer
 from .nav import Nav
 
@@ -14,7 +15,7 @@ if t.TYPE_CHECKING:
     from .nav import TPages
 
 
-class Docs(DocsRender, DocsServer, DocsBuilder):
+class Docs(DocsBuilder, DocsRender, DocsSearch, DocsServer):
     THEME_FOLDER = "theme"
     COMPONENTS_FOLDER = "components"
     CONTENT_FOLDER = "content"

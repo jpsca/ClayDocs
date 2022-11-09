@@ -39,7 +39,7 @@
       text-zinc-900 dark:text-zinc-200"
     >
       {% for lang in nav.languages -%}
-        <a href="{{ lang.root if lang.code != nav.page.lang else '' }}"
+        <a href="{{ lang.url if lang.code != nav.page.lang else '' }}"
           class="w-full px-5 h-8 flex items-center
           {% if lang.code == nav.page.lang -%}
             text-accent dark:text-accent-darker
