@@ -150,14 +150,17 @@ class DocsRender(THasPaths if t.TYPE_CHECKING else object):
 
         filepath = self.content_folder / page.filename
         logger.debug(f"Rendering `{filepath}`")
-
         md_source, meta = load_markdown_metadata(filepath)
         nav = self.nav.get_page_nav(page)
         content = self.render_markdown(md_source)
         nav.page_toc = self.nav._get_page_toc(self.markdowner.toc_tokens)  # type: ignore
         component = meta.get("component", self.DEFAULT_COMPONENT)
         source = (
-            '<%(component)s title="%(title)s">%(content)s</%(component)s>'
+            "<%(component)s title=\"%(title)s\">"
+            "<!--startpage-->"
+            "%(content)s"
+            "<!--endpage-->"
+            "</%(component)s>"
          ) % {
             "title": nav.page.title,
             "component": component,

@@ -227,19 +227,32 @@ class Nav:
 
         # self.pages
         {
-            en: {
-                "/index":
-                    <Page url="/index", root="en/index.md", title="Home", index=0, section="", meta={...}>,
-                "/guide/index":
-                    <Page url="/guide/index", root="en/guide/index.md", title="The Guide", index=1, section="Guide", meta={...}>,
-                "/guide/arguments":
-                    <Page url="/guide/arguments", root="en/guide/arguments.md", title="The Arguments", index=2, section="Guide", meta={...}>,
-                "/guide/extra":
-                    <Page url="/guide/extra", root="en/guide/extra.md", title="Extra arguments", index=3, section="Guide", meta={...}>,
-                "/faq":
-                    <Page url="/faq", root="en/faq.md", title="FAQ", index=4, section="", meta={...}>,
+            "/index":
+                <Page
+                    lang="en" url="/index", root="en/index.md",
+                    title="Home", index=0, section="", meta={...}
+                >,
+            "/guide/index":
+                <Page
+                    lang="en" url="/guide/index", root="en/guide/index.md",
+                    title="The Guide", index=1, section="Guide", meta={...}
+                >,
+            "/guide/arguments":
+                <Page
+                    lang="en" url="/guide/arguments", root="en/guide/arguments.md",
+                    title="The Arguments", index=2, section="Guide", meta={...}
+                >,
+            "/guide/extra":
+                <Page
+                    lang="en" url="/guide/extra", root="en/guide/extra.md",
+                    title="Extra arguments", index=3, section="Guide", meta={...}
+                >,
+            "/faq":
+                <Page
+                    lang="en" url="/faq", root="en/faq.md",
+                    title="FAQ", index=4, section="", meta={...}
+                >,
             },
-            ...
         }
 
         # self.urls

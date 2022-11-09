@@ -26,16 +26,6 @@ META_END = "\n---"
 
 logger = logging.getLogger(LOGGER_NAME)
 logger.setLevel(LOGGER_LEVEL)
-ch = logging.StreamHandler()
-ch.setLevel(LOGGER_LEVEL)
-
-formatter = logging.Formatter(
-    fmt="{levelname: <10}-  [{asctime}] {message}",
-    style="{",
-    datefmt="%H:%M:%S",
-)
-ch.setFormatter(formatter)
-logger.addHandler(ch)
 
 
 class THasPaths:

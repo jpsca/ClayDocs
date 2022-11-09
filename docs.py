@@ -45,8 +45,9 @@ def tailwind():
     ])
 
 if __name__ == "__main__":
-    proc_tailwind = tailwind()
-    try:
-        docs.run()
-    finally:
-        proc_tailwind.terminate()
+    docs.run()
+    # proc_tailwind = tailwind()
+    # try:
+    #     docs.run()
+    # finally:
+    #     proc_tailwind.terminate()

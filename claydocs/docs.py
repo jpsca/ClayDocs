@@ -6,8 +6,8 @@ from pathlib import Path
 from signal import SIGTERM, signal
 
 from .docs_builder import DocsBuilder
+from .docs_index import DocsIndex
 from .docs_render import DocsRender
-from .docs_search import DocsSearch
 from .docs_server import DocsServer
 from .nav import Nav
 
@@ -15,7 +15,10 @@ if t.TYPE_CHECKING:
     from .nav import TPages
 
 
-class Docs(DocsBuilder, DocsRender, DocsSearch, DocsServer):
+VALID_COMMANDS = ("serve", "build", "index")
+
+
+class Docs(DocsBuilder, DocsIndex, DocsRender, DocsServer):
     THEME_FOLDER = "theme"
     COMPONENTS_FOLDER = "components"
     CONTENT_FOLDER = "content"
@@ -76,19 +79,31 @@ class Docs(DocsBuilder, DocsRender, DocsSearch, DocsServer):
         try:
             py, *sysargs = sys.argv
             cmd = sysargs[0] if sysargs else "serve"
+            if cmd not in VALID_COMMANDS:
+                return self.cmd_help(py)
             if cmd == "serve":
-                self.serve()
+                self.cmd_serve()
             elif cmd == "build":
-                self.build()
-            else:
-                print(
-                    f"""
-Valid commands:
-  python {py} serve
-  python {py} build
-"""
-                )
+                self.cmd_build()
+            elif cmd == "index":
+                self.cmd_index()
+        except Exception:
+            raise
         finally:
             shutil.rmtree(self.temp_folder, ignore_errors=True)
             sys.stderr.write("\n")
             exit(1)
+
+    def cmd_serve(self):
+        self.serve()
+
+    def cmd_build(self):
+        self.build()
+
+    def cmd_index(self):
+        self.index()
+
+    def cmd_help(self, py: str):
+        print("\nValid commands:")
+        for cmd in VALID_COMMANDS:
+            print(f"  python {py} {cmd}")
