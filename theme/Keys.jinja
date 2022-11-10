@@ -1,50 +1,51 @@
 {#def sep="+", symbols=True #}
 
 {% set symbol_map = {
-  "alt": "⎇",
-  "arrow_down": "↓",
-  "arrow_left": "←",
-  "arrow_right": "→",
-  "arrow_up": "↑",
-  "back": "⌫",
-  "backspace": "⌫",
-  "bksp": "⌫",
-  "caps_lock": "⇪",
-  "cmd": "⌘",
-  "command": "⌘",
+  "arrow_left": "&#x2190;",
+  "left": "&#x2190;",
+  "arrow_up": "&#x2191;",
+  "up": "&#x2191;",
+  "arrow_right": "&#x2192;",
+  "right": "&#x2192;",
+  "arrow_down": "&#x2193;",
+  "down": "&#x2193;",
+
+  "alt": "&#x2387;",
+  "opt": "&#x2387;",
+  "option": "&#x2387;",
+  "back": "&#x232B;",
+  "backspace": "&#x232B;",
+  "bksp": "&#x232B;",
+  "caps_lock": "&#x21EA;",
+  "cmd": "&#x2318;",
+  "command": "&#x2318;",
   "control": "⌃",
   "ctrl": "⌃",
-  "down": "↓",
-  "enter": "⏎",
-  "esc": "⎋",
-  "escape": "⎋",
-  "left": "←",
-  "menu": "☰",
-  "meta": "◆",
-  "opt": "⌥",
-  "option": "⌥",
-  "print_screen": "⎙",
-  "print": "⎙",
-  "prtsc": "⎙",
-  "return": "⏎",
-  "right": "→",
-  "shift": "⇧",
-  "super" :"❖",
-  "tab": "⇥",
-  "up": "↑",
-  "win": "⊞",
-  "windows": "⊞",
+  "enter": "&#x23CE;",
+  "return": "&#x23CE;",
+  "esc": "&#x238B;",
+  "escape": "&#x238B;",
+  "menu": "&#x2630;",
+  "meta": "&#x25C6;",
+  "print_screen": "&#x2399;",
+  "print": "&#x2399;",
+  "prtsc": "&#x2399;",
+  "shift": "&#x21E7;",
+  "super" :"&#x2756;",
+  "tab": "&#x21E5;",
+  "win": "&#x229E;",
+  "windows": "&#x229E;",
 } %}
 
 {% set insert_plus = joiner("+") %}
 
-<span class="not-prose inline-flex items-centerfont-mono font-medium leading-0 mx-1">
+<span class="not-prose inline-flex items-center font-mono font-medium leading-0 mx-1">
 {% for key in content.split(sep) -%}
   {%- set symbol = symbol_map.get(utils.underscore(key)) -%}
   {{ insert_plus() }}{#
-  #}<kbd class="flex items-center text-sm border rounded border-white dark:border-black bg-zinc-100 dark:bg-zinc-900 py-[0.1em] px-1 shadow-[0_0_2px_0_#000]">
+  #}<kbd class="flex items-center border rounded border-white dark:border-black bg-zinc-100 dark:bg-zinc-900 py-[0.1em] px-1 shadow-[0_0_2px_0_#000]">
     {%- if symbols and symbol -%}
-      <span class="block mr-1 align-text-bottom">{{ symbol }} </span>
+      <span class="block mr-1 align-text-bottom">{{ symbol|safe }} </span>
     {%- endif -%}
     {{ key|trim }}</kbd>
 {%- endfor %}

@@ -157,7 +157,7 @@ class LiveReloadServer(socketserver.ThreadingMixIn, wsgiref.simple_server.WSGISe
         else:
             body, status = self.render_page()
 
-        self.headers.setdefault("Content-Type", "text/html")
+        self.headers.setdefault("Content-Type", "text/html; charset=utf-8")
         return body, status
 
     def redirect_to(self, path: str) -> tuple[str, str]:
