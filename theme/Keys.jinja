@@ -36,17 +36,16 @@
   "windows": "⊞",
 } %}
 
+{% set insert_plus = joiner("+") %}
+
 <span class="not-prose inline-flex items-centerfont-mono font-medium leading-0 mx-1">
 {% for key in content.split(sep) -%}
-  {% set symbol = symbol_map.get(utils.underscore(key)) -%}
-
-  <kbd class="flex items-center text-sm border rounded border-white dark:border-black bg-zinc-100 dark:bg-zinc-900 py-[0.1em] px-1 shadow-[0_0_2px_0_#000]">
+  {%- set symbol = symbol_map.get(utils.underscore(key)) -%}
+  {{ insert_plus() }}{#
+  #}<kbd class="flex items-center text-sm border rounded border-white dark:border-black bg-zinc-100 dark:bg-zinc-900 py-[0.1em] px-1 shadow-[0_0_2px_0_#000]">
     {%- if symbols and symbol -%}
-      <span class="block mr-1 align-text-bottom">{{ symbol }}</span>
+      <span class="block mr-1 align-text-bottom">{{ symbol }} </span>
     {%- endif -%}
-
-    {{ key|trim }}
-  </kbd>
-  {% if not loop.last %}&nbsp;+&nbsp;{% endif %}
+    {{ key|trim }}</kbd>
 {%- endfor %}
 </span>

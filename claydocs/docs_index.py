@@ -1,13 +1,12 @@
 import json
 import typing as t
-from html.parser import HTMLParser
 
 import Stemmer
 from lunr import lunr
 from lunr.builder import Builder
 from lunr.stop_word_filter import generate_stop_word_filter
-from lunr.trimmer import trimmer
 
+from .text_extractor import extract_text
 from .stop_words import stop_words
 from .utils import logger
 
@@ -34,42 +33,10 @@ STEMMER_LANGS = {
 }
 FIELDS = ("id", "title", "tags", "body")
 
-
-class DocumentExtractor(HTMLParser):
-    START_PAGE = "startpage"
-    START_PAGE_COM = f"<!--{START_PAGE}-->"
-    ENDPAGE = "endpage"
-    start_pos: tuple[int, int]
-    end_pos: tuple[int, int]
-
-    def handle_comment(self, data: str) -> None:
-        if data == self.START_PAGE:
-            self.start_pos = self.getpos()
-        elif data == self.ENDPAGE:
-            self.end_pos = self.getpos()
-
-    def feed(self, data:str) -> str:
-        super().feed(data)
-        start_line = self.start_pos[0]
-        end_line = self.end_pos[0]
-        start_char = self.start_pos[1] + len(self.START_PAGE_COM)
-        end_char = self.end_pos[1]
-        lines = data.split("\n")
-        html = [
-            lines[start_line - 1][start_char:],
-            *lines[start_line:end_line - 1],
-            lines[end_line - 1][:end_char],
-        ]
-        doc = "\n".join(html)
-        return doc
-
-
-doc_extractor = DocumentExtractor()
-
-
 class DocsIndex(THasRender if t.TYPE_CHECKING else object):
     def index(self) -> None:
         documents = self._get_documents()
+        print(documents.keys())
         for lang, documents in documents.items():
             logger.info(f"Indexing {lang} pages...")
             idx = self._index_lang(lang, documents)
@@ -88,6 +55,7 @@ class DocsIndex(THasRender if t.TYPE_CHECKING else object):
     def _store_search_index(self, lang: str, idx: dict) -> None:
         filename = f"search-{lang}.json"
         filepath = self.static_folder / filename
+        logger.info(f"Saving {filepath}...")
         filepath.write_text(json.dumps(idx))
 
     def _get_documents(self) -> dict[str, list[dict]]:
@@ -107,26 +75,42 @@ class DocsIndex(THasRender if t.TYPE_CHECKING else object):
             "tags": page.meta.get("tags", []),
             "body": self._extract_page_body(page.url),
         }
-        logger.debug(data)
+
+        log_dict = {k: v for k, v in data.items() if k != "body"}
+        log_dict["body"] = "..."
+        logger.debug(str(log_dict))
         return data
 
     def _extract_page_body(self, url: str) -> str:
-        breakpoint()
         html = self.render(url)
-        return doc_extractor.feed(html)
+        return extract_text(html)
 
     def _get_builder(self, lang: str) -> Builder:
         builder = Builder()
         stop_word_filter = self._get_stop_word_filter(lang)
         stemmer = self._get_stemmer(lang)
-        builder.pipeline.add(trimmer, stop_word_filter, stemmer)
-        builder.search_pipeline.add(stemmer)
+
+        builder.search_pipeline.register_function(
+            stop_word_filter, label=f"stopWordFilter-{lang}"
+        )
+        builder.search_pipeline.register_function(
+            stop_word_filter, label="stopWordFilter"
+        )
+        builder.search_pipeline.register_function(
+            stemmer, label="stemmer"
+        )
         return builder
 
     def _get_stop_word_filter(self, lang: str) -> t.Callable:
         return generate_stop_word_filter(stop_words[lang], lang)
 
     def _get_stemmer(self, lang: str) -> Stemmer:
-        return Stemmer.Stemmer(STEMMER_LANGS[lang])
+        stemmer = Stemmer.Stemmer(STEMMER_LANGS[lang])
+        # lunr requires a non-slot-ed object
+        def stemmer_func(*args, **kw):
+            return stemmer(*args, **kw)
+
+        return stemmer_func
+
 
 
