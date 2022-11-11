@@ -1,14 +1,15 @@
-import shutil
+import json
 import sys
+import shutil
 import tempfile
 import typing as t
 from pathlib import Path
 from signal import SIGTERM, signal
 
 from .docs_builder import DocsBuilder
-from .docs_index import DocsIndex
 from .docs_render import DocsRender
 from .docs_server import DocsServer
+from .indexer import Indexer
 from .nav import Nav
 
 if t.TYPE_CHECKING:
@@ -18,7 +19,7 @@ if t.TYPE_CHECKING:
 VALID_COMMANDS = ("serve", "build", "index")
 
 
-class Docs(DocsBuilder, DocsIndex, DocsRender, DocsServer):
+class Docs(DocsBuilder, DocsRender, DocsServer):
     THEME_FOLDER = "theme"
     COMPONENTS_FOLDER = "components"
     CONTENT_FOLDER = "content"
@@ -61,6 +62,9 @@ class Docs(DocsBuilder, DocsIndex, DocsRender, DocsServer):
             languages=languages or {},
             default=default,
         )
+
+        self.indexer = Indexer(self.render)
+
         super().__init__(
             globals=globals,
             filters=filters,
@@ -101,7 +105,15 @@ class Docs(DocsBuilder, DocsIndex, DocsRender, DocsServer):
         self.build()
 
     def cmd_index(self):
-        self.index()
+        pages = list(self.nav.pages.values())
+        documents, indexes = self.indexer.index(pages)
+
+        filepath = self.static_folder / "documents.json"
+        filepath.write_text(json.dumps(documents))
+
+        for lang, index in indexes.items():
+            filepath = self.static_folder / f"search-{lang}.json"
+            filepath.write_text(json.dumps(index))
 
     def cmd_help(self, py: str):
         print("\nValid commands:")

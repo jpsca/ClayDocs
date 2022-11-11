@@ -102,7 +102,6 @@ class DocsRender(THasPaths if t.TYPE_CHECKING else object):
                 super().__init__(this.static_folder / source)
 
             def __str__(self) -> str:
-                ops = str(self.options).encode("utf8", errors="ignore")
                 filename = self.get_temp_filename()
                 dest = this.temp_folder / filename
                 if not dest.is_file():
@@ -156,12 +155,12 @@ class DocsRender(THasPaths if t.TYPE_CHECKING else object):
         nav.page_toc = self.nav._get_page_toc(self.markdowner.toc_tokens)  # type: ignore
         component = meta.get("component", self.DEFAULT_COMPONENT)
         source = (
-            "<%(component)s title=\"%(title)s\">"
+            '<%(component)s title="%(title)s">'
             "<!--startpage-->"
             "%(content)s"
             "<!--endpage-->"
             "</%(component)s>"
-         ) % {
+        ) % {
             "title": nav.page.title,
             "component": component,
             "content": content,

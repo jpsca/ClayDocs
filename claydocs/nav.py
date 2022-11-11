@@ -9,12 +9,17 @@ from slugify import slugify
 from .exceptions import InvalidNav
 from .utils import load_markdown_metadata, logger
 
-TPagesBranch = t.Sequence[t.Union[str, t.Sequence]]
-TPagesMultiLang = dict[str,TPagesBranch]
-TPages = t.Union[TPagesBranch, TPagesMultiLang]
-TStrOrPath = t.Union[str, Path]
+if t.TYPE_CHECKING:
+    TPagesBranch = t.Sequence[t.Union[str, t.Sequence]]
+    TPagesMultiLang = dict[str, TPagesBranch]
+    TPages = t.Union[TPagesBranch, TPagesMultiLang]
+    TStrOrPath = t.Union[str, Path]
+
 
 DEFAULT_LANG = "en"
+rx_markdwown_h1 = re.compile(r"(^|\n)#\s+(?P<h1>[^\n]+)(\n|$)")
+rx_html_h1 = re.compile(r"<h1>(?P<h1>.+)</h1>", re.IGNORECASE)
+
 
 @dataclass
 class Language:
@@ -37,16 +42,12 @@ class Page:
 @dataclass
 class PageNav:
     page: Page
-    prev_page:  Page
+    prev_page: Page
     next_page: Page
     toc: list
     page_toc: list
     languages: list[Language]
     base_url: str = ""
-
-
-rx_markdwown_h1 = re.compile(r"(^|\n)#\s+(?P<h1>[^\n]+)(\n|$)")
-rx_html_h1 = re.compile(r"<h1>(?P<h1>.+)</h1>", re.IGNORECASE)
 
 
 class Nav:
@@ -121,7 +122,7 @@ class Nav:
     def get_page(self, url: str) -> "t.Optional[Page]":
         return self.pages.get(url) \
             or self.pages.get(f"{url}/") \
-                or None
+            or None
 
     def get_page_nav(self, page: "Page") -> "PageNav":
         prev_page = self._get_prev(page.url, lang=page.lang)

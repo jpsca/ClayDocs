@@ -2,7 +2,6 @@ import html
 import logging
 import re
 import socketserver
-import string
 import traceback
 import threading
 import typing as t
@@ -17,7 +16,6 @@ import watchdog.observers.polling
 from .utils import logger, timestamp
 
 if t.TYPE_CHECKING:
-    from pathlib import Path
     from watchdog.observers import ObservedWatch  # type: ignore
 
 
