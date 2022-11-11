@@ -86,6 +86,7 @@ class Docs(DocsBuilder, DocsRender, DocsServer):
             if cmd not in VALID_COMMANDS:
                 return self.cmd_help(py)
             if cmd == "serve":
+                self.cmd_index()
                 self.cmd_serve()
             elif cmd == "build":
                 self.cmd_build()
