@@ -3,11 +3,11 @@
 {% set symbol_map = {
   "arrow_left": "&#x2190;",
   "left": "&#x2190;",
-  "arrow_up": "&#x2191;",
+  "arrow-up": "&#x2191;",
   "up": "&#x2191;",
-  "arrow_right": "&#x2192;",
+  "arrow-right": "&#x2192;",
   "right": "&#x2192;",
-  "arrow_down": "&#x2193;",
+  "arrow-down": "&#x2193;",
   "down": "&#x2193;",
 
   "alt": "&#x2387;",
@@ -16,7 +16,7 @@
   "back": "&#x232B;",
   "backspace": "&#x232B;",
   "bksp": "&#x232B;",
-  "caps_lock": "&#x21EA;",
+  "caps-lock": "&#x21EA;",
   "cmd": "&#x2318;",
   "command": "&#x2318;",
   "control": "⌃",
@@ -27,7 +27,7 @@
   "escape": "&#x238B;",
   "menu": "&#x2630;",
   "meta": "&#x25C6;",
-  "print_screen": "&#x2399;",
+  "print-screen": "&#x2399;",
   "print": "&#x2399;",
   "prtsc": "&#x2399;",
   "shift": "&#x21E7;",
@@ -39,14 +39,12 @@
 
 {% set insert_plus = joiner("+") %}
 
-<span class="not-prose inline-flex items-center font-mono font-medium leading-0 mx-1">
+<span class="inline-flex items-center font-mono font-medium text-[0.9em]">
 {% for key in content.split(sep) -%}
-  {%- set symbol = symbol_map.get(utils.underscore(key)) -%}
-  {{ insert_plus() }}{#
-  #}<kbd class="flex items-center border rounded border-white dark:border-black bg-zinc-100 dark:bg-zinc-900 py-[0.1em] px-1 shadow-[0_0_2px_0_#000]">
-    {%- if symbols and symbol -%}
-      <span class="block mr-1 align-text-bottom">{{ symbol|safe }} </span>
-    {%- endif -%}
+  {%- set key = utils.underscore(key)|replace("_", "-") -%}
+  {%- set symbol = symbol_map.get(key) -%}
+  {{ insert_plus() }}<kbd class="inline-block border rounded border-white dark:border-black bg-zinc-100 dark:bg-zinc-900 leading-tight px-1 mx-1 shadow-[0_0_2px_0_#000]">
+    {%- if symbols and symbol -%}{{ symbol|safe }} {% endif -%}
     {{ key|trim }}</kbd>
 {%- endfor %}
 </span>

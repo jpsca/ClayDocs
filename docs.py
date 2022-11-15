@@ -15,6 +15,7 @@ pages = {
                 "guide/css_and_js.md",
             ],
         ],
+        "search.md",
     ],
     "es": [
         "index.md",

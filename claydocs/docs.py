@@ -107,14 +107,11 @@ class Docs(DocsBuilder, DocsRender, DocsServer):
 
     def cmd_index(self):
         pages = list(self.nav.pages.values())
-        documents, indexes = self.indexer.index(pages)
+        data = self.indexer.index(pages)
 
-        filepath = self.static_folder / "documents.json"
-        filepath.write_text(json.dumps(documents))
-
-        for lang, index in indexes.items():
+        for lang, langdata in data.items():
             filepath = self.static_folder / f"search-{lang}.json"
-            filepath.write_text(json.dumps(index))
+            filepath.write_text(json.dumps(langdata))
 
     def cmd_help(self, py: str):
         print("\nValid commands:")

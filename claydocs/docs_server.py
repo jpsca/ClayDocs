@@ -11,8 +11,8 @@ if t.TYPE_CHECKING:
 
 class DocsServer(THasRender if t.TYPE_CHECKING else object):
     def serve(self) -> None:
-        logger.info("Starting server...")
         print_random_messages()
+        logger.info("Starting server...")
         try:
             server = self.get_server()
             server.watch(self.content_folder)
