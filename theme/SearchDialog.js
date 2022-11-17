@@ -35,8 +35,16 @@
 
     function onInput(event) {
       if (input.value.length >= MIN_INPUT_LENGTH) {
-        const search_term = `${input.value}*`
-        const matches = idx.search(search_term)
+        let search_term = input.value.replace(/\s+/g, " ")
+        let matches = idx.search(search_term)
+
+        if (!matches.length) {
+          search_term = search_term.split(" ").map(function (word) {
+            return word.slice(0, -1)
+          }).join(" ")
+          matches = idx.search(search_term)
+        }
+
         showResults(matches)
       }
     }
@@ -56,7 +64,8 @@
       const title = page.title.replace(rx, term)
 
       const html = resultTmpl
-        .replace("{URL}", match.ref)
+        .replace("{URL}", page.loc)
+        .replace("{PARENT}", page.parent || "")
         .replace("{TITLE}", title)
         .replace("{BODY}", body)
         .replace("{SCORE}", match.score)
@@ -76,7 +85,7 @@
     }
 
     function escapeReplacement(string) {
-      return string.replace(/\$/g, "$$$$").replace(/\*/g, "")
+      return string.replace(/\$/g, "$$$$")
     }
 
     function htmlToElement(html) {

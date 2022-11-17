@@ -1,8 +1,6 @@
 import re
 import typing as t
 
-from lunr import lunr
-
 from ..utils import logger
 from .builder import Builder
 from .text_extractor import TSections, extract_sections, rx_multiple_spaces
@@ -46,26 +44,29 @@ class Indexer:
         tags = " ".join([f"#{tag}" for tag in page.meta.get("tags", [])])
 
         if tags:
-            data[page.url] = {"title": page.title, "body": tags}
+            data["0"] = {
+                "title": page.title,
+                "body": tags,
+                "parent": "",
+                "loc": page.url,
+            }
 
         return data
 
     def _index_lang(self, lang: str, sections: TSections) -> dict:
         builder = Builder(lang)
-        documents = [
-            {
-                "loc": loc,
+        builder.ref("uid")
+        builder.field("title")
+        builder.field("body")
+
+        for uid, data in sections.items():
+            builder.add({
+                "uid": uid,
                 "title": data["title"],
                 "body": self._normalize_body(data["body"]),
-            }
-            for loc, data in sections.items()
-        ]
-        idx = lunr(
-            ref="loc",
-            fields=("title", "body"),
-            documents=documents,
-            builder=builder,
-        )
+            })
+
+        idx = builder.build()
         return idx.serialize()
 
     def _normalize_body(self, html: str) -> str:

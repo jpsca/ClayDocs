@@ -1,3 +1,4 @@
+import html
 import re
 from html.parser import HTMLParser
 
@@ -10,13 +11,21 @@ END_PAGE = "endpage"
 # Ignore these tags but save its content
 IGNORE_TAGS = (
     "a",
+    "address",
+    "article",
+    "aside",
+    "div",
     "fieldset",
     "figcaption>",
+    "footer",
+    "header",
     "hgroup",
     "hr",
     "main",
+    "section",
     "span",
     "srcset",
+    "summary",
     "tbody",
     "thead",
 )
@@ -41,9 +50,6 @@ IGNORE_TAG_AND_CONTENTS = (
 HEADER_TAGS = ("h1", "h2", "h3", "h4", "h5", "h6")
 PRE_TAG = "pre"
 DETAILS_TAG = "details"
-SUMMARY_TAG = "summary"
-DIV_TAG = "div"
-B_TAG = "b"
 
 CUT_ON = (
     "address",
@@ -55,8 +61,8 @@ CUT_ON = (
     "dl",
     "figure",
     "footer",
-    *HEADER_TAGS,
     "header",
+    *HEADER_TAGS,
     "ol",
     "p",
     PRE_TAG,
@@ -83,6 +89,7 @@ class TextExtractor(HTMLParser):
     _loc: str
     _title: list[str]
     _body: list[str]
+    _uid: int
 
     def __init__(self, page_title: str = "", base_loc: str = ""):
         super().__init__()
@@ -92,50 +99,56 @@ class TextExtractor(HTMLParser):
         self._loc = ""
         self._title = []
         self._body = []
+        self._uid = 1
 
     def handle_starttag(self, tag: str, attrs: list):
-        html_attrs = ""
+        if not (self._in_page and self._capture):
+            return
 
         if tag in IGNORE_TAG_AND_CONTENTS:
             self._capture = False
             return
 
-        if not (self._in_page and self._capture):
-            return
-
-        if tag in IGNORE_TAGS:
-            return
-
-        if tag in HEADER_TAGS:
-            attr_id = next((x for x in attrs if x[0] == ID_ATTR), None)
-            if attr_id:
-                self.save_section()
-                self._loc = attr_id[1]
-                self._title = []
-                self._body = []
-                self._in_header = True
+        if self._in_pre:
+            if tag not in IGNORE_TAGS:
+                self._body.append(f"<{tag}>")
             return
 
         if self._in_header:
             return
 
+        if tag in CUT_ON:
+            self.save_section()
+
+        if tag in HEADER_TAGS:
+            attr_id = next((x for x in attrs if x[0] == ID_ATTR), None)
+            self._title = []
+            self._body = []
+            if attr_id:
+                self._loc = attr_id[1]
+                self._in_header = True
+            return
+
         if tag == PRE_TAG:
             self._in_pre = True
 
-        if tag == DETAILS_TAG:
-            html_attrs = " open"
-
-        self._body.append(f"<{tag}{html_attrs}>")
+        if tag not in IGNORE_TAGS:
+            self._body.append(f"<{tag}>")
 
     def handle_endtag(self, tag: str):
-        if tag in NON_DATA_TAGS:
-            self._capture = True
-            return
-
         if not (self._in_page and self._capture):
             return
 
-        if tag in IGNORE_TAGS:
+        if tag in IGNORE_TAG_AND_CONTENTS:
+            self._capture = True
+            return
+
+        if tag == PRE_TAG:
+            self._in_pre = False
+
+        if self._in_pre:
+            if tag not in IGNORE_TAGS:
+                self._body.append(f"</{tag}>")
             return
 
         if tag in HEADER_TAGS:
@@ -145,10 +158,8 @@ class TextExtractor(HTMLParser):
         if self._in_header:
             return
 
-        if tag == PRE_TAG:
-            self._in_pre = False
-
-        self._body.append(f"</{tag}>")
+        if tag not in IGNORE_TAGS:
+            self._body.append(f"</{tag}>")
 
     def handle_comment(self, data: str):
         if data == START_PAGE:
@@ -160,11 +171,13 @@ class TextExtractor(HTMLParser):
         if not (self._in_page and self._capture):
             return
 
+        data = html.escape(data.replace("¶", ""))
+
         if self._in_pre:
             self._body.append(data)
             return
 
-        data = rx_multiple_spaces.sub(" ", data.replace("¶", ""))
+        data = rx_multiple_spaces.sub(" ", data)
 
         if self._in_header:
             self._title.append(data)
@@ -179,21 +192,32 @@ class TextExtractor(HTMLParser):
         self.handle_data(f"&#{name};")
 
     def save_section(self):
-        title = "".join(self._title)
+        title = "".join(self._title).strip()
         if not title or title == self._page_title:
             title = self._page_title
             parent = ""
         else:
             parent = self._page_title
 
+        num_parts = len(self._body)
         body = "".join(self._body).strip()
+        self._body = []
+
+        if not body or body == title:
+            return
+
+        if num_parts == 1 and body.startswith("<"):
+            return
+
         loc = f"{self._base_loc}#{self._loc}"
 
-        self.sections[loc] = {
+        self.sections[str(self._uid)] = {
             "parent": parent,
             "title": title,
             "body": body,
+            "loc": loc
         }
+        self._uid += 1
 
     def close(self):
         self.save_section()
