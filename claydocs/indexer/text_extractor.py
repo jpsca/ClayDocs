@@ -47,16 +47,19 @@ IGNORE_TAG_AND_CONTENTS = (
     "video",
 )
 
+TO_DIV_TAGS = (
+    "details",
+)
+
 HEADER_TAGS = ("h1", "h2", "h3", "h4", "h5", "h6")
 PRE_TAG = "pre"
-DETAILS_TAG = "details"
+CODE_TAG = "code"
 
 CUT_ON = (
     "address",
     "article",
     "aside",
     "blockquote",
-    DETAILS_TAG,
     "div",
     "dl",
     "figure",
@@ -73,6 +76,10 @@ CUT_ON = (
 ID_ATTR = "id"
 
 rx_multiple_spaces = re.compile(r"\s+")
+rx_non_text = re.compile(
+    r"[^\w./_\-]|\s[._-]+|[._-]+\s|[._-]+$|^[._-]+|\s/\s",
+    re.UNICODE | re.IGNORECASE
+)
 
 
 class TextExtractor(HTMLParser):
@@ -81,6 +88,7 @@ class TextExtractor(HTMLParser):
     _capture: bool = True
     _in_page: bool = False
     _in_pre: bool = False
+    _in_code: bool = False
     _in_header: bool = False
 
     _page_title: str
@@ -89,6 +97,7 @@ class TextExtractor(HTMLParser):
     _loc: str
     _title: list[str]
     _body: list[str]
+    _raw: list[str]
     _uid: int
 
     def __init__(self, page_title: str = "", base_loc: str = ""):
@@ -99,6 +108,7 @@ class TextExtractor(HTMLParser):
         self._loc = ""
         self._title = []
         self._body = []
+        self._raw = []
         self._uid = 1
 
     def handle_starttag(self, tag: str, attrs: list):
@@ -109,21 +119,18 @@ class TextExtractor(HTMLParser):
             self._capture = False
             return
 
-        if self._in_pre:
-            if tag not in IGNORE_TAGS:
-                self._body.append(f"<{tag}>")
-            return
-
         if self._in_header:
             return
 
         if tag in CUT_ON:
             self.save_section()
 
+        if tag in IGNORE_TAGS:
+            return
+
         if tag in HEADER_TAGS:
             attr_id = next((x for x in attrs if x[0] == ID_ATTR), None)
             self._title = []
-            self._body = []
             if attr_id:
                 self._loc = attr_id[1]
                 self._in_header = True
@@ -132,8 +139,13 @@ class TextExtractor(HTMLParser):
         if tag == PRE_TAG:
             self._in_pre = True
 
-        if tag not in IGNORE_TAGS:
-            self._body.append(f"<{tag}>")
+        if tag == CODE_TAG:
+            self._in_code = True
+
+        if tag in TO_DIV_TAGS:
+            tag = "div"
+
+        self._body.append(f"<{tag}>")
 
     def handle_endtag(self, tag: str):
         if not (self._in_page and self._capture):
@@ -143,23 +155,23 @@ class TextExtractor(HTMLParser):
             self._capture = True
             return
 
-        if tag == PRE_TAG:
-            self._in_pre = False
-
-        if self._in_pre:
-            if tag not in IGNORE_TAGS:
-                self._body.append(f"</{tag}>")
+        if tag in IGNORE_TAGS:
             return
 
         if tag in HEADER_TAGS:
             self._in_header = False
             return
 
-        if self._in_header:
-            return
+        if tag == PRE_TAG:
+            self._in_pre = False
 
-        if tag not in IGNORE_TAGS:
-            self._body.append(f"</{tag}>")
+        if tag == CODE_TAG:
+            self._in_code = False
+
+        if tag in TO_DIV_TAGS:
+            tag = "div"
+
+        self._body.append(f"</{tag}>")
 
     def handle_comment(self, data: str):
         if data == START_PAGE:
@@ -171,18 +183,20 @@ class TextExtractor(HTMLParser):
         if not (self._in_page and self._capture):
             return
 
-        data = html.escape(data.replace("¶", ""))
-
-        if self._in_pre:
-            self._body.append(data)
-            return
-
-        data = rx_multiple_spaces.sub(" ", data)
+        text_data = data
+        data = html.escape(text_data)
 
         if self._in_header:
             self._title.append(data)
             return
 
+        if not self._in_pre:
+            data = rx_multiple_spaces.sub(" ", data)
+
+        if not self._in_code:
+            text_data = rx_non_text.sub(" ", text_data)
+
+        self._raw.append(text_data)
         self._body.append(data)
 
     def handle_entityref(self, name):
@@ -192,29 +206,33 @@ class TextExtractor(HTMLParser):
         self.handle_data(f"&#{name};")
 
     def save_section(self):
+        raw = "".join(self._raw).strip()
+        raw = rx_multiple_spaces.sub(" ", raw)
+        if not raw:
+            return
+
         title = "".join(self._title).strip()
+        title = rx_multiple_spaces.sub(" ", title)
+        body = "".join(self._body).strip()
+
         if not title or title == self._page_title:
             title = self._page_title
             parent = ""
         else:
             parent = self._page_title
 
-        num_parts = len(self._body)
-        body = "".join(self._body).strip()
         self._body = []
+        self._raw = []
 
-        if not body or body == title:
-            return
-
-        if num_parts == 1 and body.startswith("<"):
+        if title == body:
             return
 
         loc = f"{self._base_loc}#{self._loc}"
-
         self.sections[str(self._uid)] = {
             "parent": parent,
             "title": title,
             "body": body,
+            "raw": raw,
             "loc": loc
         }
         self._uid += 1

@@ -11,6 +11,7 @@ from .docs_render import DocsRender
 from .docs_server import DocsServer
 from .indexer import Indexer
 from .nav import Nav
+from .utils import is_debug
 
 if t.TYPE_CHECKING:
     from .nav import TPages
@@ -108,10 +109,11 @@ class Docs(DocsBuilder, DocsRender, DocsServer):
     def cmd_index(self):
         pages = list(self.nav.pages.values())
         data = self.indexer.index(pages)
+        indent = 2 if is_debug() else None
 
         for lang, langdata in data.items():
             filepath = self.static_folder / f"search-{lang}.json"
-            filepath.write_text(json.dumps(langdata))
+            filepath.write_text(json.dumps(langdata, indent=indent))
 
     def cmd_help(self, py: str):
         print("\nValid commands:")

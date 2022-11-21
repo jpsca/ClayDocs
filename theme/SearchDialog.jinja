@@ -2,7 +2,7 @@
 {#js lunr-2.3.9.js, SearchDialog.js #}
 
 <dialog class="SearchDialog not-prose text-sm h-full sm:h-4/5 w-full sm:w-4/5 max-w-3xl sm:rounded-lg
-  bg-white dark:bg-zinc-800 p-0 border border-zinc-400
+  bg-white dark:bg-zinc-800 dark:text-zinc-100 p-0 border border-zinc-400
   backdrop:backdrop-blur-sm backdrop:bg-zinc-500/30"
 >
   <header class="px-4 flex items-center">
@@ -19,7 +19,7 @@
       autofocus=True
     ) }} />
 
-    <kbd class="text-[0.6em] border rounded-md p-[3px_6px] font-semibold font-mono">ESC</kbd>
+    <kbd class="text-[0.6em] border rounded-md p-[3px_6px] font-semibold font-mono text-zinc-100 dark:bg-black">ESC</kbd>
   </header>
   <div class="SearchResults border-t border-zinc-300 absolute top-14 bottom-0 w-full overflow-y-auto overflow-x-hidden"></div>
   <template><SearchResult /></template>

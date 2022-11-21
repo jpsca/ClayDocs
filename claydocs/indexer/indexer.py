@@ -1,15 +1,16 @@
 import re
 import typing as t
 
-from ..utils import logger
+from ..utils import is_debug, logger
 from .builder import Builder
-from .text_extractor import TSections, extract_sections, rx_multiple_spaces
+from .text_extractor import TSections, extract_sections
 
 
 if t.TYPE_CHECKING:
     from ..nav import Page
 
 
+DEBUG = True
 rx_html_tags = re.compile(r"</?[a-z]+[1-6]?( open)?>")
 
 
@@ -19,14 +20,24 @@ class Indexer:
 
     def index(self, pages: "list[Page]") -> dict:
         data = {}
-
         docs = self._get_docs(pages)
+
         for lang, sections in docs.items():
             logger.info(f"Indexing {lang} pages...")
             index = self._index_lang(lang, sections)
-            data[lang] = {"docs": docs[lang], "index": index}
+            data[lang] = {
+                "docs": self._filter_docs(docs[lang]),
+                "index": index
+            }
 
         return data
+
+    def _filter_docs(self, ldocs: TSections) -> TSections:
+        if is_debug():
+            return ldocs
+        for doc in ldocs.values():
+            del doc["raw"]
+        return ldocs
 
     def _get_docs(self, pages: "list[Page]") -> dict[str, TSections]:
         logger.info("Rendering pages for indexing...")
@@ -46,7 +57,8 @@ class Indexer:
         if tags:
             data["0"] = {
                 "title": page.title,
-                "body": tags,
+                "body": "",
+                "raw": tags,
                 "parent": "",
                 "loc": page.url,
             }
@@ -63,13 +75,8 @@ class Indexer:
             builder.add({
                 "uid": uid,
                 "title": data["title"],
-                "body": self._normalize_body(data["body"]),
+                "body": data["raw"],
             })
 
         idx = builder.build()
         return idx.serialize()
-
-    def _normalize_body(self, html: str) -> str:
-        html  = rx_html_tags.sub("", html)
-        html = rx_multiple_spaces.sub(" ", html)
-        return html

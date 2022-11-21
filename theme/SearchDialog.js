@@ -5,9 +5,7 @@
   const SEL_RESULTS = ".SearchResults"
   const INDEX_ATTR = "data-index"
 
-  // Minimum lenght of the search text
-  // to start a search
-  const MIN_INPUT_LENGTH = 3
+  const MIN_WORD_LENGTH = 2
 
   setupAll(document)
 
@@ -33,35 +31,33 @@
         dialog.showModal()
       })
 
-    function onInput(event) {
-      if (input.value.length >= MIN_INPUT_LENGTH) {
-        let search_term = input.value.replace(/\s+/g, " ")
-        let matches = idx.search(search_term)
-
-        if (!matches.length) {
-          search_term = search_term.split(" ").map(function (word) {
-            return word.slice(0, -1)
-          }).join(" ")
-          matches = idx.search(search_term)
-        }
-
-        showResults(matches)
-      }
+    function onInput (event) {
+      let search_term = input.value.replace(/\s+/g, " ").trim()
+      if (!search_term) { return }
+      // search_term = search_term.split(" ").map(function (word) {
+      //   return word.includes('*') ? word : word + "*"
+      // }).join(" ")
+      const matches =  idx.search(search_term)
+      showResults(matches, search_term)
     }
 
-    function showResults(matches) {
+    function showResults (matches, search_term) {
       results.textContent = ""
-      const term = `<mark>${escapeReplacement(input.value)}</mark>`
       matches.forEach(function (match) {
-        appendResult(match, term)
+        appendResult(match, search_term)
       })
     }
 
-    function appendResult (match, term) {
+    function appendResult (match, search_term) {
       const page = docs[match.ref]
-      const rx = new RegExp(escapeRegExp(input.value), "gi")
-      const body = page.body.replace(rx, term)
-      const title = page.title.replace(rx, term)
+      let body = page.body
+      let title = page.title
+
+      search_term.split(" ").forEach(function (word) {
+        const rx = new RegExp(escapeRegExp(word), "gi")
+        body = page.body.replace(rx, "<mark>$1</mark>")
+        title = page.title.replace(rx, "<mark>$1</mark>")
+      })
 
       const html = resultTmpl
         .replace("{URL}", page.loc)
@@ -75,17 +71,14 @@
 
     /* UTILS */
 
-    function escapeRegExp(string) {
-      const escaped = string.replace(
+    function escapeRegExp(word) {
+      const escaped = word.replace(
         /[.+?^${}()|[\]\\]/g,
-        "\\$&" // $& means the whole matched string
+        "\\$&" // $& means the matched char
       )
       // Allow * to match anything in a word
-      return escaped.replace(/\*/g, "\W*")
-    }
-
-    function escapeReplacement(string) {
-      return string.replace(/\$/g, "$$$$")
+      console.debug(escaped.replace(/\*/g, "\\W*"))
+      return escaped.replace(/\*/g, "\\W*")
     }
 
     function htmlToElement(html) {

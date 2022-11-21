@@ -18,6 +18,7 @@ if t.TYPE_CHECKING:
     from .nav import Nav
 
 
+DEBUG = logging.DEBUG
 LOGGER_NAME = "claydocs"
 LOGGER_LEVEL = logging.INFO
 
@@ -26,6 +27,10 @@ META_END = "\n---"
 
 logger = logging.getLogger(LOGGER_NAME)
 logger.setLevel(LOGGER_LEVEL)
+
+
+def is_debug():
+    return logger.level == logging.DEBUG
 
 
 class THasPaths:
@@ -86,6 +91,7 @@ RANDOM_MESSAGES = [
     "Reversing the polarity",
     "Self-affirming",
     "Extracting meaning",
+    "Counting to twenty... in greek"
 ]
 
 
