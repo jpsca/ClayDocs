@@ -3,9 +3,8 @@
   const SEL_DIALOG = ".SearchDialog"
   const SEL_INPUT = ".SearchInput"
   const SEL_RESULTS = ".SearchResults"
-  const INDEX_ATTR = "data-index"
-
-  const MIN_WORD_LENGTH = 2
+  const ATTR_INDEX = "data-index"
+  const ATTR_TRIGGER_KEY = "data-trigger-key"
 
   setupAll(document)
 
@@ -16,28 +15,34 @@
 
   function setup(dialog) {
     const input = dialog.querySelector(SEL_INPUT)
+    const indexUrl = dialog.getAttribute(ATTR_INDEX)
+    const triggerKey = (dialog.getAttribute(ATTR_TRIGGER_KEY) || "").toLowerCase()
+
     const results = dialog.querySelector(SEL_RESULTS)
     const resultTmpl = dialog.querySelector("template").innerHTML.trim()
 
     let idx, docs
 
-    const indexUrl = input.getAttribute(INDEX_ATTR)
     fetch(indexUrl)
       .then((response) => response.json())
       .then((data) => {
         docs = data.docs
         idx = lunr.Index.load(data.index)
+
         input.addEventListener("input", onInput)
-        dialog.showModal()
+
+        if (triggerKey) {
+          document.body.addEventListener("keydown", onBodyKeyDown)
+        }
       })
+
+    /* --- */
 
     function onInput (event) {
       let search_term = input.value.replace(/\s+/g, " ").trim()
       if (!search_term) { return }
-      // search_term = search_term.split(" ").map(function (word) {
-      //   return word.includes('*') ? word : word + "*"
-      // }).join(" ")
       const matches =  idx.search(search_term)
+      console.log(search_term, matches)
       showResults(matches, search_term)
     }
 
@@ -69,22 +74,58 @@
       results.appendChild(htmlToElement(html))
     }
 
-    /* UTILS */
+    /* --- */
 
-    function escapeRegExp(word) {
-      const escaped = word.replace(
-        /[.+?^${}()|[\]\\]/g,
-        "\\$&" // $& means the matched char
-      )
-      // Allow * to match anything in a word
-      console.debug(escaped.replace(/\*/g, "\\W*"))
-      return escaped.replace(/\*/g, "\\W*")
-    }
+    function onBodyKeyDown (event) {
 
-    function htmlToElement(html) {
-      var template = document.createElement("template");
-      template.innerHTML = html;
-      return template.content.firstChild;
+      if (event.shiftKey || event.altKey || event.metaKey || !event.ctrlKey) {
+        return
+      }
+      if (event.key.toLowerCase() == triggerKey) {
+        dialog.showModal()
+        event.preventDefault()
+        return false
+      }
     }
   }
+
+  /* --- UTILS --- */
+
+  function escapeRegExp(word) {
+    const escaped = word.replace(
+      /[.+?^${}()|[\]\\]/g,
+      "\\$&" // $& means the matched char
+    )
+    // Allow * to match anything in a word
+    console.debug(escaped.replace(/\*/g, "\\W*"))
+    return escaped.replace(/\*/g, "\\W*")
+  }
+
+  function htmlToElement(html) {
+    var template = document.createElement("template");
+    template.innerHTML = html;
+    return template.content.firstChild;
+  }
+
+  /* --- OBSERVER --- */
+
+  new MutationObserver( (mutationList) => {
+    mutationList.forEach( (mutation) => {
+      if (mutation.type !== "childList") return
+      mutation.addedNodes.forEach( (node) => {
+        // Node of type "element"
+        if (node.nodeType === 1) {
+          setupAll(node)
+        }
+      })
+    })
+  })
+  .observe(document.body, {
+    subtree: true,
+    childList: true,
+    attributes: false,
+    characterData: false
+  })
+
+  /* --- THE END --- */
 })()

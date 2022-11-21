@@ -39,11 +39,11 @@
 
 {% set insert_plus = joiner("+") %}
 
-<span class="inline-flex items-center font-mono font-medium text-[0.9em]">
+<span class="inline-flex items-center font-mono font-medium mx-1 my-1">
 {% for key in content.split(sep) -%}
   {%- set key = utils.underscore(key)|replace("_", "-") -%}
   {%- set symbol = symbol_map.get(key) -%}
-  {{ insert_plus() }}<kbd class="inline-block border rounded border-white dark:border-black bg-zinc-100 dark:bg-zinc-900 leading-tight px-1 mx-1 shadow-[0_0_2px_0_#000]">
+  {{ insert_plus() }}<kbd class="inline-block border rounded border-white dark:border-black bg-zinc-100 dark:bg-zinc-900 leading-tight px-[0.1rem] mx-[0.1rem] shadow-[0_0_2px_0_#000]">
     {%- if symbols and symbol -%}{{ symbol|safe }} {% endif -%}
     {{ key|trim }}</kbd>
 {%- endfor %}

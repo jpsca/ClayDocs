@@ -1,7 +1,10 @@
 (function(){
 
-const ATTR = "data-toggle"
-const SEL_TARGET = `[${ATTR}]`
+const ATTR_TOGGLE_CLASS = "data-toggle"
+const SEL_TOGGLE = `[${ATTR_TOGGLE_CLASS}]`
+
+const ATTR_SHOW_DIALOG = "data-show-dialog"
+const SEL_SHOW = `[${ATTR_SHOW_DIALOG}]`
 
 new MutationObserver( (mutationList) => {
   mutationList.forEach( (mutation) => {
@@ -22,17 +25,21 @@ new MutationObserver( (mutationList) => {
   })
 
 function addEvents (root) {
-  root.querySelectorAll(SEL_TARGET)
+  root.querySelectorAll(SEL_TOGGLE)
     .forEach( (node) => {
-      node.addEventListener("click", onClick)
+      node.addEventListener("click", onToggleClick)
     })
+  root.querySelectorAll(SEL_SHOW)
+  .forEach( (node) => {
+    node.addEventListener("click", onShowClick)
+  })
 }
 
 addEvents(document)
 
-function onClick (event) {
-  const target = event.target.closest(SEL_TARGET)
-  const [ sel, value ] = (target.getAttribute(ATTR) || "").split("|")
+function onToggleClick (event) {
+  const target = event.target.closest(SEL_TOGGLE)
+  const [ sel, value ] = (target.getAttribute(ATTR_TOGGLE_CLASS) || "").split("|")
   if (!!sel && !!value) { toggle(sel, value) }
 }
 
@@ -47,6 +54,14 @@ function toggleAttribute (node, value) {
     node.toggleAttribute(value.slice(1, -1))
   } else if (value[0] == ".") {
     node.classList.toggle(value.slice(1))
+  }
+}
+
+function onShowClick (event) {
+  const target = event.target.closest(SEL_SHOW)
+  const sel = target.getAttribute(ATTR_SHOW_DIALOG) || ""
+  for (const dialog of document.querySelectorAll(sel)) {
+    dialog.showDialog()
   }
 }
 
