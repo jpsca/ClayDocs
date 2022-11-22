@@ -38,6 +38,7 @@ class Docs(DocsBuilder, DocsRender, DocsServer):
         root: "t.Union[str,Path]" = "./",
         site_url: str = "/",
         default: str = DEFAULT_LANG,
+        search: bool = True,
         globals: "t.Optional[dict[str,t.Any]]" = None,
         filters: "t.Optional[dict[str,t.Any]]" = None,
         tests: "t.Optional[dict[str,t.Any]]" = None,
@@ -78,7 +79,8 @@ class Docs(DocsBuilder, DocsRender, DocsServer):
             default=default,
         )
 
-        self.indexer = Indexer(self.render)
+        self.search = search
+        self.indexer = Indexer(self.render) if search else None
 
         super().__init__(
             globals=globals,
@@ -118,6 +120,8 @@ class Docs(DocsBuilder, DocsRender, DocsServer):
         self.build()
 
     def cmd_index(self):
+        if not self.search:
+            return
         pages = list(self.nav.pages.values())
         data = self.indexer.index(pages)
         indent = 2 if is_debug() else None
