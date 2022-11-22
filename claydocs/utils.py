@@ -1,5 +1,6 @@
 import logging
 import random
+import re
 import time
 import typing as t
 
@@ -18,9 +19,8 @@ if t.TYPE_CHECKING:
     from .nav import Nav
 
 
-DEBUG = logging.DEBUG
 LOGGER_NAME = "claydocs"
-LOGGER_LEVEL = logging.INFO
+LOGGER_LEVEL = logging.DEBUG
 
 META_START = "---"
 META_END = "\n---"
@@ -44,12 +44,13 @@ class THasPaths:
     THUMBNAILS_URL: str
     DEFAULT_COMPONENT: str
 
-    theme_folder: "Path"
-    components_folder: "Path"
     content_folder: "Path"
-    static_folder: "Path"
     build_folder: "Path"
     temp_folder: "Path"
+
+    theme_folder: "t.Optional[Path]"
+    components_folder: "t.Optional[Path]"
+    static_folder: "t.Optional[Path]"
 
     nav: "Nav"
 
@@ -91,10 +92,39 @@ RANDOM_MESSAGES = [
     "Reversing the polarity",
     "Self-affirming",
     "Extracting meaning",
-    "Counting to twenty... in greek"
+    "Counting to twenty... in greek",
 ]
 
 
 def print_random_messages(num=3) -> None:
     for message in random.sample(RANDOM_MESSAGES, num):
         logger.info(f"{message}...")
+
+
+rx_widont = re.compile(r"\s+(\S+\s*)$")
+
+
+def widont(value, count=1):
+    """
+    Adds an HTML non-breaking space between the final two words of the string to
+    avoid "widowed" words.
+
+    Examples:
+
+    >>> print widont('Test   me   out')
+    Test   me&nbsp;out
+
+    >>> widont('It works with trailing spaces too  ')
+    u'It works with trailing spaces&nbsp;too  '
+
+    >>> print widont('no-effect')
+    no-effect
+
+    """
+
+    def replace(matchobj):
+        return f"&nbsp;{matchobj.group(1)}"
+
+    for i in range(count):
+        value = rx_widont.sub(replace, str(value))
+    return value

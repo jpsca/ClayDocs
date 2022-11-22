@@ -66,6 +66,9 @@ class Indexer:
         return data
 
     def _index_lang(self, lang: str, sections: TSections) -> dict:
+        if not sections:
+            return {}
+
         builder = Builder(lang)
         builder.ref("uid")
         builder.field("title")

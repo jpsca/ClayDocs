@@ -128,8 +128,13 @@ class Nav:
         prev_page = self._get_prev(page.url, lang=page.lang)
         next_page = self._get_next(page.url, lang=page.lang)
         toc = self.toc[page.lang]
-        base_url = self.languages[page.lang].url
-        languages = list(self.languages.values())
+
+        if self.languages:
+            base_url = self.languages[page.lang].url
+            languages = list(self.languages.values())
+        else:
+            base_url = "/"
+            languages = []
 
         return PageNav(
             page=page,

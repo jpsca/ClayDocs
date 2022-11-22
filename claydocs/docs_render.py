@@ -9,7 +9,7 @@ from markupsafe import Markup
 from markdown.extensions.toc import slugify_unicode  # type: ignore
 from tcom.catalog import Catalog
 
-from .utils import load_markdown_metadata, logger, timestamp
+from .utils import load_markdown_metadata, logger, timestamp, widont
 
 if t.TYPE_CHECKING:
     from .utils import THasPaths
@@ -67,6 +67,7 @@ UTILS = {
     "singularize": inflection.singularize,
     "titleize": inflection.titleize,
     "underscore": inflection.underscore,
+    "widont": widont,
 }
 DEFAULT_EXTENSIONS = [
     "jinja2.ext.loopcontrols",
@@ -124,7 +125,8 @@ class DocsRender(THasPaths if t.TYPE_CHECKING else object):
         _globals["utils"]["thumb"] = self.Thumbnailer
 
         _filters = filters or {}
-        _filters["utils"] = UTILS.copy()
+        for name, func in UTILS.items():
+            _filters[f"utils.{name}"] = func
 
         _tests = tests or {}
 
@@ -138,8 +140,10 @@ class DocsRender(THasPaths if t.TYPE_CHECKING else object):
             extensions=_extensions,
         )
         catalog.add_folder(self.content_folder)
-        catalog.add_folder(self.components_folder)
-        catalog.add_folder(self.theme_folder)
+        if self.components_folder:
+            catalog.add_folder(self.components_folder)
+        if self.theme_folder:
+            catalog.add_folder(self.theme_folder)
         self.catalog = catalog
 
     def render(self, url: str, **kw) -> str:
@@ -147,7 +151,7 @@ class DocsRender(THasPaths if t.TYPE_CHECKING else object):
         if not page:
             return ""
 
-        filepath = self.content_folder / page.filename
+        filepath = self.content_folder / page.filename.strip("/")
         logger.debug(f"Rendering `{filepath}`")
         md_source, meta = load_markdown_metadata(filepath)
         nav = self.nav.get_page_nav(page)

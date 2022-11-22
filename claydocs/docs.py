@@ -10,8 +10,8 @@ from .docs_builder import DocsBuilder
 from .docs_render import DocsRender
 from .docs_server import DocsServer
 from .indexer import Indexer
-from .nav import Nav
-from .utils import is_debug
+from .nav import DEFAULT_LANG, Nav
+from .utils import logger, is_debug
 
 if t.TYPE_CHECKING:
     from .nav import TPages
@@ -35,9 +35,9 @@ class Docs(DocsBuilder, DocsRender, DocsServer):
         pages: "TPages",
         languages: "t.Optional[dict[str,str]]" = None,
         *,
-        root: "t.Union[str,Path]" = ".",
+        root: "t.Union[str,Path]" = "./",
         site_url: str = "/",
-        default: str = "",
+        default: str = DEFAULT_LANG,
         globals: "t.Optional[dict[str,t.Any]]" = None,
         filters: "t.Optional[dict[str,t.Any]]" = None,
         tests: "t.Optional[dict[str,t.Any]]" = None,
@@ -48,13 +48,27 @@ class Docs(DocsBuilder, DocsRender, DocsServer):
         root = Path(root)
         if root.is_file():
             root = root.parent
-        self.root = root
-        self.theme_folder = root / self.THEME_FOLDER
-        self.components_folder = root / self.COMPONENTS_FOLDER
+        self.root = root.absolute()
+        logger.debug(f"Root path {self.root}")
+
         self.content_folder = root / self.CONTENT_FOLDER
-        self.static_folder = root / self.STATIC_FOLDER
         self.build_folder = root / self.BUILD_FOLDER
         self.temp_folder = Path(tempfile.mkdtemp())
+
+        self.theme_folder = root / self.THEME_FOLDER
+        if not self.theme_folder.is_dir():
+            logger.warning(f"{self.theme_folder} is not a folder")
+            self.theme_folder = None
+
+        self.components_folder = root / self.COMPONENTS_FOLDER
+        if not self.components_folder.is_dir():
+            logger.warning(f"{self.components_folder} is not a folder")
+            self.components_folder = None
+
+        self.static_folder = root / self.STATIC_FOLDER
+        if not self.static_folder.is_dir():
+            logger.warning(f"{self.static_folder} is not a folder")
+            self.static_folder = None
 
         self.nav = Nav(
             self.content_folder,
@@ -93,12 +107,9 @@ class Docs(DocsBuilder, DocsRender, DocsServer):
                 self.cmd_build()
             elif cmd == "index":
                 self.cmd_index()
-        except Exception:
-            raise
         finally:
             shutil.rmtree(self.temp_folder, ignore_errors=True)
             sys.stderr.write("\n")
-            exit(1)
 
     def cmd_serve(self):
         self.serve()
