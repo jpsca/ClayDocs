@@ -42,7 +42,6 @@ DEFAULT_MD_EXT_CONFIG = {
     },
     "toc": {
         "marker": "",
-        "toc_class": "",
         "anchorlink": False,
         "permalink": True,
         "slugify": slugify_unicode,
