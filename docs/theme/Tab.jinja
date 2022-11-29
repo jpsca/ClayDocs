@@ -1,1 +1,5 @@
-<ui.Tab class="">{{ content }}</ui.Tab>
+<ui.Tab {{ attrs.render(
+  class="rounded-t bg-zinc-50 text-sm px-5 py-2 relative text-zinc-500 text-center select-none w-full z-10
+  [&open]:text-zinc-700 open:bg-white open:z-20
+  disabled:text-zinc-400 disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:z-0"
+) }}>{{ content }}</ui.Tab>

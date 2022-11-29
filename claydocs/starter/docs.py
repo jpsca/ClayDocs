@@ -5,9 +5,8 @@ pages = [
     "index.md",
 ]
 
-docs = Docs(
-    pages,
-)
+docs = Docs(pages)
+
 
 if __name__ == "__main__":
     docs.run()
