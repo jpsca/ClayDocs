@@ -1,6 +1,6 @@
 {#def tag="div" #}
 
-{%- do attrs.setdefault("tabindex", "0") -%}
+{% do attrs.setdefault(tabindex="0") %}
 
 <{{ tag }} {{ attrs.render(
   class="UITabPanel",

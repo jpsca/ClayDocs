@@ -16,19 +16,19 @@
 		{{ components_assets }}
 
 		<meta property="og:title" content="{{ title }}">
-		<meta property="generator" content="ClayDocs" />
+		<meta property="generator" content="claydocs" />
 		{% if description -%}<meta property="og:description" content="{{ description }}">{% endif -%}
 		<meta property="og:type" content="profile" />
 	</head>
 	<body class="
 		antialiased
 		overflow-x-hidden overflow-y-auto
-		text-zinc-900 dark:text-zinc-100
-		bg-white dark:bg-zinc-800
+		text-default-color
+		bg-default-color
 		accent-accent dark:accent-accent-darker
 	">
 		{{ content }}
 		<Footer />
-		<SearchDialog />
+		<SearchDialog id="search-dialog" />
 	</body>
 </html>

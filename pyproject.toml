@@ -1,9 +1,59 @@
-[build-system]
-requires = [
-    "setuptools>=42",
-    "wheel"
+[tool.poetry]
+name = "claydocs"
+version = "0.1"
+description = "Markdoc-based extensible authoring system"
+authors = ["Juan-Pablo Scaletti <juanpablo@jpscaletti.com>"]
+license = "MIT"
+readme = "README.md"
+homepage = "https://claydocs.scaletti.dev/"
+repository = "https://github.com/jpsca/claydocs"
+documentation = "https://claydocs.scaletti.dev/docs/"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Web Environment",
+    "Intended Audience :: Developers",
+    "Topic :: Text Processing :: Markup :: HTML",
 ]
-build-backend = "setuptools.build_meta"
+include = ["claydocs/starter/*"]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+image-processing-egg = ">=0.3"
+inflection = ">=0.5"
+jinjax = ">=0.16"
+lunr = "^0.6.2"
+markdown = ">=3.2"
+pygments = ">=2.6.1"
+pymdown-extensions = ">=9.0"
+pystemmer = "2.0.1"
+python-slugify = ">=6.1.0"
+pyyaml = ">=6.0"
+watchdog = ">=2.0"
+
+[tool.poetry.group.dev]
+optional = true
+
+[tool.poetry.group.dev.dependencies]
+black = "*"
+ipdb = "*"
+pyright = "*"
+
+[tool.poetry.group.test]
+optional = true
+
+[tool.poetry.group.test.dependencies]
+flake8 = "*"
+flake8-bugbear = "*"
+pytest = ">=7.2.0"
+coverage = "*"
+tox = "*"
+
+[tool.poetry.scripts]
+claydocs = 'claydocs.console:run'
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
 
 [tool.black]
 line-length = 88
@@ -12,24 +62,38 @@ exclude = '''
 /(
     \.git
   | \.hg
-  | \.mypy_cache
   | \.tox
   | \.venv
   | _build
   | build
   | dist
-  | tests/toml-test
 )/
 '''
 
 [tool.isort]
 profile = "black"
 force_single_line = true
+include_trailing_comma=true
 atomic = true
 lines_after_imports = 2
 lines_between_types = 1
-
 known_first_party = ["claydocs"]
 
+[tool.coverage.run]
+branch = true
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "TYPE_CHECKING",
+    "def __repr__",
+    "def __str__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:"
+]
 
 [tool.pyright]
+
+[tool.pytest.ini_options]
+addopts = "--doctest-modules"

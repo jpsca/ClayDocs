@@ -6,7 +6,7 @@ module.exports = {
     './content/**/*.md',
     './content/**/*.jinja',
     './components/**/*.jinja',
-    './theme/**/*.jinja',
+    '../claydocs/starter/theme/**/*.jinja',
   ],
   darkMode: 'class',
   theme: {

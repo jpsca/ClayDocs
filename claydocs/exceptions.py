@@ -1,14 +1,14 @@
-class ClayDocsException(Exception):
+class claydocsException(Exception):
     pass
 
 
-class InvalidFrontMatter(ClayDocsException):
+class InvalidFrontMatter(claydocsException):
     pass
 
 
-class InvalidNav(ClayDocsException):
+class InvalidNav(claydocsException):
     pass
 
 
-class Abort(ClayDocsException):
+class Abort(claydocsException):
     pass

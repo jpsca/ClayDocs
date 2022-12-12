@@ -77,11 +77,13 @@
     /* --- */
 
     function onBodyKeyDown (event) {
-
-      if (event.shiftKey || event.altKey || event.metaKey || !event.ctrlKey) {
+      if (event.shiftKey || event.altKey) {
         return
       }
-      if (event.key.toLowerCase() == triggerKey) {
+      if (
+        event.key.toLowerCase() == triggerKey
+        && (event.metaKey || event.ctrlKey)
+      ) {
         dialog.showModal()
         event.preventDefault()
         return false

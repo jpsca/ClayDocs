@@ -1,1 +1,5 @@
-<ui.TabList class="">{{ content }}</ui.TabList>
+{% do attrs.render(
+  class="flex rounded-t items-end justify-evenly z-0"
+) %}
+
+<ui.TabList __attrs={attrs}>{{ content }}</ui.TabList>

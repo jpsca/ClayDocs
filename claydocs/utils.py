@@ -15,7 +15,7 @@ except ImportError:  # pragma: no cover
 
 if t.TYPE_CHECKING:
     from pathlib import Path
-    from tcom.catalog import Catalog
+    from jinjax.catalog import Catalog
     from .nav import Nav
 
 
@@ -89,10 +89,9 @@ RANDOM_MESSAGES = [
     "Stretching the truth",
     "Optimizing for happiness",
     "Swapping time and space",
-    "Reversing the polarity",
-    "Self-affirming",
+    "Reversing the bits polarity",
     "Extracting meaning",
-    "Counting to twenty... in greek",
+    "Counting to 42 backwards",
 ]
 
 
@@ -104,7 +103,7 @@ def print_random_messages(num=3) -> None:
 rx_widont = re.compile(r"\s+(\S+\s*)$")
 
 
-def widont(value, count=1):
+def widont(value):
     """
     Adds an HTML non-breaking space between the final two words of the string to
     avoid "widowed" words.
@@ -125,6 +124,4 @@ def widont(value, count=1):
     def replace(matchobj):
         return f"&nbsp;{matchobj.group(1)}"
 
-    for i in range(count):
-        value = rx_widont.sub(replace, str(value))
-    return value
+    return rx_widont.sub(replace, str(value))

@@ -1,20 +1,28 @@
 .PHONY: test
 test:
-	pytest -x claydocs tests
+	poetry run pytest -x -vv claydocs tests
 
 .PHONY: lint
 lint:
-	flake8 --config=setup.cfg claydocs tests
+	poetry run flake8 claydocs tests
 
 .PHONY: coverage
 coverage:
-	pytest --cov-config=.coveragerc --cov-report html --cov claydocs claydocs tests
+	poetry run pytest --cov-config=pyproject.toml --cov-report html --cov claydocs claydocs tests
 
 .PHONY: types
 types:
-	pyright claydocs
+	poetry run pyright claydocs
 
 .PHONY: install
 install:
-	pip install -e .[test,dev]
+	poetry install --with dev,test
 	# pre-commit install
+
+.PHONY: docs
+docs:
+	cd docs && python docs.py
+
+.PHONY: docs.build
+docs.build:
+	cd docs && python docs.py build

@@ -7,7 +7,7 @@ import markdown
 from pymdownx import emoji
 from markupsafe import Markup
 from markdown.extensions.toc import slugify_unicode  # type: ignore
-from tcom.catalog import Catalog
+from jinjax.catalog import Catalog
 
 from .utils import load_markdown_metadata, logger, timestamp, widont
 
@@ -138,11 +138,21 @@ class DocsRender(THasPaths if t.TYPE_CHECKING else object):
             tests=_tests,
             extensions=_extensions,
         )
+        logger.debug("Adding folders to catalog...")
+        logger.debug(f"Adding content folder: {self.content_folder}")
         catalog.add_folder(self.content_folder)
+
         if self.components_folder:
+            logger.debug(f"Adding components folder: {self.components_folder}")
             catalog.add_folder(self.components_folder)
+        else:
+            logger.debug(f"components_folder is {repr(self.components_folder)}")
+
         if self.theme_folder:
+            logger.debug(f"Adding theme folder: {self.theme_folder}")
             catalog.add_folder(self.theme_folder)
+        else:
+            logger.debug(f"theme_folder is {repr(self.theme_folder)}")
         self.catalog = catalog
 
     def render(self, url: str, **kw) -> str:
@@ -170,7 +180,7 @@ class DocsRender(THasPaths if t.TYPE_CHECKING else object):
         }
 
         self.catalog.jinja_env.globals["nav"] = nav
-        self.catalog.jinja_env.globals["meta"] = nav.page.meta
+        self.catalog.jinja_env.globals["meta"] = meta
         self.catalog.jinja_env.globals["utils"]["timestamp"] = timestamp()
         return self.catalog.render(component, source=source, **kw)
 

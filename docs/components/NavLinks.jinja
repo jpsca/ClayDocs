@@ -1,0 +1,14 @@
+{# def home=False #}
+
+<ul class="
+  flex items-center
+  [&_a]:py-1 [&_a]:px-4
+  [&_a:hover]:text-accent [&_a:hover]:dark:text-accent-darker
+  [&_a]:decoration-accent [&_a]:dark:decoration-accent-darker [&_a:hover]:underline
+">
+  {% if home -%}
+  <li><a href="{{ nav.next_page.url }}">Docs</a></li>
+  {%- endif %}
+  <li><a href="#">Blog</a></li>
+  <li><a title="Source code" href="https://github.com/">GitHub</a></li>
+</ul>

@@ -1,15 +1,15 @@
-{#def target, active=None, tag="button" #}
-{#js tab.js #}
+{#def target, open=False, tag="button" #}
+{#js ui/tab.js #}
 
-{#% set active = attrs.has_class("active") if active == None else bool(active) %#}
-{% do attrs.add_class("active") if active else attrs.remove_class("active") %}
-
-{% if tag == "button" %}{% do attrs.setdefault(type="button") %}{% endif %}
+{%- if tag == "button" -%}
+    {% do attrs.setdefault(type="button") %}
+{%- endif -%}
 
 <{{ tag }} {{ attrs.render(
     class="UITab",
     role="tab",
-    aria_selected="true" if active else "false",
+    aria_selected="true" if open else "false",
     aria_controls=target,
-    tabindex="0" if active else "-1",
+    tabindex="0" if open else "-1",
+    open=open,
 ) }}>{{ content }}</{{ tag }}>

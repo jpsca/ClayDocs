@@ -112,7 +112,7 @@ class LiveReloadServer(socketserver.ThreadingMixIn, wsgiref.simple_server.WSGISe
         if path.startswith(LIVERELOAD_URL):
             return self.livereload(path, start_response)
 
-        self.headers = {"Server": "ClayDocs"}
+        self.headers = {"Server": "claydocs"}
         str_body, status = self.call()
         body = str_body.encode("utf8")
         body = self._inject_js_into_html(body)

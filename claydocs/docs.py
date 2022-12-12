@@ -35,6 +35,7 @@ class Docs(DocsBuilder, DocsRender, DocsServer):
         pages: "TPages",
         languages: "t.Optional[dict[str,str]]" = None,
         *,
+        theme: "t.Union[str,Path]" = "",
         root: "t.Union[str,Path]" = "./",
         site_url: str = "/",
         default: str = DEFAULT_LANG,
@@ -49,24 +50,34 @@ class Docs(DocsBuilder, DocsRender, DocsServer):
         root = Path(root)
         if root.is_file():
             root = root.parent
-        self.root = root.absolute()
-        logger.debug(f"Root path {self.root}")
+        self.root = root
+        logger.debug(f"Root path is {self.root}")
 
-        self.content_folder = root / self.CONTENT_FOLDER
-        self.build_folder = root / self.BUILD_FOLDER
+        self.content_folder = (root / self.CONTENT_FOLDER).absolute()
+        logger.debug(f"content_folder is {self.content_folder}")
+
+        self.build_folder = (root / self.BUILD_FOLDER).absolute()
+        logger.debug(f"build_folder is {self.build_folder}")
+
         self.temp_folder = Path(tempfile.mkdtemp())
 
-        self.theme_folder = root / self.THEME_FOLDER
+        if theme:
+            self.theme_folder = Path(theme).absolute()
+        else:
+            self.theme_folder = (root / self.THEME_FOLDER).absolute()
+        logger.debug(f"theme_folder is {self.theme_folder}")
         if not self.theme_folder.is_dir():
             logger.warning(f"{self.theme_folder} is not a folder")
             self.theme_folder = None
 
-        self.components_folder = root / self.COMPONENTS_FOLDER
+        self.components_folder = (root / self.COMPONENTS_FOLDER).absolute()
+        logger.debug(f"components_folder is {self.components_folder}")
         if not self.components_folder.is_dir():
             logger.warning(f"{self.components_folder} is not a folder")
             self.components_folder = None
 
-        self.static_folder = root / self.STATIC_FOLDER
+        self.static_folder = (root / self.STATIC_FOLDER).absolute()
+        logger.debug(f"static_folder is {self.static_folder}")
         if not self.static_folder.is_dir():
             logger.warning(f"{self.static_folder} is not a folder")
             self.static_folder = None

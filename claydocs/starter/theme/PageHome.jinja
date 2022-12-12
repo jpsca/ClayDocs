@@ -2,9 +2,17 @@
 {#css Page.css #}
 
 <Layout title={title} description={meta.get('description', '')}>
-  <NavBarHome />
-  <main class="Page content max-w-[88rem] min-h-screen mx-auto pt-10 pb-5">
-    {{ content }}
-  </main>
+  <NavBar home />
+  <div class="
+    content pb-16 z-10
+    max-w-[88rem] mx-auto
+    flex justify-between
+  ">
+    <main class="Page pt-10 mx-auto w-full">
+      <div class="prose prose-zinc dark:prose-invert max-w-full">
+        {{ content }}
+      </div>
+    </main>
+  </div>
   <Menu class="lg:hidden" />
 </Layout>

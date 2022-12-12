@@ -24,6 +24,7 @@ STEMMER_LANGS = {
     "sw": "swedish",
 }
 
+
 class Builder(LunrBuilder):
     def __init__(self, lang: str) -> None:
         super().__init__()

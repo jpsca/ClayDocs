@@ -1,7 +1,7 @@
 {#js ThemeSwitch.js #}
 
 {% do attrs.set(
-  class="ThemeSwitch",
+  class="ThemeSwitch px-3 py-2",
   title="Toggle light & dark mode",
   aria_label="auto",
   aria_live="polite",
@@ -10,7 +10,7 @@
 
 <TextButton __attrs={attrs}>
   <svg
-    class="sun-and-moon w-6 h-6 pointer-events-none"
+    class="sun-and-moon w-5 h-5 pointer-events-none mr-2"
     aria-hidden="true"
     stroke-linecap="round"
     viewBox="0 0 24 24"
@@ -20,11 +20,12 @@
         origin-center
         transform-gpu
         stroke-transparent
-        fill-zinc-400
-        group-hover:fill-zinc-500
-        group-focus-visible:fill-zinc-500
-        dark:group-hover:fill-zinc-300
-        dark:group-focus-visible:fill-zinc-300
+        fill-zinc-700
+        group-hover:fill-zinc-800
+        group-focus-visible:fill-zinc-800
+        dark:fill-zinc-200
+        dark:group-hover:fill-zinc-100
+        dark:group-focus-visible:fill-zinc-100
         scale-100
         dark:scale-[1.75]
         motion-safe:transition-transform
@@ -41,11 +42,12 @@
         origin-center
         transform-gpu
         stroke-2
-        stroke-zinc-400
-        group-hover:stroke-zinc-500
-        group-focus-visible:stroke-zinc-500
-        dark:group-hover:stroke-zinc-300
-        dark:group-focus-visible:stroke-zinc-300
+        stroke-zinc-700
+        group-hover:stroke-zinc-800
+        group-focus-visible:stroke-zinc-800
+        dark:stroke-zinc-200
+        dark:group-hover:stroke-zinc-100
+        dark:group-focus-visible:stroke-zinc-100
         dark:opacity-0
         dark:rotate-[-25deg]
         motion-safe:transition-[transform,opacity]
@@ -85,4 +87,6 @@
       ></circle>
     </mask>
   </svg>
+  <span class="whitespace-nowrap inline-block dark:hidden">Light mode</span>
+  <span class="whitespace-nowrap hidden dark:inline-block">Dark mode</span>
 </TextButton>

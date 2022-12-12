@@ -1,0 +1,10 @@
+{
+  "docs": {},
+  "index": {
+    "version": "2.3.9",
+    "fields": ["title", "body"],
+    "fieldVectors": [],
+    "invertedIndex": [],
+    "pipeline": []
+  }
+}
