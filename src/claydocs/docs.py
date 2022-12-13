@@ -35,11 +35,11 @@ class Docs(DocsBuilder, DocsRender, DocsServer):
         pages: "TPages",
         languages: "t.Optional[dict[str,str]]" = None,
         *,
-        theme: "t.Union[str,Path]" = "",
         root: "t.Union[str,Path]" = "./",
         site_url: str = "/",
         default: str = DEFAULT_LANG,
         search: bool = True,
+        add_ons: "t.Optional[list[t.Any]]" = None,
         globals: "t.Optional[dict[str,t.Any]]" = None,
         filters: "t.Optional[dict[str,t.Any]]" = None,
         tests: "t.Optional[dict[str,t.Any]]" = None,
@@ -59,12 +59,7 @@ class Docs(DocsBuilder, DocsRender, DocsServer):
         self.build_folder = (root / self.BUILD_FOLDER).absolute()
         logger.debug(f"build_folder is {self.build_folder}")
 
-        self.temp_folder = Path(tempfile.mkdtemp())
-
-        if theme:
-            self.theme_folder = Path(theme).absolute()
-        else:
-            self.theme_folder = (root / self.THEME_FOLDER).absolute()
+        self.theme_folder = (root / self.THEME_FOLDER).absolute()
         logger.debug(f"theme_folder is {self.theme_folder}")
         if not self.theme_folder.is_dir():
             logger.warning(f"{self.theme_folder} is not a folder")
@@ -81,6 +76,9 @@ class Docs(DocsBuilder, DocsRender, DocsServer):
         if not self.static_folder.is_dir():
             logger.warning(f"{self.static_folder} is not a folder")
             self.static_folder = None
+
+        self.temp_folder = Path(tempfile.mkdtemp())
+        self.add_ons = add_ons or []
 
         self.nav = Nav(
             self.content_folder,

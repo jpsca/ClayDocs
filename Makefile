@@ -1,18 +1,18 @@
 .PHONY: test
 test:
-	poetry run pytest -x -vv claydocs tests
+	poetry run pytest -x -vv src/claydocs tests
 
 .PHONY: lint
 lint:
-	poetry run flake8 claydocs tests
+	poetry run flake8 src/claydocs tests
 
 .PHONY: coverage
 coverage:
-	poetry run pytest --cov-config=pyproject.toml --cov-report html --cov claydocs claydocs tests
+	poetry run pytest --cov-config=pyproject.toml --cov-report html --cov claydocs src/claydocs tests
 
 .PHONY: types
 types:
-	poetry run pyright claydocs
+	poetry run pyright src/claydocs
 
 .PHONY: install
 install:

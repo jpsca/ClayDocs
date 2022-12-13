@@ -1,3 +1,0 @@
-include MIT-LICENSE
-recursive-exclude tests *
-recursive-include claydocs *

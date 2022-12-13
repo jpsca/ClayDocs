@@ -27,7 +27,7 @@ META_END = "\n---"
 
 logger = logging.getLogger(LOGGER_NAME)
 logger.setLevel(LOGGER_LEVEL)
-
+logging.getLogger("jinjax").setLevel(LOGGER_LEVEL)
 
 def is_debug():
     return logger.level == logging.DEBUG
@@ -52,6 +52,7 @@ class THasPaths:
     components_folder: "t.Optional[Path]"
     static_folder: "t.Optional[Path]"
 
+    add_ons: list[t.Any]
     nav: "Nav"
 
 

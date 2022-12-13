@@ -146,13 +146,18 @@ class DocsRender(THasPaths if t.TYPE_CHECKING else object):
             logger.debug(f"Adding components folder: {self.components_folder}")
             catalog.add_folder(self.components_folder)
         else:
-            logger.debug(f"components_folder is {repr(self.components_folder)}")
+            logger.debug("Missing components folder")
 
         if self.theme_folder:
             logger.debug(f"Adding theme folder: {self.theme_folder}")
             catalog.add_folder(self.theme_folder)
         else:
-            logger.debug(f"theme_folder is {repr(self.theme_folder)}")
+            logger.debug("Missing theme folder")
+
+        for module in self.add_ons:
+            logger.debug(f"Adding add-on {module.components_path}")
+            catalog.add_module(module)
+
         self.catalog = catalog
 
     def render(self, url: str, **kw) -> str:

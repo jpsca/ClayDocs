@@ -35,13 +35,13 @@
 
 {%- else -%}
 
-<div {{ attrs.render(class="flex items-center py-6 px-7") }}>
+<div {{ attrs.render(class="flex items-start py-6 px-7") }}>
   {% if show_icon -%}
-  <div class="mr-4 -ml-1">
+  <div class="pr-4 pt-1">
     <Icon type={type} class="w-7 h-7 pointer-events-none opacity-70" />
   </div>
   {%- endif %}
-  {{content}}
+  <div>{{content}}</div>
 </div>
 
 {%- endif %}
