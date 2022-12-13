@@ -28,7 +28,7 @@ classifiers = [
     "Topic :: Text Processing :: Markup :: HTML",
     "Typing :: Typed",
 ]
-include = ["claydocs/starter/*"]
+include = ["src/claydocs/starter/*"]
 
 [tool.poetry.dependencies]
 python = "^3.9"
