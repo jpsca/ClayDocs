@@ -2725,6 +2725,11 @@ body.dark .scrollbar-thin::-webkit-scrollbar-thumb {
 }
 
 @media (min-width: 1280px) {
+  .xl\:mx-10 {
+    margin-left: 2.5rem;
+    margin-right: 2.5rem;
+  }
+
   .xl\:block {
     display: block;
   }
@@ -2736,9 +2741,30 @@ body.dark .scrollbar-thin::-webkit-scrollbar-thumb {
   .xl\:w-\[30rem\] {
     width: 30rem;
   }
+
+  .xl\:w-64 {
+    width: 16rem;
+  }
+
+  .xl\:w-96 {
+    width: 24rem;
+  }
 }
 
 @media (min-width: 1536px) {
+  .\32xl\:mx-10 {
+    margin-left: 2.5rem;
+    margin-right: 2.5rem;
+  }
+
+  .\32xl\:w-\[40rem\] {
+    width: 40rem;
+  }
+
+  .\32xl\:w-\[30rem\] {
+    width: 30rem;
+  }
+
   .\32xl\:text-base {
     font-size: 1rem;
     line-height: 1.5rem;
