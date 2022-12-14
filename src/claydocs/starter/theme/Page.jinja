@@ -4,12 +4,11 @@
 <Layout title={title} description={meta.get('description', '')}>
   <NavBar />
   <div class="
-    content pb-16 z-10
-    max-w-[88rem] mx-auto
+    content pb-16 z-10 mx-auto
     flex justify-between
   ">
     <SidebarGlobal class="hidden lg:block" />
-    <main class="Page pt-10 mx-auto w-full max-w-[78ch]">
+    <main class="Page content pt-10 lg:mx-10 w-full max-w-full">
       <div class="prose prose-zinc dark:prose-invert max-w-full">
         {{ content }}
       </div>

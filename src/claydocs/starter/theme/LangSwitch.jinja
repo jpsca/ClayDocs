@@ -22,37 +22,15 @@
       <path d="M4.18179 6.18181C4.35753 6.00608 4.64245 6.00608 4.81819 6.18181L7.49999 8.86362L10.1818 6.18181C10.3575 6.00608 10.6424 6.00608 10.8182 6.18181C10.9939 6.35755 10.9939 6.64247 10.8182 6.81821L7.81819 9.81821C7.73379 9.9026 7.61934 9.95001 7.49999 9.95001C7.38064 9.95001 7.26618 9.9026 7.18179 9.81821L4.18179 6.81821C4.00605 6.64247 4.00605 6.35755 4.18179 6.18181Z"></path>
     </svg>
   </div>
-  <div class="
-    hidden group-hover:block group-focus:block
-    absolute top-full -left-1/2 -mt-1
-  ">
-    <div class="
-      absolute top-0 left-1/2 w-0 h-0 -ml-1
-      border-t-0 border-l-4 border-r-4 border-b-8
-      border-transparent border-b-zinc-200 dark:border-b-black
-    "></div>
 
-    <div class="
-      mt-2 p-1 text-sm font-medium rounded-md
-      bg-zinc-200 dark:bg-black
-      shadow-lg shadow-zinc-400 dark:shadow-zinc-900
-      text-zinc-900 dark:text-zinc-200"
+  <Dropdown>
+  {% for lang in nav.languages -%}
+    <a href="{{ lang.url if lang.code != nav.page.lang else '' }}"
+      class="{% if lang.code == nav.page.lang %}active{% endif %}"
     >
-      {% for lang in nav.languages -%}
-        <a href="{{ lang.url if lang.code != nav.page.lang else '' }}"
-          class="w-full px-5 h-8 flex items-center
-          {% if lang.code == nav.page.lang -%}
-            text-accent dark:text-accent-darker
-          {%- endif %}
-          first:rounded-t-md last:rounded-b-md
-          hover:text-zinc-200 dark:hover:text-zinc-900
-          hover:bg-accent dark:hover:bg-accent-darker
-          "
-        >
-          {{ lang.name }}
-        </a>
-      {% endfor -%}
-    </div>
-  </div>
+      {{ lang.name }}
+    </a>
+  {% endfor -%}
+  </Dropdown>
 </div>
 {% endif %}

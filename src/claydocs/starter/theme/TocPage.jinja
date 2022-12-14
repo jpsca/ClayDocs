@@ -6,18 +6,7 @@
 
 {% macro render_item(url, title, depth=0) %}
 <li>
-  <a href="{{ url }}"
-    class="
-      flex items-center
-      py-1 pl-3 pr-2
-      text-zinc-600 dark:text-zinc-500
-      hover:text-black dark:hover:text-zinc-100
-      border-l border-zinc-100 dark:border-zinc-700/50
-      hover:border-zinc-300 dark:hover:border-zinc-400
-      [&.active]:text-accent [&.active]:dark:text-accent-darker
-      {{ indent[depth] }}
-    "
-  >
+  <a href="{{ url }}" class="{{ indent[depth] }}">
     {{ title }}
   </a>
 </li>
@@ -32,7 +21,18 @@
 {%- endfor %}
 {% endmacro %}
 
-<ul {{ attrs.render(class="TocPage") }}>
+<ul {{ attrs.render(
+  class="
+  TocPage
+  [&_a]:flex [&_a]:items-center
+  [&_a]:pt-2 [&_a]:pb-1 [&_a]:pl-3 [&_a]:pr-2
+  [&_a]:text-zinc-600 [&_a]:dark:text-zinc-500
+  [&_a:hover]:text-black [&_a:hover]:dark:text-zinc-100
+  [&_a]:border-l [&_a]:border-transparent
+  [&_a:hover]:border-accent [&_a:hover]:dark:border-accent-darker
+  [&_a.active]:text-accent [&_a.active]:dark:text-accent-darker
+  "
+) }}>
 {%- for url, title, children in toc %}
   {{ render_item(url, title) }}
   {{ render_sub_items(children, depth=1) }}
