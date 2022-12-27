@@ -9,6 +9,8 @@ from markupsafe import Markup
 from markdown.extensions.toc import slugify_unicode  # type: ignore
 from jinjax.catalog import Catalog
 
+from .jinja_code import CodeExtension
+from .jinja_markdown import MarkdownExtension
 from .utils import load_markdown_metadata, logger, timestamp, widont
 
 if t.TYPE_CHECKING:
@@ -18,6 +20,7 @@ if t.TYPE_CHECKING:
 DEFAULT_MD_EXTENSIONS = [
     "attr_list",
     "def_list",
+    "md_in_html",
     "meta",
     "sane_lists",
     "tables",
@@ -70,6 +73,8 @@ UTILS = {
 }
 DEFAULT_EXTENSIONS = [
     "jinja2.ext.loopcontrols",
+    CodeExtension,
+    MarkdownExtension,
 ]
 
 
@@ -99,6 +104,8 @@ class DocsRender(THasPaths if t.TYPE_CHECKING else object):
         class Thumbnailer(ImageProcessing):
             def __init__(self, source: str) -> None:
                 source = source.strip(" /").removeprefix(this.STATIC_URL).strip("/")
+                if not this.static_folder:
+                    raise ValueError("static_folder must exists")
                 super().__init__(this.static_folder / source)
 
             def __str__(self) -> str:
@@ -130,7 +137,7 @@ class DocsRender(THasPaths if t.TYPE_CHECKING else object):
         _tests = tests or {}
 
         _extensions = extensions or []
-        _extensions += DEFAULT_EXTENSIONS
+        _extensions += DEFAULT_EXTENSIONS[:]
 
         catalog = Catalog(
             globals=_globals,
@@ -138,6 +145,7 @@ class DocsRender(THasPaths if t.TYPE_CHECKING else object):
             tests=_tests,
             extensions=_extensions,
         )
+        catalog.jinja_env.extend(markdowner=self.markdowner)
         logger.debug("Adding folders to catalog...")
         logger.debug(f"Adding content folder: {self.content_folder}")
         catalog.add_folder(self.content_folder)
@@ -173,21 +181,20 @@ class DocsRender(THasPaths if t.TYPE_CHECKING else object):
         nav.page_toc = self.nav._get_page_toc(self.markdowner.toc_tokens)  # type: ignore
         component = meta.get("component", self.DEFAULT_COMPONENT)
         source = (
-            '<%(component)s title="%(title)s">'
-            "<!--startpage-->"
+            '{%% %(component)s title="%(title)s" %%}\n'
+            "<!--startpage-->\n"
             "%(content)s"
-            "<!--endpage-->"
-            "</%(component)s>"
+            "\n<!--endpage-->"
+            "\n{%% end%(component)s %%}"
         ) % {
             "title": nav.page.title,
             "component": component,
             "content": content,
         }
-
         self.catalog.jinja_env.globals["nav"] = nav
         self.catalog.jinja_env.globals["meta"] = meta
         self.catalog.jinja_env.globals["utils"]["timestamp"] = timestamp()
-        return self.catalog.render(component, source=source, **kw)
+        return self.catalog.render(component, __source=source, **kw)
 
     def render_markdown(self, source: str) -> Markup:
         source = textwrap.dedent(source.strip("\n"))

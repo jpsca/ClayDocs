@@ -29,6 +29,7 @@ logger = logging.getLogger(LOGGER_NAME)
 logger.setLevel(LOGGER_LEVEL)
 logging.getLogger("jinjax").setLevel(LOGGER_LEVEL)
 
+
 def is_debug():
     return logger.level == logging.DEBUG
 

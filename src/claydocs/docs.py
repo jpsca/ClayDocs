@@ -129,14 +129,15 @@ class Docs(DocsBuilder, DocsRender, DocsServer):
         self.build()
 
     def cmd_index(self):
-        if not self.search:
+        if not self.search or not self.indexer:
             return
         pages = list(self.nav.pages.values())
         data = self.indexer.index(pages)
         indent = 2 if is_debug() else None
 
+        static_folder = self.static_folder or Path(self.STATIC_FOLDER)
         for lang, langdata in data.items():
-            filepath = self.static_folder / f"search-{lang}.json"
+            filepath = static_folder / f"search-{lang}.json"
             filepath.write_text(json.dumps(langdata, indent=indent))
 
     def cmd_help(self, py: str):
