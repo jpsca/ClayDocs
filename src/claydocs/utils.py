@@ -55,6 +55,7 @@ class THasPaths:
 
     add_ons: list[t.Any]
     nav: "Nav"
+    search: bool
 
 
 class THasRender(THasPaths):

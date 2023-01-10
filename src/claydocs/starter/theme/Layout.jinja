@@ -29,6 +29,8 @@
 	">
 		{{ content }}
 		<Footer />
+		{% if nav.search -%}
 		<SearchDialog id="search-dialog" />
+		{%- endif %}
 	</body>
 </html>

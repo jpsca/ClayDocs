@@ -48,6 +48,7 @@ class PageNav:
     page_toc: list
     languages: list[Language]
     base_url: str = ""
+    search: bool = True
 
 
 class Nav:
