@@ -10,18 +10,33 @@ if t.TYPE_CHECKING:
 
 
 class DocsServer(THasRender if t.TYPE_CHECKING else object):
+    server: "LiveReloadServer"
+
+    def __init_server__(self) -> None:
+        server = LiveReloadServer(render=self.render)
+
+        middleware = self.catalog.get_middleware(
+            server.application,
+            allowed_ext=None,  # All file extensions allowed as static files
+            autorefresh=True,
+        )
+        middleware.add_files(self.static_folder, self.STATIC_URL)
+        middleware.add_files(self.temp_folder, self.THUMBNAILS_URL)
+        server.application = middleware  # type: ignore
+        self.server = server
+
     def serve(self) -> None:
         print_random_messages()
         logger.info("Starting server...")
         try:
-            server = self.get_server()
+            server = self.server
             server.watch(self.content_folder)
+            server.watch(self.static_folder)
+
             if self.components_folder:
                 server.watch(self.components_folder)
             if self.theme_folder:
                 server.watch(self.theme_folder)
-            if self.static_folder:
-                server.watch(self.static_folder)
 
             try:
                 server.serve()
@@ -36,16 +51,3 @@ class DocsServer(THasRender if t.TYPE_CHECKING else object):
             # Avoid ugly, unhelpful traceback
             print(f"{type(err).__name__}: {err}")
             raise Abort(f"{type(err).__name__}: {err}")
-
-    def get_server(self) -> "LiveReloadServer":
-        server = LiveReloadServer(render=self.render)
-
-        middleware = self.catalog.get_middleware(
-            server.application,
-            allowed_ext=None,  # All file extensions allowed as static files
-            autorefresh=True,
-        )
-        middleware.add_files(self.static_folder, self.STATIC_URL)
-        middleware.add_files(self.temp_folder, self.THUMBNAILS_URL)
-        server.application = middleware  # type: ignore
-        return server

@@ -55,9 +55,15 @@ class Docs(DocsBuilder, DocsRender, DocsServer):
 
         self.content_folder = (root / self.CONTENT_FOLDER).absolute()
         logger.debug(f"content_folder is {self.content_folder}")
+        self.content_folder.mkdir(exist_ok=True)
+
+        self.static_folder = (root / self.STATIC_FOLDER).absolute()
+        logger.debug(f"static_folder is {self.static_folder}")
+        self.static_folder.mkdir(exist_ok=True)
 
         self.build_folder = (root / self.BUILD_FOLDER).absolute()
         logger.debug(f"build_folder is {self.build_folder}")
+        self.build_folder_static = self.build_folder / self.STATIC_FOLDER
 
         self.theme_folder = (root / self.THEME_FOLDER).absolute()
         logger.debug(f"theme_folder is {self.theme_folder}")
@@ -71,12 +77,7 @@ class Docs(DocsBuilder, DocsRender, DocsServer):
             logger.warning(f"{self.components_folder} is not a folder")
             self.components_folder = None
 
-        self.static_folder = (root / self.STATIC_FOLDER).absolute()
-        logger.debug(f"static_folder is {self.static_folder}")
-        if not self.static_folder.is_dir():
-            logger.warning(f"{self.static_folder} is not a folder")
-            self.static_folder = None
-
+        self.static_url = f"/{self.STATIC_URL.lstrip('/')}"
         self.temp_folder = Path(tempfile.mkdtemp())
         self.add_ons = add_ons or []
 
@@ -91,7 +92,7 @@ class Docs(DocsBuilder, DocsRender, DocsServer):
         self.search = search
         self.indexer = Indexer(self.render) if search else None
 
-        super().__init__(
+        self.__init_renderer__(
             globals=globals,
             filters=filters,
             tests=tests,
@@ -99,6 +100,7 @@ class Docs(DocsBuilder, DocsRender, DocsServer):
             md_extensions=md_extensions,
             md_ext_config=md_ext_config,
         )
+        self.__init_server__()
 
     def run(self) -> None:
         def sigterm_handler(_, __):
@@ -135,9 +137,8 @@ class Docs(DocsBuilder, DocsRender, DocsServer):
         data = self.indexer.index(pages)
         indent = 2 if is_debug() else None
 
-        static_folder = self.static_folder or Path(self.STATIC_FOLDER)
         for lang, langdata in data.items():
-            filepath = static_folder / f"search-{lang}.json"
+            filepath = self.static_folder / f"search-{lang}.json"
             filepath.write_text(json.dumps(langdata, indent=indent))
 
     def cmd_help(self, py: str):

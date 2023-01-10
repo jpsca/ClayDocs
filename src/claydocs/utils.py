@@ -16,7 +16,8 @@ except ImportError:  # pragma: no cover
 if t.TYPE_CHECKING:
     from pathlib import Path
     from jinjax.catalog import Catalog
-    from .nav import Nav
+    from .nav import Nav, Page
+    from .server import LiveReloadServer
 
 
 LOGGER_NAME = "claydocs"
@@ -46,22 +47,29 @@ class THasPaths:
     DEFAULT_COMPONENT: str
 
     content_folder: "Path"
+    static_folder: "Path"
     build_folder: "Path"
+    build_folder_static: "Path"
     temp_folder: "Path"
+
+    static_url: str
 
     theme_folder: "t.Optional[Path]"
     components_folder: "t.Optional[Path]"
-    static_folder: "t.Optional[Path]"
 
     add_ons: list[t.Any]
-    nav: "Nav"
     search: bool
+    nav: "Nav"
+    server: "LiveReloadServer"
 
 
 class THasRender(THasPaths):
     catalog: "Catalog"
 
     def render(self, name: str, **kw) -> str:  # type: ignore
+        ...
+
+    def render_page(self, page: "Page", **kw) -> str:  # type: ignore
         ...
 
 

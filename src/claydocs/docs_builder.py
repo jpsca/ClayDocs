@@ -1,4 +1,5 @@
 import re
+import shutil
 import typing as t
 
 from .utils import logger, print_random_messages
@@ -17,56 +18,99 @@ RX_ABS_URL = re.compile(
 class DocsBuilder(THasRender if t.TYPE_CHECKING else object):
     def build(self) -> None:
         logger.info("Rendering pages...")
+        self.build_folder.mkdir(exist_ok=True)
+        self.build_folder_static.mkdir(exist_ok=True)
+
+        logger.info("Copying static folder")
+        self._copy_static_folder()
 
         for url in self.nav.pages:
-            name = url.strip("/")
-            if name.endswith("/index") or name == "index":
-                filename = f"{name}.html"
+            page = self.nav.get_page(url)
+            if not page:
+                logger.error(f"Page not found: {url}")
+                continue
+
+            filename = page.filename.strip("/").removesuffix(".md")
+            if filename == "index":
+                filename = "index.html"
             else:
-                filename = f"{name}/index.html"
+                filename = f"{filename}/index.html"
+
             filepath = self.build_folder / filename
-            folder = filepath.parent
-            logger.info(folder)
-            folder.mkdir(parents=True, exist_ok=True)
+            filepath.parent.mkdir(parents=True, exist_ok=True)
 
-            html = self.render(name)
-
+            html = self.render_page(page)
             logger.debug("Relativizing URLs")
-            pass
+            html = self._fix_urls(html, filename)
 
-            logger.info(f"{self.BUILD_FOLDER}/{filename}")
+            logger.info(f"Writing {filename}")
             filepath.write_text(html)
 
+        logger.info("...")
         print_random_messages()
-        print("\n✨ Done! ✨")
+        logger.info("\n✨ Done! ✨")
 
-    def relativize_urls(
-        self,
-        html: str,
-        base_path: "Path",
-        relpath: str,
-    ) -> str:
-        relpath = str(relpath)
+    def _copy_static_folder(self) -> None:
+        shutil.copytree(
+            self.static_folder,
+            self.build_folder_static,
+            dirs_exist_ok=True
+        )
 
-        for attr, url in RX_ABS_URL.findall(html):
-            newurl = self._get_relative_url(url, base_path, relpath)
-            repl = r' %s="%s"' % (attr, newurl)
-            html = re.sub(RX_ABS_URL, repl, html, count=1)
+    def _fix_urls(self, html: str, filename: str, relativize_static: bool = True) -> str:
+        filename = filename.removesuffix("index.html")
+        pos = 0
+
+        while True:
+            match = RX_ABS_URL.search(html, pos=pos)
+            if not match:
+                break
+
+            attr, url = match.groups()
+            if url.startswith(self.static_url):
+                newurl = self._fix_static_url(url)
+                if relativize_static:
+                    newurl = self._get_relative_url(newurl, filename)
+            else:
+                newurl = self._get_relative_url(url, filename)
+
+            logger.debug(f"{url} -> {newurl}")
+            pos = match.end()
+            html = f'{html[:match.start()]} {attr}="{newurl}"{html[pos:]}'
 
         return html
 
-    def _get_relative_url(
-        self,
-        curent_url: str,
-        base_path: "Path",
-        relpath: str,
-    ) -> str:
-        depth = relpath.count("/")
-        url = (r"../" * depth) + curent_url.lstrip("/")
+    def _fix_static_url(self, current_url: str) -> str:
+        url = current_url.rsplit("?", 1)[0]
 
+        filepath = self.build_folder_static / url.removeprefix(self.static_url).lstrip("/")
+        if not filepath.exists():
+            logger.debug(f"{filepath} doesn't exists")
+            self._download_url(url, filepath)
+
+        return url
+
+    def _download_url(self, url: str, filepath: "Path") -> None:
+        logger.debug(f"Downloading {url}...")
+        sf = self.server.application.find_file(url)
+        if sf is None:
+            logger.error(f"{url} doesn't exists")
+            return
+        src_path, _ = sf.get_path_and_headers({})
+        filepath.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(src_path, filepath)
+        logger.debug(f"Created {filepath}")
+
+    def _get_relative_url(self, current_url: str, filename: str) -> str:
+        depth = filename.count("/")
+        url = ("../" * depth) + current_url.lstrip("/")
         if not url:
-            return "index.html"
-        if (base_path / relpath).is_dir() or url.endswith("/"):
-            return url.rstrip("/") + "/index.html"
+            return "./"
+
+        if not url.startswith("."):
+            url = f"./{url}"
+
+        if (self.build_folder / filename).is_dir():
+            url = f"{url.rstrip('/')}/"
 
         return url

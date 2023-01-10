@@ -14,6 +14,7 @@ from .jinja_markdown import MarkdownExtension
 from .utils import load_markdown_metadata, logger, timestamp, widont
 
 if t.TYPE_CHECKING:
+    from .nav import Page
     from .utils import THasPaths
 
 
@@ -79,7 +80,7 @@ DEFAULT_EXTENSIONS = [
 
 
 class DocsRender(THasPaths if t.TYPE_CHECKING else object):
-    def __init__(
+    def __init_renderer__(
         self,
         *,
         globals: "t.Optional[dict[str,t.Any]]" = None,
@@ -89,23 +90,26 @@ class DocsRender(THasPaths if t.TYPE_CHECKING else object):
         md_extensions: "t.Optional[list[str]]" = None,
         md_ext_config: "t.Optional[dict[str,t.Any]]" = None,
     ) -> None:
-        self.markdowner = markdown.Markdown(
+        self.__init_markdowner__(
             extensions=md_extensions or DEFAULT_MD_EXTENSIONS,
-            extension_configs=md_ext_config or DEFAULT_MD_EXT_CONFIG,
-            output_format="html",
-            tab_length=2,
+            ext_config=md_ext_config or DEFAULT_MD_EXT_CONFIG,
         )
         self.__init_thumbnailer__()
         self.__init_catalog__(globals, filters, tests, extensions)
 
+    def __init_markdowner__(self, extensions: list, ext_config: dict[str,t.Any]) -> None:
+        self.markdowner = markdown.Markdown(
+            extensions=extensions,
+            extension_configs=ext_config,
+            output_format="html",
+            tab_length=2,
+        )
     def __init_thumbnailer__(self) -> None:
         this = self
 
         class Thumbnailer(ImageProcessing):
             def __init__(self, source: str) -> None:
                 source = source.strip(" /").removeprefix(this.STATIC_URL).strip("/")
-                if not this.static_folder:
-                    raise ValueError("static_folder must exists")
                 super().__init__(this.static_folder / source)
 
             def __str__(self) -> str:
@@ -172,7 +176,9 @@ class DocsRender(THasPaths if t.TYPE_CHECKING else object):
         page = self.nav.get_page(url)
         if not page:
             return ""
+        return self.render_page(page, **kw)
 
+    def render_page(self, page: "Page", **kw) -> str:
         filepath = self.content_folder / page.filename.strip("/")
         logger.debug(f"Rendering `{filepath}`")
         md_source, meta = load_markdown_metadata(filepath)
