@@ -97,13 +97,18 @@ class DocsRender(THasPaths if t.TYPE_CHECKING else object):
         self.__init_thumbnailer__()
         self.__init_catalog__(globals, filters, tests, extensions)
 
-    def __init_markdowner__(self, extensions: list, ext_config: dict[str,t.Any]) -> None:
+    def __init_markdowner__(
+        self,
+        extensions: list,
+        ext_config: dict[str, t.Any],
+    ) -> None:
         self.markdowner = markdown.Markdown(
             extensions=extensions,
             extension_configs=ext_config,
             output_format="html",
             tab_length=2,
         )
+
     def __init_thumbnailer__(self) -> None:
         this = self
 

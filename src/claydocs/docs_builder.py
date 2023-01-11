@@ -30,12 +30,8 @@ class DocsBuilder(THasRender if t.TYPE_CHECKING else object):
                 logger.error(f"Page not found: {url}")
                 continue
 
-            filename = page.filename.strip("/").removesuffix(".md")
-            if filename == "index":
-                filename = "index.html"
-            else:
-                filename = f"{filename}/index.html"
-
+            filename = page.url.strip("/")
+            filename = f"{filename}/index.html".lstrip("/")
             filepath = self.build_folder / filename
             filepath.parent.mkdir(parents=True, exist_ok=True)
 
@@ -48,17 +44,21 @@ class DocsBuilder(THasRender if t.TYPE_CHECKING else object):
 
         logger.info("...")
         print_random_messages()
-        logger.info("\n✨ Done! ✨")
+        logger.info("✨ Done! ✨")
 
     def _copy_static_folder(self) -> None:
         shutil.copytree(
             self.static_folder,
             self.build_folder_static,
-            dirs_exist_ok=True
+            dirs_exist_ok=True,
         )
 
-    def _fix_urls(self, html: str, filename: str, relativize_static: bool = True) -> str:
-        filename = filename.removesuffix("index.html")
+    def _fix_urls(
+        self,
+        html: str,
+        filename: str,
+        relativize_static: bool = True,
+    ) -> str:
         pos = 0
 
         while True:
@@ -73,6 +73,8 @@ class DocsBuilder(THasRender if t.TYPE_CHECKING else object):
                     newurl = self._get_relative_url(newurl, filename)
             else:
                 newurl = self._get_relative_url(url, filename)
+                if not newurl.endswith("/"):
+                    newurl = f"{newurl}/"
 
             logger.debug(f"{url} -> {newurl}")
             pos = match.end()
@@ -83,7 +85,9 @@ class DocsBuilder(THasRender if t.TYPE_CHECKING else object):
     def _fix_static_url(self, current_url: str) -> str:
         url = current_url.rsplit("?", 1)[0]
 
-        filepath = self.build_folder_static / url.removeprefix(self.static_url).lstrip("/")
+        filepath = self.build_folder_static / url.removeprefix(self.static_url).lstrip(
+            "/"
+        )
         if not filepath.exists():
             logger.debug(f"{filepath} doesn't exists")
             self._download_url(url, filepath)
@@ -102,15 +106,10 @@ class DocsBuilder(THasRender if t.TYPE_CHECKING else object):
         logger.debug(f"Created {filepath}")
 
     def _get_relative_url(self, current_url: str, filename: str) -> str:
+        filename = filename.removesuffix("index.html")
         depth = filename.count("/")
         url = ("../" * depth) + current_url.lstrip("/")
-        if not url:
-            return "./"
 
         if not url.startswith("."):
             url = f"./{url}"
-
-        if (self.build_folder / filename).is_dir():
-            url = f"{url.rstrip('/')}/"
-
         return url
