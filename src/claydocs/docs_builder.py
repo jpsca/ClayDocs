@@ -16,6 +16,8 @@ RX_ABS_URL = re.compile(
 
 
 class DocsBuilder(THasRender if t.TYPE_CHECKING else object):
+    relativize_static: bool = False
+
     def build(self) -> None:
         logger.info("Rendering pages...")
         self.build_folder.mkdir(exist_ok=True)
@@ -57,7 +59,6 @@ class DocsBuilder(THasRender if t.TYPE_CHECKING else object):
         self,
         html: str,
         filename: str,
-        relativize_static: bool = True,
     ) -> str:
         pos = 0
 
@@ -69,7 +70,7 @@ class DocsBuilder(THasRender if t.TYPE_CHECKING else object):
             attr, url = match.groups()
             if url.startswith(self.static_url):
                 newurl = self._fix_static_url(url)
-                if relativize_static:
+                if self.relativize_static:
                     newurl = self._get_relative_url(newurl, filename)
             else:
                 newurl = self._get_relative_url(url, filename)
