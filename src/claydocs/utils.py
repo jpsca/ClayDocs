@@ -4,6 +4,7 @@ import re
 import time
 import typing as t
 
+import jinjax  # noqa
 import yaml
 
 from .exceptions import InvalidFrontMatter

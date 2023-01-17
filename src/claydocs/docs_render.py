@@ -52,7 +52,7 @@ DEFAULT_MD_EXT_CONFIG = {
     },
     "pymdownx.highlight": {
         "linenums_style": "pymdownx-inline",
-        "anchor_linenums": True,
+        "anchor_linenums": False,
         "css_class": "highlight not-prose",
     },
     "pymdownx.emoji": {
@@ -193,11 +193,11 @@ class DocsRender(THasPaths if t.TYPE_CHECKING else object):
         nav.page_toc = self.nav._get_page_toc(self.markdowner.toc_tokens)  # type: ignore
         component = meta.get("component", self.DEFAULT_COMPONENT)
         source = (
-            '{%% %(component)s title="%(title)s" %%}\n'
+            '<%(component)s title="%(title)s">\n'
             "<!--startpage-->\n"
             "%(content)s"
             "\n<!--endpage-->"
-            "\n{%% end%(component)s %%}"
+            "\n</%(component)s>"
         ) % {
             "title": nav.page.title,
             "component": component,
