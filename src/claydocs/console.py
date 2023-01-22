@@ -4,7 +4,7 @@ from pathlib import Path
 
 
 DEFAULT_PATH = "./docs"
-STARTER = Path(__file__).parent / "starter"
+STARTER = Path(__file__).parent.parent / "starter"
 
 
 def run():

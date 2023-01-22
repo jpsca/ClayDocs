@@ -122,14 +122,14 @@ def widont(value):
 
     Examples:
 
-    >>> print widont('Test   me   out')
-    Test   me&nbsp;out
+    >>> widont('Test   me   out')
+    'Test   me&nbsp;out'
 
     >>> widont('It works with trailing spaces too  ')
-    u'It works with trailing spaces&nbsp;too  '
+    'It works with trailing spaces&nbsp;too  '
 
-    >>> print widont('no-effect')
-    no-effect
+    >>> widont('no-effect')
+    'no-effect'
 
     """
 

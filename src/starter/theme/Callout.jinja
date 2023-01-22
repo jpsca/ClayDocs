@@ -22,7 +22,7 @@
 
 <details {{ attrs.render(
   open=open,
-  class="group relative sm:border-x border-y rounded overflow-hidden bg-opacity-90 -mx-4",
+  class="group relative sm:border-x border-y sm:rounded overflow-hidden bg-opacity-90 -mx-4 sm:mx-0",
 ) }}>
   <summary class="flex items-center font-bold h-12 px-5 cursor-pointer
   ">
@@ -43,8 +43,8 @@
 
 <div {{ attrs.render(
   class="
-    group relative sm:border-x border-y rounded overflow-hidden bg-opacity-90
-    flex items-start p-4 sm:px-7 sm:py-6 -mx-4
+    group relative sm:border-x border-y overflow-hidden bg-opacity-90
+    flex items-start px-4 py-7 sm:px-7 -mx-4 sm:mx-0 sm:rounded
   ") }}>
   {% if show_icon -%}
   <div class="pr-4 hidden sm:block">
