@@ -1,5 +1,10 @@
+{#def vertical=False, manual=False #}
+
 {% do attrs.render(
-  class="flex rounded-t items-end justify-evenly z-0"
+  class="sm:flex rounded-t items-end justify-evenly z-0
+  scrollbar-thin overflow-x-auto overflow-y-hidden",
+  vertical=vertical,
+  manual=manual,
 ) %}
 
 <ui.TabList __attrs={attrs}>{{ content }}</ui.TabList>

@@ -4,8 +4,8 @@
 
 @layer base {
   :root {
-    --accent: theme(colors.sky.500);
-    --accent-darker: theme(colors.sky.400);
+    --accent: #00c100;
+    --accent-darker: theme(colors.lime.500);
 
     /* https://github.com/argyleink/open-props/blob/main/src/props.easing.css */
     --ease-3: cubic-bezier(.25,0,.3,1);
@@ -27,13 +27,15 @@
   .prose h6:hover a.headerlink {
     @apply opacity-50;
   }
+
+  .Page :where(code):not(:where(pre code)) {
+    background-color: rgba(128,128,128,0.2);
+    padding: 1px 2px;
+    font-size: 0.98em;
+  }
 }
 
 @layer components {
-  .content {
-    @apply px-4 sm:px-6 lg:px-8;
-  }
-
   .border-default-color {
     @apply border-zinc-200 dark:border-zinc-600;
   }

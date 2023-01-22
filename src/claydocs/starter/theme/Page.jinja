@@ -3,13 +3,11 @@
 
 <Layout title={title} description={meta.get('description', '')}>
   <NavBar />
-  <div class="
-    content pb-16 z-10 mx-auto
-    flex justify-between
+  <div class="px-4 sm:px-6 lg:px-8 pb-16 z-10 mx-auto flex justify-between
   ">
     <SidebarGlobal class="hidden lg:block" />
-    <main class="Page content pt-10 2xl:mx-10 w-full max-w-full">
-      <div class="prose prose-zinc dark:prose-invert max-w-full">
+    <main class="Page lg:pl-8 pt-10 2xl:mx-10 w-full max-w-full">
+      <div class="prose prose-zinc dark:prose-invert max-w-full overflow-x-hidden">
         {{ content }}
       </div>
       <PrevNext
@@ -19,7 +17,11 @@
         next={nav.next_page}
       />
     </main>
-    <SidebarLocal class="hidden xl:block" />
+    <SidebarLocal class="hidden xl:block pl-8" />
   </div>
   <Menu class="lg:hidden" />
+  <Footer />
+  {% if nav.search -%}
+    <SearchDialog id="search-dialog" />
+  {%- endif %}
 </Layout>

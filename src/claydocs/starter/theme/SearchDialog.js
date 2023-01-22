@@ -60,8 +60,8 @@
 
       search_term.split(" ").forEach(function (word) {
         const rx = new RegExp(escapeRegExp(word), "gi")
-        body = page.body.replace(rx, "<mark>$1</mark>")
-        title = page.title.replace(rx, "<mark>$1</mark>")
+        body = page.body.replace(rx, "<mark>$&</mark>")
+        title = page.title.replace(rx, "<mark>$&</mark>")
       })
 
       const html = resultTmpl

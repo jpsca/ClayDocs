@@ -13,7 +13,7 @@
 
 		<link rel="stylesheet" href="/static/docs.css?v={{utils.timestamp}}">
 		<script src="/static/docs.js?v={{utils.timestamp}}"></script>
-		{{ components_assets }}
+		{{ catalog.render_assets() }}
 
 		<meta property="og:title" content="{{ title }}">
 		<meta property="generator" content="claydocs" />
@@ -28,9 +28,5 @@
 		accent-accent dark:accent-accent-darker
 	">
 		{{ content }}
-		<Footer />
-		{% if nav.search -%}
-		<SearchDialog id="search-dialog" />
-		{%- endif %}
 	</body>
 </html>

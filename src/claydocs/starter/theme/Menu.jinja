@@ -24,13 +24,13 @@
     w-full max-w-md
     overflow-auto overscroll-contain
   ">
-    <div class="content flex items-center h-16">
-      <CloseBtn class="ml-[-5px] mr-4" aria-label="Close" data-toggle="#menu|[open]" />
+    <div class="px-4 sm:px-6 lg:px-8 flex items-center h-16">
+      <CloseBtn class="ml-[-5px] mr-4" aria_label="Close" data_toggle="#menu|[open]" />
       <Logo base_url={nav.base_url} />
       <SearchBtn class="ml-auto" />
     </div>
 
-    <nav class="content flex flex-col pt-5 pb-5 text-base">
+    <nav class="px-4 sm:px-6 lg:px-8 flex flex-col pt-5 pb-5 text-base">
       <Toc toc={nav.toc} page={nav.page} />
     </nav>
   </div>

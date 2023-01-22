@@ -17,33 +17,41 @@
 
 {% set color_classes = colors.get(type, "bg-zinc-100 border-zinc-300 text-zinc-800") %}
 {% do attrs.set(class=color_classes) %}
-{% do attrs.set(class="group relative border rounded overflow-hidden bg-opacity-90") %}
 
 {% if title -%}
 
-<details {{ attrs.render(open=open) }}>
+<details {{ attrs.render(
+  open=open,
+  class="group relative sm:border-x border-y rounded overflow-hidden bg-opacity-90 -mx-4",
+) }}>
   <summary class="flex items-center font-bold h-12 px-5 cursor-pointer
   ">
     {% if show_icon -%}
-    <div class="pr-4">
-      <Icon type={type} class="w-7 h-7 pointer-events-none opacity-70" />
+    <div class="pr-4 hidden sm:block">
+      <Icon type={type} class="w-7 h-7 pointer-events-none opacity-70"/>
     </div>
     {%- endif %}
     {{ title }}
-    <ArrowRight class="ml-auto rotate-90 group-open:-rotate-90 transition-transform pointer-events-none" />
+    <ArrowRight class="
+      ml-auto rotate-90
+      group-open:-rotate-90 transition-transform pointer-events-none" />
   </summary>
-  <div class="pb-6 px-7">{{content}}</div>
+  <div class="p-4 sm:px-7 sm:py-6 w-full">{{content}}</div>
 </details>
 
 {%- else -%}
 
-<div {{ attrs.render(class="flex items-start py-6 px-7") }}>
+<div {{ attrs.render(
+  class="
+    group relative sm:border-x border-y rounded overflow-hidden bg-opacity-90
+    flex items-start p-4 sm:px-7 sm:py-6 -mx-4
+  ") }}>
   {% if show_icon -%}
-  <div class="pr-4">
+  <div class="pr-4 hidden sm:block">
     <Icon type={type} class="w-7 h-7 pointer-events-none opacity-70" />
   </div>
   {%- endif %}
-  <div>{{content}}</div>
+  <div class="w-full">{{content}}</div>
 </div>
 
 {%- endif %}

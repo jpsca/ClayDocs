@@ -1,14 +1,17 @@
 <footer {{ attrs.render(
   class="
-    content py-5 text-sm
-    text-center sm:flex sm:items-center
-    border-t border-default-color
-  ",
+    pl-[max(1rem,env(safe-area-inset-left)]
+    pr-[max(1rem,env(safe-area-inset-right))]
+    sm:px-6 lg:px-8 py-5
+    text-sm text-center sm:flex sm:items-center
+    border-t border-default-color",
 ) }}>
-  <div class="mb-3 sm:mb-0 sm:mr-auto"><Copyright /></div>
-  <div class="hidden sm:block h-full dark:text-inherit text-zinc-500">
+  <div class="mx-auto mb-3 sm:mb-0 sm:mr-auto sm:ml-0">
+    <Copyright />
+  </div>
+  <div class="hidden sm:block mx-auto sm:m-0 h-full dark:text-inherit text-zinc-500">
     This site was
-    <a href="https://claydocs.scaletti.dev" class="underline">built using Claydocs</a>
+    <a title="Coming soon!" class="underline cursor-pointer">built using Claydocs</a>
   </div>
   <ThemeSwitch class="mx-auto sm:ml-6 sm:mr-0" />
 </footer>

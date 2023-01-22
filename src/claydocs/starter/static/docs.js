@@ -7,17 +7,24 @@ function setTheme () {
   const LIGHT = "light";
 
   function getColorPreference () {
-    return localStorage.getItem(STORAGE_KEY);
+    let value = localStorage.getItem(STORAGE_KEY)
+    if (!value) {
+      value = window.matchMedia('(prefers-color-scheme: dark)')
+        ? DARK
+        : LIGHT
+    }
+    return value
   }
 
   function reflectPreference () {
     const value = getColorPreference ();
+    localStorage.setItem(STORAGE_KEY, value)
     if (value === DARK) {
-      document.documentElement.classList.add(DARK);
       document.documentElement.classList.remove(LIGHT);
+      document.documentElement.classList.add(DARK);
     } else {
-      document.documentElement.classList.add(LIGHT);
       document.documentElement.classList.remove(DARK);
+      document.documentElement.classList.add(LIGHT);
     }
   }
   reflectPreference();
