@@ -1,3 +1,8 @@
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+
 [tool.poetry]
 name = "claydocs"
 version = "0.1"
@@ -66,9 +71,6 @@ tox = "*"
 [tool.poetry.scripts]
 claydocs = 'claydocs.console:run'
 
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
 
 [tool.black]
 line-length = 88
@@ -85,6 +87,7 @@ exclude = '''
 )/
 '''
 
+
 [tool.isort]
 profile = "black"
 force_single_line = true
@@ -93,6 +96,7 @@ atomic = true
 lines_after_imports = 2
 lines_between_types = 1
 known_first_party = ["claydocs"]
+
 
 [tool.coverage.run]
 branch = true
@@ -108,7 +112,37 @@ exclude_lines = [
     "if __name__ == .__main__.:"
 ]
 
+[tool.coverage.html]
+directory = "covreport"
+
+
 [tool.pyright]
+include = ["src"]
+exclude = [
+    "**/node_modules",
+    "**/__pycache__",
+    "**/tests",
+]
+ignore = ["src/starter"]
+reportPrivateImportUsage = false
+reportWildcardImportFromLibrary = false
+
 
 [tool.pytest.ini_options]
 addopts = "--doctest-modules"
+
+
+[tool.tox]
+legacy_tox_ini = """
+[tox]
+skipsdist = True
+envlist = py39,py310,py311
+
+[testenv]
+skip_install = true
+commands =
+    pip install -U pip wheel
+    pip install pytest
+    pip install -e .
+    pytest -x src/claydocs tests
+"""
