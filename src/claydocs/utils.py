@@ -22,14 +22,13 @@ if t.TYPE_CHECKING:
 
 
 LOGGER_NAME = "claydocs"
-LOGGER_LEVEL = logging.DEBUG
+LOGGER_LEVEL = logging.INFO
 
 META_START = "---"
 META_END = "\n---"
 
 logger = logging.getLogger(LOGGER_NAME)
 logger.setLevel(LOGGER_LEVEL)
-logging.getLogger("jinjax").setLevel(LOGGER_LEVEL)
 
 
 def is_debug():
