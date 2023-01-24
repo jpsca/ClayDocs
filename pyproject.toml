@@ -33,7 +33,10 @@ classifiers = [
     "Topic :: Text Processing :: Markup :: HTML",
     "Typing :: Typed",
 ]
-include = ["src/starter/*"]
+include = [
+    "src/starter/*",
+    "src/theme/*",
+]
 
 [tool.poetry.dependencies]
 python = "^3.9"

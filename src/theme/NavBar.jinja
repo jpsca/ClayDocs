@@ -11,11 +11,11 @@
   pr-[max(0.75rem,env(safe-area-inset-right))]
   sm:px-6 lg:px-8
 ">
-  <Hamburger class="mr-4 lg:hidden" />
   <Logo class="mr-auto" base_url={nav.base_url} />
   <nav class="hidden md:flex items-center space-x-8 pr-6 mr-4 border-r border-default-color">
     <NavLinks home={home} />
   </nav>
   <LangSwitch class="mr-3" languages={nav.languages} lang={nav.lang} />
-  <SearchBtn />
+  <SearchBtn class="hidden lg:block" />
+  <Hamburger class="lg:hidden" />
 </section>

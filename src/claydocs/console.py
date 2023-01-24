@@ -5,6 +5,7 @@ from pathlib import Path
 
 DEFAULT_PATH = "./docs"
 STARTER = Path(__file__).parent.parent / "starter"
+THEME = Path(__file__).parent.parent / "theme"
 
 
 def run():
@@ -16,4 +17,5 @@ def run():
 
     print(f"Creating the starter project at `{dst}`...")
     shutil.copytree(STARTER, dst)
+    shutil.copytree(THEME, dst / "theme")
     print("✨ Done! ✨")

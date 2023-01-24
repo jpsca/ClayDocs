@@ -3,11 +3,11 @@
 
 <div {{ attrs.render(
   id="menu",
-  class="group fixed inset z-30 hidden open:block",
+  class="group fixed inset z-30 hidden open:block open:lg:hidden w-full",
 ) }}>
   <div
     class="
-      fixed inset-0
+      hidden sm:block fixed inset-0
       transition-all
       bg-black/0 group-open:bg-black/20
       dark:bg-white/0 group-open:dark:bg-white/20
@@ -18,21 +18,22 @@
 
 
   <div class="
-    text-sm pb-12 justify-between
+    text-sm pb-12
     bg-white dark:bg-zinc-900
-    border-r dark:border-r-zinc-600
-    fixed top-0 bottom-0 left-0
-    w-full max-w-md
+    sm:border-l dark:sm:border-l-zinc-600
+    fixed top-0 bottom-0 right-0
+    w-full max-w-screen-sm
     overflow-auto overscroll-contain
   ">
     <div class="flex items-center h-16
       pl-[max(0.75rem,env(safe-area-inset-left))]
       pr-[max(0.75rem,env(safe-area-inset-right))]
       sm:px-6 lg:px-8 mb-5
+      border-b border-default-color
     ">
-      <CloseBtn class="mr-4" aria_label="Close" data_toggle="#menu|[open]" />
       <Logo base_url={nav.base_url} />
       <SearchBtn class="ml-auto" />
+      <CloseBtn class="ml-4" aria_label="Close" data_toggle="#menu|[open]" />
     </div>
 
     <nav class="flex flex-col pb-8 space-y-4 text-base

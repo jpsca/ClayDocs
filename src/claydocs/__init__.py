@@ -4,4 +4,5 @@ from .docs import Docs  # noqa
 from .exceptions import *  # noqa
 
 
-starter_theme_path = Path(__file__).parent / "starter" / "theme"
+components_path = Path(__file__).parent / "theme"
+prefix = ""
