@@ -211,6 +211,7 @@ class LiveReloadServer(socketserver.ThreadingMixIn, wsgiref.simple_server.WSGISe
 
             with self.epoch_cond:
                 logger.info("Reloading page...")
+
                 self.epoch = timestamp()
                 self.epoch_cond.notify_all()
 

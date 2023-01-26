@@ -26,6 +26,13 @@ class DocsBuilder(THasRender if t.TYPE_CHECKING else object):
         logger.info("Copying static folder")
         self._copy_static_folder()
 
+
+
+        logger.info("...")
+        print_random_messages()
+        logger.info("✨ Done! ✨")
+
+    def build_pages(self, fix_urls: bool = False) -> None:
         for url in self.nav.pages:
             page = self.nav.get_page(url)
             if not page:
@@ -38,15 +45,12 @@ class DocsBuilder(THasRender if t.TYPE_CHECKING else object):
             filepath.parent.mkdir(parents=True, exist_ok=True)
 
             html = self.render_page(page)
+            if fix_urls
             logger.debug("Relativizing URLs")
             html = self._fix_urls(html, filename)
 
             logger.info(f"Writing {filename}")
             filepath.write_text(html)
-
-        logger.info("...")
-        print_random_messages()
-        logger.info("✨ Done! ✨")
 
     def _copy_static_folder(self) -> None:
         shutil.copytree(
