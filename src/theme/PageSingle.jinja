@@ -1,0 +1,13 @@
+{#def title="" #}
+
+<theme.Layout title={title} description={meta.get('description', '')}>
+<theme.NavBar />
+  <main class="Page m-0 p-0 max-w-full font-sans">
+    {{ content }}
+  </main>
+  <theme.Menu single />
+  <theme.Footer />
+  {% if nav.search -%}
+    <theme.SearchDialog id="search-dialog" />
+  {%- endif %}
+</theme.Layout>

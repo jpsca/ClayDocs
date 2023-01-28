@@ -3,19 +3,16 @@
 <a
   {{ attrs.render(
     class="
+      Logo
       group flex items-center text-zinc-400
       opacity-90 hover:opacity-100
+      whitespace-nowrap leading-none
+      text-base font-semibold
     ",
     href=base_url
 ) }}>
   <span class="block w-8 h-8 rounded-lg border border-current"></span>
-  {% if nav.page.url != "/index" -%}
-  <span class="
-    ml-2 whitespace-nowrap leading-none
-    text-base font-semibold
-    hidden lg:block
-  ">
+  <span class="ml-2">
     Awesome
   </span>
-  {%- endif %}
 </a>

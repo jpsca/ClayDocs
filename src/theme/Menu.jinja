@@ -1,4 +1,3 @@
-{#def home=False #}
 {#js toggle.js #}
 
 <div {{ attrs.render(
@@ -32,8 +31,8 @@
       border-b border-default-color
     ">
       <Logo base_url={nav.base_url} />
-      <SearchBtn class="ml-auto" />
-      <CloseBtn class="ml-4" aria_label="Close" data_toggle="#menu|[open]" />
+      <theme.SearchBtn class="ml-auto" />
+      <theme.CloseBtn class="ml-4" aria_label="Close" data_toggle="#menu|[open]" />
     </div>
 
     <nav class="flex flex-col pb-8 space-y-4 text-base
@@ -42,7 +41,7 @@
       pr-[max(1rem,env(safe-area-inset-right))]
       sm:px-6 lg:px-8
     ">
-      <NavLinks home={home} />
+      <NavLinks />
     </nav>
 
     <nav class="
@@ -51,7 +50,7 @@
       pr-[max(1rem,env(safe-area-inset-right))]
       sm:px-6 lg:px-8
     ">
-      <Toc toc={nav.toc} page={nav.page} />
+      <theme.Toc toc={nav.toc} page={nav.page} />
     </nav>
   </div>
 </div>

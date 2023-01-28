@@ -1,13 +1,10 @@
 /** @type {import('tailwindcss').Config} */
-const colors = require('tailwindcss/colors')
-
 module.exports = {
   content: [
-    './content/**/*.md',
-    './content/**/*.jinja',
-    './components/**/*.jinja',
-    './static/**/*.js',
-    '../src/theme/**/*.jinja',
+    '*.jinja',
+    '*.js',
+    '../components/*.jinja',
+    '../components/*.js',
   ],
   darkMode: 'class',
   theme: {

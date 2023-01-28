@@ -35,8 +35,6 @@ class DocsServer(THasRender if t.TYPE_CHECKING else object):
 
             if self.components_folder:
                 server.watch(self.components_folder)
-            if self.theme_folder:
-                server.watch(self.theme_folder)
 
             try:
                 server.serve()

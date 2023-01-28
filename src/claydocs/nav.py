@@ -202,16 +202,16 @@ class Nav:
 
         ```python
         [
-            "index.md",
+            "index.mdx",
             [
                 "Guide",
                 [
-                    "guide/index.md",
-                    "guide/arguments.md",
-                    "guide/extra.md",
+                    "guide/index.mdx",
+                    "guide/arguments.mdx",
+                    "guide/extra.mdx",
                 ],
             ],
-            "faq.md",
+            "faq.mdx",
         ]
         ```
 
@@ -236,27 +236,27 @@ class Nav:
         {
             "/index":
                 <Page
-                    lang="en" url="/index", root="en/index.md",
+                    lang="en" url="/index", root="en/index.mdx",
                     title="Home", index=0, section="", meta={...}
                 >,
             "/guide/index":
                 <Page
-                    lang="en" url="/guide/index", root="en/guide/index.md",
+                    lang="en" url="/guide/index", root="en/guide/index.mdx",
                     title="The Guide", index=1, section="Guide", meta={...}
                 >,
             "/guide/arguments":
                 <Page
-                    lang="en" url="/guide/arguments", root="en/guide/arguments.md",
+                    lang="en" url="/guide/arguments", root="en/guide/arguments.mdx",
                     title="The Arguments", index=2, section="Guide", meta={...}
                 >,
             "/guide/extra":
                 <Page
-                    lang="en" url="/guide/extra", root="en/guide/extra.md",
+                    lang="en" url="/guide/extra", root="en/guide/extra.mdx",
                     title="Extra arguments", index=3, section="Guide", meta={...}
                 >,
             "/faq":
                 <Page
-                    lang="en" url="/faq", root="en/faq.md",
+                    lang="en" url="/faq", root="en/faq.mdx",
                     title="FAQ", index=4, section="", meta={...}
                 >,
             },
@@ -438,7 +438,7 @@ class Nav:
         return page_toc
 
     def _get_url(self, filename: str) -> str:
-        url = filename.strip(" /").removesuffix(".md").removesuffix("index")
+        url = filename.strip(" /").removesuffix(".mdx").removesuffix("index")
         return "/".join([slugify(part) for part in url.split("/")])
 
     def _log_initial_status(self) -> None:

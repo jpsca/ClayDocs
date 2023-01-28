@@ -1,12 +1,15 @@
 import jinjax_ui
-from claydocs import Docs
+from claydocs import Docs, theme
 
 
 pages = [
-    "index.md",
+    "index.mdx",
 ]
 
-docs = Docs(pages, add_ons=[jinjax_ui])
+docs = Docs(
+    pages,
+    add_ons=[theme, jinjax_ui]
+)
 
 
 if __name__ == "__main__":

@@ -19,10 +19,7 @@ install:
 	poetry install --with dev,test
 	# pre-commit install
 
-.PHONY: docs
-docs:
-	cd docs && python docs.py
-
-.PHONY: docs.build
-docs.build:
-	cd docs && python docs.py build
+.PHONY: theme
+theme:
+	cd src/theme \
+	&& npm run build

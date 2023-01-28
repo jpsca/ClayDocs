@@ -1,4 +1,4 @@
-{#def sep=" ", join="", symbols=True #}
+{#def symbol=False #}
 
 {% set symbol_map = {
   "LEFT": "&#x2190;",
@@ -31,15 +31,7 @@
   "WIN": "&#x229E;",
   "WINDOWS": "&#x229E;",
 } %}
+{% set key = content.strip() %}
+{% set sym = symbol_map.get(key.upper()) if symbol else '' %}
 
-{% set insert_joiner = joiner(join) %}
-
-<span {{ attrs.render(class="inline-flex items-center font-mono font-medium mx-1 my-1") }}>
-{% for key in content.split(sep) -%}
-  {%- set key = key.upper().strip() -%}
-  {%- set symbol = symbol_map.get(key) -%}
-  {{ insert_joiner() }}<kbd class="inline-block border rounded border-white dark:border-black bg-zinc-100 dark:bg-zinc-900 leading-tight px-[0.1rem] mx-[0.1rem] shadow-[0_0_2px_0_#000]">
-    {%- if symbols and symbol -%}{{ symbol|safe }} {% endif -%}
-    {{ key }}</kbd>
-{%- endfor %}
-</span>
+<kbd class="inline-block font-mono font-medium border rounded border-white dark:border-black bg-zinc-100 dark:bg-zinc-900 leading-tight px-[0.1rem] mx-[0.1rem] shadow-[0_0_2px_0_#000]">{% if sym %}{{ sym|safe }} {% endif %}{{ key }}</kbd>

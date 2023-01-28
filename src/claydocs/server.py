@@ -177,7 +177,7 @@ class LiveReloadServer(socketserver.ThreadingMixIn, wsgiref.simple_server.WSGISe
 
         if path.endswith("/"):
             path = f"{path}index"
-        return f"{path}.md not found", HTTP_NOT_FOUND
+        return f"{path} not found", HTTP_NOT_FOUND
 
     def render_error_page(self, exception: Exception) -> tuple[str, str]:
         body = ERROR_BODY.format(

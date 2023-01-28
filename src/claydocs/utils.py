@@ -36,7 +36,6 @@ def is_debug():
 
 
 class THasPaths:
-    THEME_FOLDER: str
     COMPONENTS_FOLDER: str
     CONTENT_FOLDER: str
     STATIC_FOLDER: str
@@ -51,12 +50,8 @@ class THasPaths:
     build_folder: "Path"
     build_folder_static: "Path"
     temp_folder: "Path"
-
     static_url: str
-
-    theme_folder: "t.Optional[Path]"
     components_folder: "t.Optional[Path]"
-
     add_ons: list[t.Any]
     search: bool
     nav: "Nav"

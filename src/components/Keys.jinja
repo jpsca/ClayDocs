@@ -1,0 +1,9 @@
+{#def sep=" ", join=" ", symbols=False #}
+
+{% set insert_joiner = joiner(join) %}
+
+<span {{ attrs.render(class="inline-flex items-center mx-1 my-1") }}>
+{% for key in content.split(sep) -%}
+  {{ insert_joiner() }}<Key symbol={symbol}>{{ key }}</Key>
+{%- endfor %}
+</span>

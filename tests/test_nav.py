@@ -3,18 +3,18 @@ from claydocs.nav import Nav
 
 def test_toc():
     nav = Nav("", [
-        ["1.md", "One"],
+        ["1.mdx", "One"],
         ["a", [
-            ["2.md", "Two"],
-            ["3.md", "Three"],
+            ["2.mdx", "Two"],
+            ["3.mdx", "Three"],
             ["b", [
-                ["4.md", "Four"],
+                ["4.mdx", "Four"],
                 ["c", [
-                    ["5.md", "Five"],
+                    ["5.mdx", "Five"],
                 ]],
             ]],
         ]],
-        ["6.md", "Six"],
+        ["6.mdx", "Six"],
     ])
 
     assert nav.titles == {
@@ -44,18 +44,18 @@ def test_toc():
 
 def test_next():
     nav = Nav("", [
-        ["1.md", "One"],
+        ["1.mdx", "One"],
         ["a", [
-            ["2.md", "Two"],
-            ["3.md", "Three"],
+            ["2.mdx", "Two"],
+            ["3.mdx", "Three"],
             ["b", [
-                ["4.md", "Four"],
+                ["4.mdx", "Four"],
                 ["c", [
-                    ["5.md", "Five"],
+                    ["5.mdx", "Five"],
                 ]],
             ]],
         ]],
-        ["6.md", "Six"],
+        ["6.mdx", "Six"],
     ])
 
     assert nav._get_next("1") == ("a", "/2", "Two")
@@ -68,18 +68,18 @@ def test_next():
 
 def test_prev():
     nav = Nav("", [
-        ["1.md", "One"],
+        ["1.mdx", "One"],
         ["a", [
-            ["2.md", "Two"],
-            ["3.md", "Three"],
+            ["2.mdx", "Two"],
+            ["3.mdx", "Three"],
             ["b", [
-                ["4.md", "Four"],
+                ["4.mdx", "Four"],
                 ["c", [
-                    ["5.md", "Five"],
+                    ["5.mdx", "Five"],
                 ]],
             ]],
         ]],
-        ["6.md", "Six"],
+        ["6.mdx", "Six"],
     ])
 
     assert nav._get_prev("6") == ("c", "/5", "Five")

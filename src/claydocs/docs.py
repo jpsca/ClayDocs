@@ -21,14 +21,13 @@ VALID_COMMANDS = ("serve", "build", "index")
 
 
 class Docs(DocsBuilder, DocsRender, DocsServer):
-    THEME_FOLDER = "theme"
     COMPONENTS_FOLDER = "components"
     CONTENT_FOLDER = "content"
     STATIC_FOLDER = "static"
     BUILD_FOLDER = "build"
     STATIC_URL = "static"
     THUMBNAILS_URL = "thumbnails"
-    DEFAULT_COMPONENT = "Page"
+    DEFAULT_COMPONENT = "theme.Page"
 
     def __init__(
         self,
@@ -64,12 +63,6 @@ class Docs(DocsBuilder, DocsRender, DocsServer):
         self.build_folder = (root / self.BUILD_FOLDER).absolute()
         logger.debug(f"build_folder is {self.build_folder}")
         self.build_folder_static = self.build_folder / self.STATIC_FOLDER
-
-        self.theme_folder = (root / self.THEME_FOLDER).absolute()
-        logger.debug(f"theme_folder is {self.theme_folder}")
-        if not self.theme_folder.is_dir():
-            logger.warning(f"{self.theme_folder} is not a folder")
-            self.theme_folder = None
 
         self.components_folder = (root / self.COMPONENTS_FOLDER).absolute()
         logger.debug(f"components_folder is {self.components_folder}")
