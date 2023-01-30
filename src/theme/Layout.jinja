@@ -1,5 +1,6 @@
 {#def title="", description="" #}
 {#css theme.css #}
+
 {% set DEFAULT_TITLE = "Documentation" %}
 {% set title = (title + " | " + DEFAULT_TITLE) if title else DEFAULT_TITLE %}
 
@@ -22,8 +23,8 @@
 	<body class="
 		antialiased
 		overflow-y-auto
-		text-default-color
-		bg-default-color
+		text-zinc-900 dark:text-white
+		bg-white dark:bg-zinc-800
 		accent-accent dark:accent-accent-darker
 	">
 		{{ content }}

@@ -1,7 +1,0 @@
-@tailwind components;
-@tailwind utilities;
-
-:root {
-  --accent: #00c100;
-  --accent-darker: theme(colors.lime.500);
-}

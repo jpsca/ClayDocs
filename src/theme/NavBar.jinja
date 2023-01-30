@@ -3,14 +3,14 @@
   flex items-center w-full h-16
   backdrop-blur-sm bg-white/60 dark:bg-zinc-800/60
   tall:sticky tall:top-0
-  border-b border-default-color
+  border-b border-zinc-200 dark:border-zinc-600
   focus:outline-accent dark:focus:outline-accent-darker
   pl-[max(0.75rem,env(safe-area-inset-left))]
   pr-[max(0.75rem,env(safe-area-inset-right))]
   sm:px-6 lg:px-8
 ">
   <Logo class="mr-auto" base_url={nav.base_url} />
-  <nav class="hidden md:flex items-center space-x-8 pr-6 mr-4 border-r border-default-color">
+  <nav class="hidden md:flex items-center space-x-8 pr-6 mr-4 border-r border-zinc-200 dark:border-zinc-600">
     <NavLinks />
   </nav>
   <theme.LangSwitch class="mr-3" languages={nav.languages} lang={nav.lang} />

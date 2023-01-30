@@ -2,9 +2,7 @@
 module.exports = {
   content: [
     '*.jinja',
-    '*.js',
     '../components/*.jinja',
-    '../components/*.js',
   ],
   darkMode: 'class',
   theme: {
@@ -24,7 +22,4 @@ module.exports = {
       }
     },
   },
-  plugins: [
-    require('@tailwindcss/typography'),
-  ],
 }

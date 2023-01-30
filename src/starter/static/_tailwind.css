@@ -1,0 +1,22 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --accent: #00c100;
+    --accent-darker: theme(colors.lime.500);
+  }
+}
+
+@layer components {
+  @media (max-width: 640px) {
+    .prose :where(pre):not(:where([class~="not-prose"] *)) {
+      margin-left: -1rem;
+      margin-right: -1rem;
+      border-left: none;
+      border-right: none;
+      border-radius: 0;
+    }
+  }
+}
