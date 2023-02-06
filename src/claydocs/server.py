@@ -54,14 +54,17 @@ class LiveReloadServer(socketserver.ThreadingMixIn, wsgiref.simple_server.WSGISe
 
     def __init__(
         self,
-        render: "t.Callable",
+        get_page: "t.Callable",
+        refresh: "t.Callable",
         *,
         host: str = DEFAULT_HOST,
         port: int = DEFAULT_PORT,
         shutdown_delay: float = 1,
         **kwargs,
     ) -> None:
-        self._render = render
+        self._get_page = get_page
+        self._refresh = refresh
+
         self.host = host
         self.port = port
         self.shutdown_delay = shutdown_delay
@@ -90,6 +93,7 @@ class LiveReloadServer(socketserver.ThreadingMixIn, wsgiref.simple_server.WSGISe
         path = str(path_to_watch.absolute())
         if path in self.watch_refs:
             return
+        print(path)
 
         def callback(event):
             if event.is_directory:
@@ -98,6 +102,7 @@ class LiveReloadServer(socketserver.ThreadingMixIn, wsgiref.simple_server.WSGISe
             with self.must_refresh_cond:
                 self.must_refresh = True
                 self.must_refresh_cond.notify_all()
+            self._refresh(event.src_path)
 
         handler = watchdog.events.FileSystemEventHandler()
         handler.on_any_event = callback
@@ -153,7 +158,7 @@ class LiveReloadServer(socketserver.ThreadingMixIn, wsgiref.simple_server.WSGISe
         if self.request.method == "HEAD":
             body = ""
         else:
-            body, status = self.render_page()
+            body, status = self.get_page()
 
         self.headers.setdefault("Content-Type", "text/html; charset=utf-8")
         return body, status
@@ -164,10 +169,10 @@ class LiveReloadServer(socketserver.ThreadingMixIn, wsgiref.simple_server.WSGISe
         logger.info(f"{self.request.path} -> {location}")
         return "", "302 Found"
 
-    def render_page(self) -> tuple[str, str]:
+    def get_page(self) -> tuple[str, str]:
         path = self.request.path
         try:
-            body = self._render(path.rstrip("/"))
+            body = self._get_page(path.rstrip("/"))
         except Exception as exception:
             logger.exception(path)
             return self.render_error_page(exception)

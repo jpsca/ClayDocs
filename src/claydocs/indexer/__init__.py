@@ -1,1 +1,1 @@
-from .indexer import Indexer # noqa
+from .indexer import index_pages  # noqa

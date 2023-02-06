@@ -20,12 +20,8 @@
       autofocus=True
     />
 
-    <theme.TextButton data-toggle-modal="#search-dialog">
-      <div class="pointer-events-none text-zinc-500 leading-6 px-1 h-6">
-        Close <Key>ESC</Key>
-      </div>
-    </theme.TextButton>
+    <t.CloseBtn class="text-zinc-500" data-toggle-modal="#search-dialog" />
   </header>
   <div class="SearchResults border-t border-zinc-300 absolute top-14 bottom-0 w-full overflow-y-auto overflow-x-hidden"></div>
-  <template><theme.SearchResult /></template>
+  <template><t.SearchResult /></template>
 </dialog>

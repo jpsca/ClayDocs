@@ -3,6 +3,6 @@ from pathlib import Path
 
 root = Path(__file__).parent.parent
 components = {
-    "theme": root / "theme",
+    "t": root / "theme",
     "": root / "components",
 }

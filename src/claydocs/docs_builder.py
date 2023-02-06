@@ -1,12 +1,14 @@
+import json
 import re
 import shutil
 import typing as t
 
-from .utils import logger, print_random_messages
+from .indexer import index_pages
+from .utils import is_debug, logger, print_random_messages
 
 if t.TYPE_CHECKING:
     from pathlib import Path
-    from .utils import THasRender
+    from .utils import Page, THasRender
 
 
 RX_ABS_URL = re.compile(
@@ -19,13 +21,15 @@ class DocsBuilder(THasRender if t.TYPE_CHECKING else object):
     relativize_static: bool = False
 
     def build(self) -> None:
-        logger.info("Rendering pages...")
         self.build_folder.mkdir(exist_ok=True)
         self.build_folder_static.mkdir(exist_ok=True)
 
-        logger.info("Copying static folder")
+        logger.info("Copying static folder...")
         self._copy_static_folder()
 
+        pages: "list[Page]" = []
+
+        logger.info("Rendering pages...")
         for url in self.nav.pages:
             page = self.nav.get_page(url)
             if not page:
@@ -43,6 +47,18 @@ class DocsBuilder(THasRender if t.TYPE_CHECKING else object):
 
             logger.info(f"Writing {filename}")
             filepath.write_text(html)
+            if self.search:
+                page.html = html
+                pages.append(page)
+
+        if self.search:
+            logger.info("Indexing content...")
+            data = index_pages(pages)
+            pages = []
+            indent = 2 if is_debug() else None
+            for lang, langdata in data.items():
+                filepath = self.build_folder_static / f"search-{lang}.json"
+                filepath.write_text(json.dumps(langdata, indent=indent))
 
         logger.info("...")
         print_random_messages()

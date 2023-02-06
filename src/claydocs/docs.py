@@ -1,4 +1,3 @@
-import json
 import sys
 import shutil
 import tempfile
@@ -9,9 +8,8 @@ from signal import SIGTERM, signal
 from .docs_builder import DocsBuilder
 from .docs_render import DocsRender
 from .docs_server import DocsServer
-from .indexer import Indexer
 from .nav import DEFAULT_LANG, Nav
-from .utils import logger, is_debug
+from .utils import logger
 
 if t.TYPE_CHECKING:
     from .nav import TPages
@@ -25,9 +23,10 @@ class Docs(DocsBuilder, DocsRender, DocsServer):
     CONTENT_FOLDER = "content"
     STATIC_FOLDER = "static"
     BUILD_FOLDER = "build"
+    CACHE_FOLDER = ".cache"
     STATIC_URL = "static"
     THUMBNAILS_URL = "thumbnails"
-    DEFAULT_COMPONENT = "theme.Page"
+    DEFAULT_COMPONENT = "t.Page"
 
     def __init__(
         self,
@@ -46,32 +45,36 @@ class Docs(DocsBuilder, DocsRender, DocsServer):
         md_extensions: "t.Optional[list[str]]" = None,
         md_ext_config: "t.Optional[dict[str,t.Any]]" = None,
     ) -> None:
-        root = Path(root)
+        root = Path(root).resolve()
         if root.is_file():
             root = root.parent
         self.root = root
         logger.debug(f"Root path is {self.root}")
 
-        self.content_folder = (root / self.CONTENT_FOLDER).absolute()
+        self.content_folder = (root / self.CONTENT_FOLDER).resolve()
         logger.debug(f"content_folder is {self.content_folder}")
         self.content_folder.mkdir(exist_ok=True)
 
-        self.static_folder = (root / self.STATIC_FOLDER).absolute()
+        self.static_folder = (root / self.STATIC_FOLDER).resolve()
         logger.debug(f"static_folder is {self.static_folder}")
         self.static_folder.mkdir(exist_ok=True)
 
-        self.build_folder = (root / self.BUILD_FOLDER).absolute()
-        logger.debug(f"build_folder is {self.build_folder}")
-        self.build_folder_static = self.build_folder / self.STATIC_FOLDER
-
-        self.components_folder = (root / self.COMPONENTS_FOLDER).absolute()
+        self.components_folder = (root / self.COMPONENTS_FOLDER).resolve()
         logger.debug(f"components_folder is {self.components_folder}")
         if not self.components_folder.is_dir():
             logger.warning(f"{self.components_folder} is not a folder")
             self.components_folder = None
 
+        self.cache_folder = (root / self.CACHE_FOLDER).resolve()
+        logger.debug(f"cache_folder is {self.cache_folder}")
+
+        self.build_folder = (root / self.BUILD_FOLDER).resolve()
+        self.build_folder_static = self.build_folder / self.STATIC_FOLDER
+        logger.debug(f"build_folder is {self.build_folder}")
+
         self.static_url = f"/{self.STATIC_URL.lstrip('/')}"
         self.temp_folder = Path(tempfile.mkdtemp())
+
         self.add_ons = add_ons or []
 
         self.nav = Nav(
@@ -83,7 +86,6 @@ class Docs(DocsBuilder, DocsRender, DocsServer):
         )
 
         self.search = search
-        self.indexer = Indexer(self.render) if search else None
 
         self.__init_renderer__(
             globals=globals,
@@ -107,7 +109,6 @@ class Docs(DocsBuilder, DocsRender, DocsServer):
             if cmd not in VALID_COMMANDS:
                 return self.cmd_help(py)
             if cmd == "serve":
-                self.cmd_index()
                 self.cmd_serve()
             elif cmd == "build":
                 self.cmd_build()
@@ -118,21 +119,14 @@ class Docs(DocsBuilder, DocsRender, DocsServer):
             sys.stderr.write("\n")
 
     def cmd_serve(self):
+        self.cache_pages(build_index=self.search)
         self.serve()
 
     def cmd_build(self):
         self.build()
 
     def cmd_index(self):
-        if not self.search or not self.indexer:
-            return
-        pages = list(self.nav.pages.values())
-        data = self.indexer.index(pages)
-        indent = 2 if is_debug() else None
-
-        for lang, langdata in data.items():
-            filepath = self.static_folder / f"search-{lang}.json"
-            filepath.write_text(json.dumps(langdata, indent=indent))
+        self.cache_pages(build_index=True)
 
     def cmd_help(self, py: str):
         print("\nValid commands:")

@@ -1,5 +1,6 @@
-import jinja2
 import typing as t
+
+import jinja2
 
 from .exceptions import Abort
 from .utils import logger, print_random_messages
@@ -13,7 +14,10 @@ class DocsServer(THasRender if t.TYPE_CHECKING else object):
     server: "LiveReloadServer"
 
     def __init_server__(self) -> None:
-        server = LiveReloadServer(render=self.render)
+        server = LiveReloadServer(
+            get_page=self.get_cached_page,
+            refresh=self.refresh,
+        )
 
         middleware = self.catalog.get_middleware(
             server.application,

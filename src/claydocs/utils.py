@@ -3,6 +3,7 @@ import random
 import re
 import time
 import typing as t
+from dataclasses import dataclass, field
 
 import jinjax  # noqa
 import yaml
@@ -17,7 +18,7 @@ except ImportError:  # pragma: no cover
 if t.TYPE_CHECKING:
     from pathlib import Path
     from jinjax.catalog import Catalog
-    from .nav import Nav, Page
+    from .nav import Nav
     from .server import LiveReloadServer
 
 
@@ -31,24 +32,23 @@ logger = logging.getLogger(LOGGER_NAME)
 logger.setLevel(LOGGER_LEVEL)
 
 
-def is_debug():
-    return logger.level == logging.DEBUG
-
-
 class THasPaths:
     COMPONENTS_FOLDER: str
     CONTENT_FOLDER: str
     STATIC_FOLDER: str
     BUILD_FOLDER: str
+    CACHE_FOLDER: str
 
     STATIC_URL: str
     THUMBNAILS_URL: str
     DEFAULT_COMPONENT: str
 
+    root: "Path"
     content_folder: "Path"
     static_folder: "Path"
     build_folder: "Path"
     build_folder_static: "Path"
+    cache_folder: "Path"
     temp_folder: "Path"
     static_url: str
     components_folder: "t.Optional[Path]"
@@ -61,11 +61,31 @@ class THasPaths:
 class THasRender(THasPaths):
     catalog: "Catalog"
 
-    def render(self, name: str, **kw) -> str:  # type: ignore
-        ...
-
     def render_page(self, page: "Page", **kw) -> str:  # type: ignore
         ...
+
+    def get_cached_page(self, url: str, **kw) -> str:  # type: ignore
+        ...
+
+    def refresh(self, event) -> None:
+        ...
+
+
+@dataclass
+class Page:
+    lang: str = ""
+    url: str = ""
+    filename: str = ""
+    title: str = ""
+    index: int = 0
+    section: str = ""
+    meta: dict = field(default_factory=dict)
+    html: str = ""
+    cache_path: "Path | None" = None
+
+
+def is_debug():
+    return logger.level == logging.DEBUG
 
 
 def timestamp() -> int:

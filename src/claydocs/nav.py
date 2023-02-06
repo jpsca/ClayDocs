@@ -1,13 +1,13 @@
 import json
 import re
 import typing as t
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict, dataclass
 from pathlib import Path
 
 from slugify import slugify
 
 from .exceptions import InvalidNav
-from .utils import load_markdown_metadata, logger
+from .utils import Page, load_markdown_metadata, logger
 
 if t.TYPE_CHECKING:
     TPagesBranch = t.Sequence[t.Union[str, t.Sequence]]
@@ -26,17 +26,6 @@ class Language:
     code: str
     url: str = ""
     name: str = ""
-
-
-@dataclass
-class Page:
-    lang: str = ""
-    url: str = ""
-    filename: str = ""
-    title: str = ""
-    index: int = 0
-    section: str = ""
-    meta: dict = field(default_factory=dict)
 
 
 @dataclass

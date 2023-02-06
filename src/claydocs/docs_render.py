@@ -1,21 +1,22 @@
+import json
+import shutil
 import textwrap
 import typing as t
 
-from image_processing import ImageProcessing
 import inflection
 import markdown
+from image_processing import ImageProcessing
 from pymdownx import emoji
-from markupsafe import Markup
 from markdown.extensions.toc import slugify_unicode  # type: ignore
 from jinjax.catalog import Catalog
 
 from .jinja_code import CodeExtension
 from .jinja_markdown import MarkdownExtension
-from .utils import load_markdown_metadata, logger, timestamp, widont
+from .indexer import index_pages
+from .utils import is_debug, load_markdown_metadata, logger, timestamp, widont
 
 if t.TYPE_CHECKING:
-    from .nav import Page
-    from .utils import THasPaths
+    from .utils import Page, THasPaths
 
 
 DEFAULT_MD_EXTENSIONS = [
@@ -181,32 +182,67 @@ class DocsRender(THasPaths if t.TYPE_CHECKING else object):
         filepath = self.content_folder / page.filename.strip("/")
         logger.debug(f"Rendering `{filepath}`")
         md_source, meta = load_markdown_metadata(filepath)
+        html = self.render_markdown(md_source)
+        content = f"<!--startpage-->{html}<!--endpage-->"
+
         nav = self.nav.get_page_nav(page)
         nav.search = self.search
-        content = self.render_markdown(md_source)
         nav.page_toc = self.nav._get_page_toc(self.markdowner.toc_tokens)  # type: ignore
         component = meta.get("component", self.DEFAULT_COMPONENT)
-        source = (
-            '<%(component)s title="%(title)s">\n'
-            "<!--startpage-->\n"
-            "%(content)s"
-            "\n<!--endpage-->"
-            "\n</%(component)s>"
-        ) % {
-            "title": nav.page.title,
-            "component": component,
-            "content": content,
-        }
+        meta.setdefault("title", nav.page.title)
+
+        source = f'<{component} title="{nav.page.title}">{content}</{component}>'
         self.catalog.jinja_env.globals["nav"] = nav
         self.catalog.jinja_env.globals["meta"] = meta
         self.catalog.jinja_env.globals["utils"]["timestamp"] = timestamp()
         return self.catalog.render(component, __source=source, **kw)
 
-    def render_markdown(self, source: str) -> Markup:
+    def render_markdown(self, source: str) -> str:
         source = textwrap.dedent(source.strip("\n"))
-        html = (
+        return (
             self.markdowner.convert(source)
             .replace("<code", "{% raw %}<code")
             .replace("</code>", "</code>{% endraw %}")
         )
-        return Markup(html)
+
+    def cache_pages(self, build_index=True) -> None:
+        shutil.rmtree(self.cache_folder, ignore_errors=True)
+        self.cache_folder.mkdir()
+        pages: "list[Page]" = []
+
+        for url in self.nav.pages:
+            page = self.nav.get_page(url)
+            if not page:
+                logger.error(f"Page not found: {url}")
+                continue
+
+            filename = page.url.strip("/")
+            filename = f"{filename}/index.html".lstrip("/")
+            filepath = self.cache_folder / filename
+            filepath.parent.mkdir(parents=True, exist_ok=True)
+
+            html = self.render_page(page)
+            filepath.write_text(html)
+            page.cache_path = filepath
+            if build_index:
+                page.html = html
+                pages.append(page)
+
+        if build_index:
+            data = index_pages(pages)
+            pages = []
+            indent = 2 if is_debug() else None
+            for lang, langdata in data.items():
+                filepath = self.static_folder / f"search-{lang}.json"
+                filepath.write_text(json.dumps(langdata, indent=indent))
+
+    def get_cached_page(self, url: str) -> str:
+        page = self.nav.get_page(url)
+        if not page or not page.cache_path:
+            return ""
+        return page.cache_path.read_text()
+
+    def refresh(self, src_path: str) -> None:
+        print(">>>>>>>>>>> ", src_path)
+        if src_path.endswith((".mdx", ".jinja")):
+            self.cache_pages(build_index=self.search)

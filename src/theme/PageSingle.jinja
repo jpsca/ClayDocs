@@ -1,13 +1,15 @@
 {#def title="" #}
 
-<theme.Layout title={title} description={meta.get('description', '')}>
-  <theme.NavBar />
-  <main class="prose m-0 p-0 max-w-full font-sans">
-    {{ content }}
+<t.Layout title={title} description={meta.get('description', '')}>
+  <t.NavBar />
+  <main class="m-0 p-0 max-w-full font-sans">
+    <div class="prose">
+      {{ content }}
+    </div>
   </main>
-  <theme.Menu />
-  <theme.Footer />
+  <t.Menu />
+  <t.Footer />
   {% if nav.search -%}
-    <theme.SearchDialog id="search-dialog" />
+    <t.SearchDialog id="search-dialog" />
   {%- endif %}
-</theme.Layout>
+</t.Layout>
