@@ -54,7 +54,7 @@ DEFAULT_MD_EXT_CONFIG = {
     "pymdownx.highlight": {
         "linenums_style": "pymdownx-inline",
         "anchor_linenums": False,
-        "css_class": "highlight not-prose",
+        "css_class": "highlight",
     },
     "pymdownx.emoji": {
         "emoji_generator": emoji.to_alt,
@@ -243,6 +243,5 @@ class DocsRender(THasPaths if t.TYPE_CHECKING else object):
         return page.cache_path.read_text()
 
     def refresh(self, src_path: str) -> None:
-        print(">>>>>>>>>>> ", src_path)
         if src_path.endswith((".mdx", ".jinja")):
             self.cache_pages(build_index=self.search)

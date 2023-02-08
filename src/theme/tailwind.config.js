@@ -2,6 +2,7 @@
 module.exports = {
   content: [
     '*.jinja',
+    '../components/*.jinja',
   ],
   darkMode: 'class',
   theme: {
