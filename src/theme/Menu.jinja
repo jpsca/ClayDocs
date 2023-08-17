@@ -31,8 +31,7 @@
       border-b border-zinc-200 dark:border-zinc-600
     ">
       <Logo base_url={nav.base_url} />
-      <t.SearchBtn class="ml-auto mr-3" />
-      <t.CloseBtn aria_label="Close" data_toggle="#menu|[open]" />
+      <CloseBtn aria_label="Close" data_toggle="#menu|[open]" />
     </div>
 
     <nav class="flex flex-col pb-8 space-y-4 text-base
@@ -50,7 +49,7 @@
       pr-[max(1rem,env(safe-area-inset-right))]
       sm:px-6 lg:px-8
     ">
-      <t.Toc toc={nav.toc} page={nav.page} />
+      <Toc toc={nav.toc} page={nav.page} />
     </nav>
   </div>
 </div>

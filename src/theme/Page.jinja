@@ -1,25 +1,23 @@
 {#def title="" #}
-<t.Layout title={title} description={meta.get('description', '')}>
-  <t.NavBar />
+
+<Layout title={title} description={meta.get('description', '')}>
+  <NavBar></NavBar>
   <div class="px-4 sm:px-6 lg:px-8 pb-16 z-10 mx-auto flex justify-between
   ">
-    <t.SidebarGlobal class="hidden lg:block" />
+    <SidebarGlobal class="hidden lg:block"></SidebarGlobal>
     <main class="lg:pl-8 pt-10 2xl:mx-10 w-full max-w-full">
       <div class="Page prose">
         {{ content }}
       </div>
-      <t.PrevNext
+      <PrevNext
         class="mt-16 w-full"
         curr={nav.page}
         prev={nav.prev_page}
         next={nav.next_page}
-      />
+      ></PrevNext>
     </main>
-    <t.SidebarLocal class="hidden xl:block pl-8" />
+    <SidebarLocal class="hidden xl:block pl-8"></SidebarLocal>
   </div>
-  <t.Menu />
-  <t.Footer />
-  {% if nav.search -%}
-    <t.SearchDialog id="search-dialog" />
-  {%- endif %}
-</t.Layout>
+  <Menu></Menu>
+  <Footer></Footer>
+</Layout>

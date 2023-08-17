@@ -36,6 +36,7 @@ class THasPaths:
     COMPONENTS_FOLDER: str
     CONTENT_FOLDER: str
     STATIC_FOLDER: str
+    THEME_FOLDER: str
     BUILD_FOLDER: str
     CACHE_FOLDER: str
 
@@ -51,9 +52,9 @@ class THasPaths:
     cache_folder: "Path"
     temp_folder: "Path"
     static_url: str
+    theme_folder: "t.Optional[Path]"
     components_folder: "t.Optional[Path]"
     add_ons: list[t.Any]
-    search: bool
     nav: "Nav"
     server: "LiveReloadServer"
 

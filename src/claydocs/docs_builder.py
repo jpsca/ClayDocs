@@ -1,10 +1,8 @@
-import json
 import re
 import shutil
 import typing as t
 
-from .indexer import index_pages
-from .utils import is_debug, logger, print_random_messages
+from .utils import logger, print_random_messages
 
 if t.TYPE_CHECKING:
     from pathlib import Path
@@ -47,18 +45,6 @@ class DocsBuilder(THasRender if t.TYPE_CHECKING else object):
 
             logger.info(f"Writing {filename}")
             filepath.write_text(html)
-            if self.search:
-                page.html = html
-                pages.append(page)
-
-        if self.search:
-            logger.info("Indexing content...")
-            data = index_pages(pages)
-            pages = []
-            indent = 2 if is_debug() else None
-            for lang, langdata in data.items():
-                filepath = self.build_folder_static / f"search-{lang}.json"
-                filepath.write_text(json.dumps(langdata, indent=indent))
 
         logger.info("...")
         print_random_messages()

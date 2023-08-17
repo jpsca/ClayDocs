@@ -1,4 +1,3 @@
-import json
 import shutil
 import textwrap
 import typing as t
@@ -12,8 +11,7 @@ from jinjax.catalog import Catalog
 
 from .jinja_code import CodeExtension
 from .jinja_markdown import MarkdownExtension
-from .indexer import index_pages
-from .utils import is_debug, load_markdown_metadata, logger, timestamp, widont
+from .utils import load_markdown_metadata, logger, timestamp, widont
 
 if t.TYPE_CHECKING:
     from .utils import Page, THasPaths
@@ -166,6 +164,10 @@ class DocsRender(THasPaths if t.TYPE_CHECKING else object):
         else:
             logger.debug("Missing components folder")
 
+        if self.theme_folder:
+            logger.debug(f"Adding theme folder: {self.theme_folder}")
+            catalog.add_folder(self.theme_folder)
+
         for module in self.add_ons:
             logger.debug(f"Adding add-on {module}")
             catalog.add_module(module)
@@ -186,7 +188,6 @@ class DocsRender(THasPaths if t.TYPE_CHECKING else object):
         content = f"<!--startpage-->{html}<!--endpage-->"
 
         nav = self.nav.get_page_nav(page)
-        nav.search = self.search
         nav.page_toc = self.nav._get_page_toc(self.markdowner.toc_tokens)  # type: ignore
         component = meta.get("component", self.DEFAULT_COMPONENT)
         meta.setdefault("title", nav.page.title)
@@ -205,10 +206,9 @@ class DocsRender(THasPaths if t.TYPE_CHECKING else object):
             .replace("</code>", "</code>{% endraw %}")
         )
 
-    def cache_pages(self, build_index=True) -> None:
+    def cache_pages(self) -> None:
         shutil.rmtree(self.cache_folder, ignore_errors=True)
         self.cache_folder.mkdir()
-        pages: "list[Page]" = []
 
         for url in self.nav.pages:
             page = self.nav.get_page(url)
@@ -224,17 +224,6 @@ class DocsRender(THasPaths if t.TYPE_CHECKING else object):
             html = self.render_page(page)
             filepath.write_text(html)
             page.cache_path = filepath
-            if build_index:
-                page.html = html
-                pages.append(page)
-
-        if build_index:
-            data = index_pages(pages)
-            pages = []
-            indent = 2 if is_debug() else None
-            for lang, langdata in data.items():
-                filepath = self.static_folder / f"search-{lang}.json"
-                filepath.write_text(json.dumps(langdata, indent=indent))
 
     def get_cached_page(self, url: str) -> str:
         page = self.nav.get_page(url)
@@ -244,4 +233,4 @@ class DocsRender(THasPaths if t.TYPE_CHECKING else object):
 
     def refresh(self, src_path: str) -> None:
         if src_path.endswith((".mdx", ".jinja")):
-            self.cache_pages(build_index=self.search)
+            self.cache_pages()

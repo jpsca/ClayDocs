@@ -93,7 +93,6 @@ class LiveReloadServer(socketserver.ThreadingMixIn, wsgiref.simple_server.WSGISe
         path = str(path_to_watch.absolute())
         if path in self.watch_refs:
             return
-        print(path)
 
         def callback(event):
             if event.is_directory:

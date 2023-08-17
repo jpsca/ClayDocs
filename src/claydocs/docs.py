@@ -22,11 +22,12 @@ class Docs(DocsBuilder, DocsRender, DocsServer):
     COMPONENTS_FOLDER = "components"
     CONTENT_FOLDER = "content"
     STATIC_FOLDER = "static"
+    THEME_FOLDER = "theme"
     BUILD_FOLDER = "build"
     CACHE_FOLDER = ".cache"
     STATIC_URL = "static"
     THUMBNAILS_URL = "thumbnails"
-    DEFAULT_COMPONENT = "t.Page"
+    DEFAULT_COMPONENT = "Page"
 
     def __init__(
         self,
@@ -36,7 +37,6 @@ class Docs(DocsBuilder, DocsRender, DocsServer):
         root: "t.Union[str,Path]" = "./",
         site_url: str = "/",
         default: str = DEFAULT_LANG,
-        search: bool = True,
         add_ons: "t.Optional[list[t.Any]]" = None,
         globals: "t.Optional[dict[str,t.Any]]" = None,
         filters: "t.Optional[dict[str,t.Any]]" = None,
@@ -65,6 +65,11 @@ class Docs(DocsBuilder, DocsRender, DocsServer):
             logger.warning(f"{self.components_folder} is not a folder")
             self.components_folder = None
 
+        theme_folder = (root / self.THEME_FOLDER).resolve()
+        if theme_folder.exists():
+            self.theme_folder = theme_folder
+            logger.debug(f"theme_folder is {theme_folder}")
+
         self.cache_folder = (root / self.CACHE_FOLDER).resolve()
         logger.debug(f"cache_folder is {self.cache_folder}")
 
@@ -85,8 +90,6 @@ class Docs(DocsBuilder, DocsRender, DocsServer):
             default=default,
         )
 
-        self.search = search
-
         self.__init_renderer__(
             globals=globals,
             filters=filters,
@@ -95,13 +98,14 @@ class Docs(DocsBuilder, DocsRender, DocsServer):
             md_extensions=md_extensions,
             md_ext_config=md_ext_config,
         )
-        self.__init_server__()
 
     def run(self) -> None:
         def sigterm_handler(_, __):
             raise SystemExit(1)
 
         signal(SIGTERM, sigterm_handler)
+
+        self.__init_server__()
 
         try:
             py, *sysargs = sys.argv
@@ -112,21 +116,16 @@ class Docs(DocsBuilder, DocsRender, DocsServer):
                 self.cmd_serve()
             elif cmd == "build":
                 self.cmd_build()
-            elif cmd == "index":
-                self.cmd_index()
         finally:
             shutil.rmtree(self.temp_folder, ignore_errors=True)
             sys.stderr.write("\n")
 
     def cmd_serve(self):
-        self.cache_pages(build_index=self.search)
+        self.cache_pages()
         self.serve()
 
     def cmd_build(self):
         self.build()
-
-    def cmd_index(self):
-        self.cache_pages(build_index=True)
 
     def cmd_help(self, py: str):
         print("\nValid commands:")

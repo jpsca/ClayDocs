@@ -23,7 +23,7 @@
     </svg>
   </div>
 
-  <t.Dropdown>
+  <Dropdown>
   {% for lang in nav.languages -%}
     <a href="{{ lang.url if lang.code != nav.page.lang else '' }}"
       class="{% if lang.code == nav.page.lang %}active{% endif %}"
@@ -31,6 +31,6 @@
       {{ lang.name }}
     </a>
   {% endfor %}
-  </t.Dropdown>
+  </Dropdown>
 </div>
 {% endif %}
