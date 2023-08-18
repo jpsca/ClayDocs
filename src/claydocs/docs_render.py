@@ -14,6 +14,7 @@ from .jinja_markdown import MarkdownExtension
 from .utils import load_markdown_metadata, logger, timestamp, widont
 
 if t.TYPE_CHECKING:
+    from pathlib import Path
     from .utils import Page, THasPaths
 
 
@@ -215,20 +216,29 @@ class DocsRender(THasPaths if t.TYPE_CHECKING else object):
             if not page:
                 logger.error(f"Page not found: {url}")
                 continue
+            self.cache_page(page)
 
-            filename = page.url.strip("/")
-            filename = f"{filename}/index.html".lstrip("/")
-            filepath = self.cache_folder / filename
-            filepath.parent.mkdir(parents=True, exist_ok=True)
+    def cache_page(self, page: "Page") -> None:
+        filepath = self.get_cache_path(page)
+        html = self.render_page(page)
+        filepath.write_text(html)
+        page.cache_path = filepath
 
-            html = self.render_page(page)
-            filepath.write_text(html)
-            page.cache_path = filepath
+    def get_cache_path(self, page: "Page") -> "Path":
+        filename = page.url.strip("/")
+        filename = f"{filename}/index.html".lstrip("/")
+        filepath = self.cache_folder / filename
+        filepath.parent.mkdir(parents=True, exist_ok=True)
+        return filepath
 
     def get_cached_page(self, url: str) -> str:
         page = self.nav.get_page(url)
-        if not page or not page.cache_path:
+        if not page:
             return ""
+        if not page.cache_path or not page.cache_path.exists():
+            self.cache_page(page)
+
+        assert page.cache_path
         return page.cache_path.read_text()
 
     def refresh(self, src_path: str) -> None:
