@@ -82,12 +82,12 @@ class DocsRender(THasPaths if t.TYPE_CHECKING else object):
     def __init_renderer__(
         self,
         *,
-        globals: "t.Optional[dict[str,t.Any]]" = None,
-        filters: "t.Optional[dict[str,t.Any]]" = None,
-        tests: "t.Optional[dict[str,t.Any]]" = None,
-        extensions: "t.Optional[list]" = None,
-        md_extensions: "t.Optional[list[str]]" = None,
-        md_ext_config: "t.Optional[dict[str,t.Any]]" = None,
+        globals: "dict[str, t.Any] | None" = None,
+        filters: "dict[str, t.Any] | None" = None,
+        tests: "dict[str, t.Any] | None" = None,
+        extensions: "list | None" = None,
+        md_extensions: "list[str] | None" = None,
+        md_ext_config: "dict[str, t.Any] | None" = None,
     ) -> None:
         self.__init_markdowner__(
             extensions=md_extensions or DEFAULT_MD_EXTENSIONS,
@@ -129,10 +129,10 @@ class DocsRender(THasPaths if t.TYPE_CHECKING else object):
 
     def __init_catalog__(
         self,
-        globals: "t.Optional[dict[str,t.Any]]" = None,
-        filters: "t.Optional[dict[str,t.Any]]" = None,
-        tests: "t.Optional[dict[str,t.Any]]" = None,
-        extensions: "t.Optional[list]" = None,
+        globals: "dict[str, t.Any] | None" = None,
+        filters: "dict[str, t.Any] | None" = None,
+        tests: "dict[str, t.Any] | None" = None,
+        extensions: "list | None" = None,
     ) -> None:
         _globals = globals or {}
         _globals["utils"] = UTILS.copy()

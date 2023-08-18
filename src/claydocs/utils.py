@@ -52,8 +52,8 @@ class THasPaths:
     cache_folder: "Path"
     temp_folder: "Path"
     static_url: str
-    theme_folder: "t.Optional[Path]"
-    components_folder: "t.Optional[Path]"
+    theme_folder: "Path | None"
+    components_folder: "Path | None"
     add_ons: list[t.Any]
     nav: "Nav"
     server: "LiveReloadServer"

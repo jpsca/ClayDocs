@@ -19,31 +19,30 @@ VALID_COMMANDS = ("serve", "build", "index")
 
 
 class Docs(DocsBuilder, DocsRender, DocsServer):
-    COMPONENTS_FOLDER = "components"
-    CONTENT_FOLDER = "content"
-    STATIC_FOLDER = "static"
-    THEME_FOLDER = "theme"
-    BUILD_FOLDER = "build"
-    CACHE_FOLDER = ".cache"
-    STATIC_URL = "static"
-    THUMBNAILS_URL = "thumbnails"
-    DEFAULT_COMPONENT = "Page"
-
     def __init__(
         self,
         pages: "TPages",
-        languages: "t.Optional[dict[str,str]]" = None,
+        languages: "dict[str, str] | None" = None,
         *,
-        root: "t.Union[str,Path]" = "./",
+        root: "str | Path" = "./",
         site_url: str = "/",
         default: str = DEFAULT_LANG,
-        add_ons: "t.Optional[list[t.Any]]" = None,
-        globals: "t.Optional[dict[str,t.Any]]" = None,
-        filters: "t.Optional[dict[str,t.Any]]" = None,
-        tests: "t.Optional[dict[str,t.Any]]" = None,
-        extensions: "t.Optional[list]" = None,
-        md_extensions: "t.Optional[list[str]]" = None,
-        md_ext_config: "t.Optional[dict[str,t.Any]]" = None,
+        add_ons: "list[t.Any] | None" = None,
+        globals: "dict[str,t.Any] | None" = None,
+        filters: "dict[str,t.Any] | None" = None,
+        tests: "dict[str,t.Any] | None" = None,
+        extensions: "list | None" = None,
+        md_extensions: "list[str] | None" = None,
+        md_ext_config: "dict[str, t.Any] | None" = None,
+
+        COMPONENTS_FOLDER: str = "components",
+        CONTENT_FOLDER: str = "content",
+        STATIC_FOLDER: str = "static",
+        BUILD_FOLDER: str = "build",
+        CACHE_FOLDER: str = ".cache",
+        STATIC_URL: str = "static",
+        THUMBNAILS_URL: str = "thumbnails",
+        DEFAULT_COMPONENT: str = "T.Page",
     ) -> None:
         root = Path(root).resolve()
         if root.is_file():
@@ -81,6 +80,15 @@ class Docs(DocsBuilder, DocsRender, DocsServer):
         self.temp_folder = Path(tempfile.mkdtemp())
 
         self.add_ons = add_ons or []
+
+        self.COMPONENTS_FOLDER = COMPONENTS_FOLDER
+        self.CONTENT_FOLDER = CONTENT_FOLDER
+        self.STATIC_FOLDER = STATIC_FOLDER
+        self.BUILD_FOLDER = BUILD_FOLDER
+        self.CACHE_FOLDER = CACHE_FOLDER
+        self.STATIC_URL = STATIC_URL
+        self.THUMBNAILS_URL = THUMBNAILS_URL
+        self.DEFAULT_COMPONENT = DEFAULT_COMPONENT
 
         self.nav = Nav(
             self.content_folder,

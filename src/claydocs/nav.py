@@ -10,10 +10,10 @@ from .exceptions import InvalidNav
 from .utils import Page, load_markdown_metadata, logger
 
 if t.TYPE_CHECKING:
-    TPagesBranch = t.Sequence[t.Union[str, t.Sequence]]
+    TPagesBranch = t.Sequence[str | t.Sequence]
     TPagesMultiLang = dict[str, TPagesBranch]
-    TPages = t.Union[TPagesBranch, TPagesMultiLang]
-    TStrOrPath = t.Union[str, Path]
+    TPages = TPagesBranch | TPagesMultiLang
+    TStrOrPath = str | Path
 
 
 DEFAULT_LANG = "en"
@@ -108,7 +108,7 @@ class Nav:
         )
         self._max_index[default] = len(self.urls[default]) - 1
 
-    def get_page(self, url: str) -> "t.Optional[Page]":
+    def get_page(self, url: str) -> "Page | None":
         return self.pages.get(url) \
             or self.pages.get(f"{url}/") \
             or None
@@ -277,7 +277,7 @@ class Nav:
 
             elif isinstance(item, tuple_or_list) and len(item) == 2:
                 self._index_section(
-                    tuple(item),
+                    tuple(item),  # type: ignore
                     lang=lang,
                     base_url=base_url,
                     root=root,
