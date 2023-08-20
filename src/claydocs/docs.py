@@ -38,57 +38,54 @@ class Docs(DocsBuilder, DocsRender, DocsServer):
         COMPONENTS_FOLDER: str = "components",
         CONTENT_FOLDER: str = "content",
         STATIC_FOLDER: str = "static",
+        THEME_FOLDER: str = "theme",
         BUILD_FOLDER: str = "build",
         CACHE_FOLDER: str = ".cache",
         STATIC_URL: str = "static",
         THUMBNAILS_URL: str = "thumbnails",
         DEFAULT_COMPONENT: str = "T.Page",
     ) -> None:
+        self.CACHE_FOLDER = CACHE_FOLDER
+        self.STATIC_URL = STATIC_URL
+        self.THUMBNAILS_URL = THUMBNAILS_URL
+        self.DEFAULT_COMPONENT = DEFAULT_COMPONENT
+
         root = Path(root).resolve()
         if root.is_file():
             root = root.parent
         self.root = root
         logger.debug(f"Root path is {self.root}")
 
-        self.content_folder = (root / self.CONTENT_FOLDER).resolve()
+        self.content_folder = (root / CONTENT_FOLDER).resolve()
         logger.debug(f"content_folder is {self.content_folder}")
         self.content_folder.mkdir(exist_ok=True)
 
-        self.static_folder = (root / self.STATIC_FOLDER).resolve()
+        self.static_folder = (root / STATIC_FOLDER).resolve()
         logger.debug(f"static_folder is {self.static_folder}")
         self.static_folder.mkdir(exist_ok=True)
 
-        self.components_folder = (root / self.COMPONENTS_FOLDER).resolve()
+        self.components_folder = (root / COMPONENTS_FOLDER).resolve()
         logger.debug(f"components_folder is {self.components_folder}")
         if not self.components_folder.is_dir():
             logger.warning(f"{self.components_folder} is not a folder")
             self.components_folder = None
 
-        theme_folder = (root / self.THEME_FOLDER).resolve()
+        theme_folder = (root / THEME_FOLDER).resolve()
         if theme_folder.exists():
             self.theme_folder = theme_folder
             logger.debug(f"theme_folder is {theme_folder}")
 
-        self.cache_folder = (root / self.CACHE_FOLDER).resolve()
+        self.cache_folder = (root / CACHE_FOLDER).resolve()
         logger.debug(f"cache_folder is {self.cache_folder}")
 
-        self.build_folder = (root / self.BUILD_FOLDER).resolve()
-        self.build_folder_static = self.build_folder / self.STATIC_FOLDER
+        self.build_folder = (root / BUILD_FOLDER).resolve()
+        self.build_folder_static = self.build_folder / STATIC_FOLDER
         logger.debug(f"build_folder is {self.build_folder}")
 
-        self.static_url = f"/{self.STATIC_URL.lstrip('/')}"
+        self.static_url = f"/{STATIC_URL.lstrip('/')}"
         self.temp_folder = Path(tempfile.mkdtemp())
 
         self.add_ons = add_ons or []
-
-        self.COMPONENTS_FOLDER = COMPONENTS_FOLDER
-        self.CONTENT_FOLDER = CONTENT_FOLDER
-        self.STATIC_FOLDER = STATIC_FOLDER
-        self.BUILD_FOLDER = BUILD_FOLDER
-        self.CACHE_FOLDER = CACHE_FOLDER
-        self.STATIC_URL = STATIC_URL
-        self.THUMBNAILS_URL = THUMBNAILS_URL
-        self.DEFAULT_COMPONENT = DEFAULT_COMPONENT
 
         self.nav = Nav(
             self.content_folder,
