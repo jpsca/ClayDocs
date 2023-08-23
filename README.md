@@ -1,38 +1,18 @@
 # Claydocs
 
 
-## Dev
-### Compile the theme CSS
+## WARNING ##
 
-1. Go to src/theme
-2. Install TailwindCSS: `npm install`
-2. Run `npm run build`
+1. Work in progress.
+2. Contains bugs.
+3. It is pitch black. You are likely to be eaten by a grue.
 
+---
 
-### TODO
+Still here? See https://github.com/jpsca/jinjax/blob/main/docs/docs.py for an example (the only one that exists) of use
 
-- que JinjaX busque por un diccionario { prefix: [path, ...] } en vez de un solo path ????
+## Potential
 
-- que el theme sea un modulo claydocs.theme no directamente claydocs
-
-- prefix todos los componentes del tema con `theme.`
-    Para que no hagan conflicto con el contenido o componentes de cada proyecto
-
-- Hacer que theme sea un folder opcional que se agregue bajo el prfijo `theme.`
-    Para poder compilar su css usando un proyecto vacio
-
-- Que el CSS del theme este precompilado
-    Mucho mas facil para compartir
-
-- El folder de content sea un argumento y que se auna lista de folders, por defecto ['./content']
-    Asi puedo hacer que JinjaX-Display pase una lista de las paths de componentes
-
-- La extension de los archivos de contenido tambien debe ser un argumento
-    Para poder usar "mdx"
-
-- Compilar el conteido de la página primero y luego pasarlo como __content y la metadata como __attrs al renderearea el wrapper
-    Asi claydocs puede servir el HTML de las paginas independientemente y puede integrarse con StoryBook
-
-- Hacer una URL para servir las paginas individuales
-
-- Dejar de usar tailwind typography y crear tui propia hoja de prose
+1. Become a Python replacement of [Markdoc](https://markdoc.dev/)
+2. A perfect foundation for building a [StoryBook](https://storybook.js.org/) for JinjaX
+3. Could be also used for blogging
