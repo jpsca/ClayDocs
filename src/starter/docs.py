@@ -1,5 +1,5 @@
 import jinjax_ui
-from claydocs import Docs, theme
+from claydocs import Docs
 
 
 pages = [
@@ -8,7 +8,7 @@ pages = [
 
 docs = Docs(
     pages,
-    add_ons=[theme, jinjax_ui]
+    add_ons=[jinjax_ui]
 )
 
 
