@@ -6,7 +6,7 @@ from .utils import logger, print_random_messages
 
 if t.TYPE_CHECKING:
     from pathlib import Path
-    from .utils import Page, THasRender
+    from .utils import THasRender
 
 
 RX_ABS_URL = re.compile(
@@ -24,8 +24,6 @@ class DocsBuilder(THasRender if t.TYPE_CHECKING else object):
 
         logger.info("Copying static folder...")
         self._copy_static_folder()
-
-        pages: "list[Page]" = []
 
         logger.info("Rendering pages...")
         for url in self.nav.pages:

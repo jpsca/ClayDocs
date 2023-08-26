@@ -33,8 +33,6 @@ logger.setLevel(LOGGER_LEVEL)
 
 
 class THasPaths:
-    COMPONENTS_FOLDER: str
-    CONTENT_FOLDER: str
     STATIC_FOLDER: str
     THEME_FOLDER: str
     BUILD_FOLDER: str
@@ -52,8 +50,6 @@ class THasPaths:
     cache_folder: "Path"
     temp_folder: "Path"
     static_url: str
-    theme_folder: "Path | None"
-    components_folder: "Path | None"
     add_ons: list[t.Any]
     nav: "Nav"
     server: "LiveReloadServer"

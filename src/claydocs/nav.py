@@ -9,6 +9,7 @@ from slugify import slugify
 from .exceptions import InvalidNav
 from .utils import Page, load_markdown_metadata, logger
 
+
 if t.TYPE_CHECKING:
     TPagesBranch = t.Sequence[str | t.Sequence]
     TPagesMultiLang = dict[str, TPagesBranch]
@@ -44,14 +45,14 @@ class Nav:
         self,
         content_folder: "TStrOrPath",
         pages: "TPages",
-        site_url: str,
-        languages: "dict[str, str]",
+        site_url: str = "/",
+        languages: "dict[str, str] | None" = None,
         default: str = DEFAULT_LANG,
     ) -> None:
         self.pages: dict[str, Page] = {}
+        self.languages: dict[str, Language] = {}
         self.toc: dict[str, list] = {}
         self.urls: dict[str, list[str]] = {}
-        self.languages: dict[str, Language] = {}
         self._max_index: dict[str, int] = {}
 
         self._content_folder = Path(content_folder)
@@ -62,7 +63,7 @@ class Nav:
         self.default = default
 
         if isinstance(pages, dict):
-            self._init_multi_language(pages, languages)
+            self._init_multi_language(pages, languages or {})
         else:
             self._init_single_language(pages, default)
 
@@ -109,9 +110,7 @@ class Nav:
         self._max_index[default] = len(self.urls[default]) - 1
 
     def get_page(self, url: str) -> "Page | None":
-        return self.pages.get(url) \
-            or self.pages.get(f"{url}/") \
-            or None
+        return self.pages.get(url) or self.pages.get(f"{url}/") or None
 
     def get_page_nav(self, page: "Page") -> "PageNav":
         prev_page = self._get_prev(page.url, lang=page.lang)
@@ -300,9 +299,7 @@ class Nav:
         filepath = self._content_folder / root / item
         source, meta = load_markdown_metadata(filepath)
         title = (
-            meta.pop("title", None)
-            or self._extract_page_title(source)
-            or filepath.name
+            meta.pop("title", None) or self._extract_page_title(source) or filepath.name
         )
         slug = meta.get("slug") or item
         url = f"{base_url}{self._get_url(slug)}"

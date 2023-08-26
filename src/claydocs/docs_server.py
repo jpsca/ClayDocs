@@ -36,10 +36,8 @@ class DocsServer(THasRender if t.TYPE_CHECKING else object):
             server = self.server
             server.watch(self.content_folder)
             server.watch(self.static_folder)
-            if self.components_folder:
-                server.watch(self.components_folder)
-            if self.theme_folder:
-                server.watch(self.theme_folder)
+            for path in self.catalog.paths:
+                server.watch(path)
 
             try:
                 server.serve()

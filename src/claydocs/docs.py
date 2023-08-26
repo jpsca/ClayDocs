@@ -21,6 +21,7 @@ VALID_COMMANDS = ("serve", "build", "index")
 class Docs(DocsBuilder, DocsRender, DocsServer):
     def __init__(
         self,
+        content_folder: "str | Path",
         pages: "TPages",
         languages: "dict[str, str] | None" = None,
         *,
@@ -34,11 +35,7 @@ class Docs(DocsBuilder, DocsRender, DocsServer):
         extensions: "list | None" = None,
         md_extensions: "list[str] | None" = None,
         md_ext_config: "dict[str, t.Any] | None" = None,
-
-        COMPONENTS_FOLDER: str = "components",
-        CONTENT_FOLDER: str = "content",
         STATIC_FOLDER: str = "static",
-        THEME_FOLDER: str = "theme",
         BUILD_FOLDER: str = "build",
         CACHE_FOLDER: str = ".cache",
         STATIC_URL: str = "static",
@@ -56,24 +53,13 @@ class Docs(DocsBuilder, DocsRender, DocsServer):
         self.root = root
         logger.debug(f"Root path is {self.root}")
 
-        self.content_folder = (root / CONTENT_FOLDER).resolve()
+        self.content_folder = Path(content_folder).resolve()
         logger.debug(f"content_folder is {self.content_folder}")
         self.content_folder.mkdir(exist_ok=True)
 
         self.static_folder = (root / STATIC_FOLDER).resolve()
         logger.debug(f"static_folder is {self.static_folder}")
         self.static_folder.mkdir(exist_ok=True)
-
-        self.components_folder = (root / COMPONENTS_FOLDER).resolve()
-        logger.debug(f"components_folder is {self.components_folder}")
-        if not self.components_folder.is_dir():
-            logger.warning(f"{self.components_folder} is not a folder")
-            self.components_folder = None
-
-        theme_folder = (root / THEME_FOLDER).resolve()
-        if theme_folder.exists():
-            self.theme_folder = theme_folder
-            logger.debug(f"theme_folder is {theme_folder}")
 
         self.cache_folder = (root / CACHE_FOLDER).resolve()
         logger.debug(f"cache_folder is {self.cache_folder}")
@@ -103,6 +89,12 @@ class Docs(DocsBuilder, DocsRender, DocsServer):
             md_extensions=md_extensions,
             md_ext_config=md_ext_config,
         )
+
+    def add_folder(self, folder: "str | Path", *, prefix: str = "") -> None:
+        self.catalog.add_folder(folder, prefix=prefix)
+
+    def add_module(self, module: t.Any, *, prefix: str = "") -> None:
+        self.catalog.add_module(module, prefix=prefix)
 
     def run(self) -> None:
         def sigterm_handler(_, __):

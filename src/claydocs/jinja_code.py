@@ -39,6 +39,7 @@ class CodeExtension(Extension):
     make sure the fire the first line of code has the "base" indentation,
     meaning the indentation the rest of the code ahould considers as "not indented"
     """
+
     tags = set(["code"])
 
     def parse(self, parser: "Parser") -> "Node":
@@ -47,7 +48,7 @@ class CodeExtension(Extension):
         parser.stream.skip(1)
         args, kwargs = self._parse_args(parser)
 
-        body = parser.parse_statements(("name:endcode", ), drop_needle=True)
+        body = parser.parse_statements(("name:endcode",), drop_needle=True)
         call_node = self.call_method("_render_code", args, kwargs)
         return nodes.CallBlock(call_node, [], [], body).set_lineno(lineno)
 
@@ -56,15 +57,15 @@ class CodeExtension(Extension):
         kwargs = []
         require_comma = False
 
-        while parser.stream.current.type != 'block_end':
+        while parser.stream.current.type != "block_end":
             if require_comma:
-                parser.stream.expect('comma')
-                if parser.stream.current.type == 'block_end':
+                parser.stream.expect("comma")
+                if parser.stream.current.type == "block_end":
                     break
 
             if (
-                parser.stream.current.type == 'name'
-                and parser.stream.look().type == 'assign'
+                parser.stream.current.type == "name"
+                and parser.stream.look().type == "assign"
             ):
                 key = parser.stream.current.value
                 parser.stream.skip(2)
@@ -87,7 +88,7 @@ class CodeExtension(Extension):
         lang: "str | None" = None,
         *,
         caller: "t.Callable | None" = None,
-        **kwargs
+        **kwargs,
     ) -> str:
         if not caller:
             return ""

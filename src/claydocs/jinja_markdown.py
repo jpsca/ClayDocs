@@ -1,4 +1,3 @@
-
 import textwrap
 import typing as t
 
@@ -19,7 +18,7 @@ class MarkdownExtension(Extension):
 
     def parse(self, parser: "Parser") -> t.Union["Node", t.List["Node"]]:
         lineno = next(parser.stream).lineno
-        body = parser.parse_statements(("name:endmarkdown", ), drop_needle=True)
+        body = parser.parse_statements(("name:endmarkdown",), drop_needle=True)
         call_node = self.call_method("_render_markdown", [], [])
         return nodes.CallBlock(call_node, [], [], body).set_lineno(lineno)
 
