@@ -24,7 +24,7 @@ class Docs(DocsBuilder, DocsRender, DocsServer):
         pages: "TPages",
         *,
         root: "str | Path" = "./",
-        content_folder: "str | Path" = "content",
+        content_folder: "str | Path" = "",
         languages: "dict[str, str] | None" = None,
         default: str = DEFAULT_LANG,
         site_url: str = "/",
@@ -40,7 +40,7 @@ class Docs(DocsBuilder, DocsRender, DocsServer):
         CACHE_FOLDER: str = ".cache",
         STATIC_URL: str = "static",
         THUMBNAILS_URL: str = "thumbnails",
-        DEFAULT_COMPONENT: str = "T.Page",
+        DEFAULT_COMPONENT: str = "Page",
     ) -> None:
         self.CACHE_FOLDER = CACHE_FOLDER
         self.STATIC_URL = STATIC_URL
@@ -53,7 +53,10 @@ class Docs(DocsBuilder, DocsRender, DocsServer):
         self.root = root
         logger.debug(f"Root path is {self.root}")
 
-        self.content_folder = Path(content_folder).resolve()
+        if content_folder:
+            self.content_folder = Path(content_folder).resolve()
+        else:
+            self.content_folder = self.root / "content"
         logger.debug(f"content_folder is {self.content_folder}")
         self.content_folder.mkdir(exist_ok=True)
 
@@ -80,6 +83,7 @@ class Docs(DocsBuilder, DocsRender, DocsServer):
             languages=languages or {},
             default=default,
         )
+        print("nav", self.nav.pages)
 
         self.__init_renderer__(
             globals=globals,
