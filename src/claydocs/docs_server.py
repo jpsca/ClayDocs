@@ -1,4 +1,5 @@
 import typing as t
+from pathlib import Path
 
 import jinja2
 
@@ -37,7 +38,7 @@ class DocsServer(THasRender if t.TYPE_CHECKING else object):
             server.watch(self.content_folder)
             server.watch(self.static_folder)
             for path in self.catalog.paths:
-                server.watch(path)
+                server.watch(Path(path))
 
             try:
                 server.serve()

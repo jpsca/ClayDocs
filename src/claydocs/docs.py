@@ -21,13 +21,13 @@ VALID_COMMANDS = ("serve", "build", "index")
 class Docs(DocsBuilder, DocsRender, DocsServer):
     def __init__(
         self,
-        content_folder: "str | Path",
         pages: "TPages",
-        languages: "dict[str, str] | None" = None,
         *,
         root: "str | Path" = "./",
-        site_url: str = "/",
+        content_folder: "str | Path" = "content",
+        languages: "dict[str, str] | None" = None,
         default: str = DEFAULT_LANG,
+        site_url: str = "/",
         add_ons: "list[t.Any] | None" = None,
         globals: "dict[str,t.Any] | None" = None,
         filters: "dict[str,t.Any] | None" = None,
