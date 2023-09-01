@@ -1,4 +1,5 @@
 import json
+import os
 import re
 import typing as t
 from dataclasses import asdict, dataclass
@@ -309,7 +310,7 @@ class Nav:
         self.pages[url] = Page(
             lang=lang,
             url=url,
-            filename=f"{root}/{item}",
+            filename=f"{root}/{item}".strip("/"),
             title=title,
             index=index,
             section=section_title,
@@ -436,3 +437,27 @@ class Nav:
                 indent=2,
             )
             logger.debug(f"self.{name}:\n{log_data}\n")
+
+
+INDEX = "index.mdx"
+
+
+def get_pages_in_folder(path: "TStrOrPath") -> "TPages":
+    def recursive_listdir(path, prefix=""):
+        items = []
+        for item_name in sorted(os.listdir(path)):
+            item_prefixed = os.path.join(prefix, item_name)
+            item_path = os.path.join(path, item_name)
+            if os.path.isfile(item_path):
+                if item_name.endswith(".mdx"):
+                    items.append(item_prefixed)
+            else:
+                item = recursive_listdir(item_path, prefix=item_prefixed)
+                items.append(item)
+
+        if INDEX in items:
+            items.remove(INDEX)
+            items.insert(0, INDEX)
+        return [os.path.basename(path), items]
+
+    return recursive_listdir(str(path))[1]

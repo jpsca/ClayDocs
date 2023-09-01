@@ -83,7 +83,6 @@ class Docs(DocsBuilder, DocsRender, DocsServer):
             languages=languages or {},
             default=default,
         )
-        print("nav", self.nav.pages)
 
         self.__init_renderer__(
             globals=globals,
@@ -93,6 +92,7 @@ class Docs(DocsBuilder, DocsRender, DocsServer):
             md_extensions=md_extensions,
             md_ext_config=md_ext_config,
         )
+        print(self.nav.pages)
 
     def add_folder(self, folder: "str | Path", *, prefix: str = "") -> None:
         self.catalog.add_folder(folder, prefix=prefix)
