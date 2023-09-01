@@ -45,7 +45,8 @@ class Nav:
         self,
         content_folder: "TStrOrPath",
         pages: "TPages",
-        site_url: str = "/",
+        *,
+        site_url: str = "",
         languages: "dict[str, str] | None" = None,
         default: str = DEFAULT_LANG,
     ) -> None:
