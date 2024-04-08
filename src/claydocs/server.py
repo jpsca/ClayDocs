@@ -48,7 +48,7 @@ SCRIPT_TEMPLATE = (HERE / "livereload.js").read_text()
 rx_index = re.compile(r"/index$", re.IGNORECASE)
 
 
-class LiveReloadServer(socketserver.ThreadingMixIn, wsgiref.simple_server.WSGIServer):
+class LiveReloadServer(socketserver.ThreadingMixIn, wsgiref.simple_server.WSGIServer,):
     daemon_threads = True
     poll_response_timeout = 60
 
