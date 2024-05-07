@@ -1,12 +1,9 @@
 import re
 import shutil
 import typing as t
+from pathlib import Path
 
-from .utils import logger, print_random_messages
-
-if t.TYPE_CHECKING:
-    from pathlib import Path
-    from .utils import THasRender
+from .utils import THasRender, logger, print_random_messages
 
 
 RX_ABS_URL = re.compile(
@@ -95,7 +92,7 @@ class DocsBuilder(THasRender if t.TYPE_CHECKING else object):
 
         return url
 
-    def _download_url(self, url: str, filepath: "Path") -> None:
+    def _download_url(self, url: str, filepath: Path) -> None:
         logger.debug(f"Downloading {url}...")
         sf = self.server.application.find_file(url)
         if sf is None:

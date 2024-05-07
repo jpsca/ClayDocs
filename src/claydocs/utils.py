@@ -4,8 +4,9 @@ import re
 import time
 import typing as t
 from dataclasses import dataclass, field
+from pathlib import Path
 
-import jinjax  # noqa
+import jinjax
 import yaml
 
 from .exceptions import InvalidFrontMatter
@@ -16,8 +17,6 @@ except ImportError:  # pragma: no cover
     from yaml import SafeLoader  # type: ignore
 
 if t.TYPE_CHECKING:
-    from pathlib import Path
-    from jinjax.catalog import Catalog
     from .nav import Nav
     from .server import LiveReloadServer
 
@@ -32,42 +31,6 @@ logger = logging.getLogger(LOGGER_NAME)
 logger.setLevel(LOGGER_LEVEL)
 
 
-class THasPaths:
-    STATIC_FOLDER: str
-    THEME_FOLDER: str
-    BUILD_FOLDER: str
-    CACHE_FOLDER: str
-
-    STATIC_URL: str
-    THUMBNAILS_URL: str
-    DEFAULT_COMPONENT: str
-
-    root: "Path"
-    content_folder: "Path"
-    static_folder: "Path"
-    build_folder: "Path"
-    build_folder_static: "Path"
-    cache_folder: "Path"
-    temp_folder: "Path"
-    static_url: str
-    add_ons: list[t.Any]
-    nav: "Nav"
-    server: "LiveReloadServer"
-
-
-class THasRender(THasPaths):
-    catalog: "Catalog"
-
-    def render_page(self, page: "Page", **kw) -> str:  # type: ignore
-        ...
-
-    def get_cached_page(self, url: str, **kw) -> str:  # type: ignore
-        ...
-
-    def refresh(self, event) -> None:
-        ...
-
-
 @dataclass
 class Page:
     lang: str = ""
@@ -78,7 +41,43 @@ class Page:
     section: str = ""
     meta: dict = field(default_factory=dict)
     html: str = ""
-    cache_path: "Path | None" = None
+    cache_path: Path | None = None
+
+
+class THasPaths:
+    STATIC_FOLDER: str
+    THEME_FOLDER: str
+    BUILD_FOLDER: str
+    CACHE_FOLDER: str
+
+    STATIC_URL: str
+    THUMBNAILS_URL: str
+    DEFAULT_COMPONENT: str
+
+    root: Path
+    content_folder: Path
+    static_folder: Path
+    build_folder: Path
+    build_folder_static: Path
+    cache_folder: Path
+    temp_folder: Path
+    static_url: str
+    add_ons: list[t.Any]
+    nav: "Nav"
+    server: "LiveReloadServer"
+
+
+class THasRender(THasPaths):
+    catalog: jinjax.Catalog
+
+    def render_page(self, page: Page, **kwargs) -> str:  # type: ignore
+        ...
+
+    def get_cached_page(self, url: str, **kwargs) -> str:  # type: ignore
+        ...
+
+    def refresh(self, event) -> None:
+        ...
 
 
 def is_debug():
@@ -89,7 +88,7 @@ def timestamp() -> int:
     return round(time.monotonic() * 1000)
 
 
-def load_markdown_metadata(filepath: "Path") -> tuple[str, dict]:
+def load_markdown_metadata(filepath: Path) -> tuple[str, dict]:
     source = filepath.read_text().lstrip()
     if not source.startswith(META_START):
         return source, {}

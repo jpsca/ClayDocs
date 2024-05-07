@@ -3,7 +3,7 @@ import re
 from html.parser import HTMLParser
 
 
-TSections = dict[str, dict[str, str]]
+TDoc = dict[str, str]
 
 START_PAGE = "startpage"
 END_PAGE = "endpage"
@@ -47,9 +47,7 @@ IGNORE_TAG_AND_CONTENTS = (
     "video",
 )
 
-TO_DIV_TAGS = (
-    "details",
-)
+TO_DIV_TAGS = ("details",)
 
 HEADER_TAGS = ("h1", "h2", "h3", "h4", "h5", "h6")
 PRE_TAG = "pre"
@@ -77,13 +75,31 @@ ID_ATTR = "id"
 
 rx_multiple_spaces = re.compile(r"\s+")
 rx_non_text = re.compile(
-    r"[^\w./_\-]|\s[._-]+|[._-]+\s|[._-]+$|^[._-]+|\s/\s",
-    re.UNICODE | re.IGNORECASE
+    r"[^\w./_\-]|\s[._-]+|[._-]+\s|[._-]+$|^[._-]+|\s/\s", re.UNICODE | re.IGNORECASE
 )
 
 
+def make_doc(
+    *,
+    id: str,
+    title: str,
+    body: str = "",
+    raw: str = "",
+    parent: str = "",
+    loc: str = "",
+) -> TDoc:
+    return {
+        "id": id,
+        "title": title,
+        "body": body,
+        "raw": raw,
+        "parent": parent,
+        "loc": loc,
+    }
+
+
 class TextExtractor(HTMLParser):
-    sections: TSections
+    docs: list[TDoc]
 
     _capture: bool = True
     _in_page: bool = False
@@ -98,18 +114,18 @@ class TextExtractor(HTMLParser):
     _title: list[str]
     _body: list[str]
     _raw: list[str]
-    _uid: int
+    _id: int
 
     def __init__(self, page_title: str = "", base_loc: str = ""):
         super().__init__()
-        self.sections = {}
+        self.docs = []
         self._page_title = page_title
         self._base_loc = base_loc
         self._loc = ""
         self._title = []
         self._body = []
         self._raw = []
-        self._uid = 1
+        self._id = 1
 
     def handle_starttag(self, tag: str, attrs: list):
         if not (self._in_page and self._capture):
@@ -228,22 +244,25 @@ class TextExtractor(HTMLParser):
             return
 
         loc = f"{self._base_loc}#{self._loc}"
-        self.sections[str(self._uid)] = {
-            "parent": parent,
-            "title": title,
-            "body": body,
-            "raw": raw,
-            "loc": loc
-        }
-        self._uid += 1
+        self.docs.append(
+            make_doc(
+                id=str(self._id),
+                parent=parent,
+                title=title,
+                body=body,
+                raw=raw,
+                loc=loc,
+            )
+        )
+        self._id += 1
 
     def close(self):
         self.save_section()
         super().close()
 
 
-def extract_sections(html: str, loc: str, title: str) -> TSections:
+def extract_docs(html: str, loc: str, title: str) -> list[TDoc]:
     parser = TextExtractor(page_title=title, base_loc=loc)
     parser.feed(html)
     parser.close()
-    return parser.sections
+    return parser.docs

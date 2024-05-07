@@ -12,7 +12,7 @@ if t.TYPE_CHECKING:
 
 
 class DocsServer(THasRender if t.TYPE_CHECKING else object):
-    server: "LiveReloadServer"
+    server: LiveReloadServer
 
     def __init_server__(self) -> None:
         server = LiveReloadServer(

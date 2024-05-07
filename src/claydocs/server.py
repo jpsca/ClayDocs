@@ -12,11 +12,9 @@ from sys import exc_info
 
 import watchdog.events
 import watchdog.observers.polling
+from watchdog.observers import Observer
 
 from .utils import logger, timestamp
-
-if t.TYPE_CHECKING:
-    from watchdog.observers import ObservedWatch  # type: ignore
 
 
 DEFAULT_HOST = "0.0.0.0"
@@ -54,8 +52,8 @@ class LiveReloadServer(socketserver.ThreadingMixIn, wsgiref.simple_server.WSGISe
 
     def __init__(
         self,
-        get_page: "t.Callable",
-        refresh: "t.Callable",
+        get_page: t.Callable,
+        refresh: t.Callable,
         *,
         host: str = DEFAULT_HOST,
         port: int = DEFAULT_PORT,
@@ -82,12 +80,12 @@ class LiveReloadServer(socketserver.ThreadingMixIn, wsgiref.simple_server.WSGISe
             target=lambda: self.serve_forever(shutdown_delay)
         )
         self.observer = watchdog.observers.polling.PollingObserver()
-        self.watch_refs: "dict[str, ObservedWatch]" = {}
+        self.watch_refs: dict[str, Observer] = {}
         self.running = False
 
         super().__init__((host, port), RequestHandler, **kwargs)
 
-    def watch(self, path_to_watch: "Path", recursive: bool = True) -> None:
+    def watch(self, path_to_watch: Path, recursive: bool = True) -> None:
         """Add the 'path' to watched paths, call the function and reload
         when any file changes under it."""
         path = str(path_to_watch.absolute())
@@ -246,7 +244,7 @@ class RequestHandler(wsgiref.simple_server.WSGIRequestHandler):
     def log_request(
         self,
         code: str = "200",
-        _size: "t.Union[int, str]" = "-",
+        _size: int | str = "-",
     ) -> None:
         message = self.path
         code = str(code)

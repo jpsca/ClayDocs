@@ -6,14 +6,12 @@ import typing as t
 
 from jinja2 import nodes
 from jinja2.ext import Extension
+from jinja2.nodes import Node
+from jinja2.parser import Parser
 
 from pygments import highlight
 from pygments.lexers import get_lexer_by_name, guess_lexer
 from pygments.formatters import HtmlFormatter
-
-if t.TYPE_CHECKING:
-    from jinja2.nodes import Node
-    from jinja2.parser import Parser
 
 
 class CodeExtension(Extension):
@@ -42,7 +40,7 @@ class CodeExtension(Extension):
 
     tags = set(["code"])
 
-    def parse(self, parser: "Parser") -> "Node":
+    def parse(self, parser: Parser) -> Node:
         lineno = parser.stream.current.lineno
         # the first token is the token that started the tag.
         parser.stream.skip(1)
@@ -52,7 +50,7 @@ class CodeExtension(Extension):
         call_node = self.call_method("_render_code", args, kwargs)
         return nodes.CallBlock(call_node, [], [], body).set_lineno(lineno)
 
-    def _parse_args(self, parser: "Parser") -> tuple[list, list]:
+    def _parse_args(self, parser: Parser) -> tuple[list, list]:
         args = []
         kwargs = []
         require_comma = False
@@ -85,9 +83,9 @@ class CodeExtension(Extension):
 
     def _render_code(
         self,
-        lang: "str | None" = None,
+        lang: str | None = None,
         *,
-        caller: "t.Callable | None" = None,
+        caller: t.Callable | None = None,
         **kwargs,
     ) -> str:
         if not caller:

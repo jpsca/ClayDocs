@@ -11,16 +11,16 @@ from .exceptions import InvalidNav
 from .utils import Page, load_markdown_metadata, logger
 
 
-if t.TYPE_CHECKING:
-    TPagesBranch = t.Sequence[str | t.Sequence]
-    TPagesMultiLang = dict[str, TPagesBranch]
-    TPages = TPagesBranch | TPagesMultiLang
-    TStrOrPath = str | Path
 
+TPagesBranch = t.Sequence[str | tuple[str, "TPagesBranch"]]
+TPagesMultiLang = dict[str, TPagesBranch]
+TPages = TPagesBranch | TPagesMultiLang
+TStrOrPath = str | Path
 
 DEFAULT_LANG = "en"
 rx_markdwown_h1 = re.compile(r"(^|\n)#\s+(?P<h1>[^\n]+)(\n|$)")
 rx_html_h1 = re.compile(r"<h1>(?P<h1>.+)</h1>", re.IGNORECASE)
+
 
 
 @dataclass
@@ -44,11 +44,11 @@ class PageNav:
 class Nav:
     def __init__(
         self,
-        content_folder: "TStrOrPath",
-        pages: "TPages",
+        content_folder: TStrOrPath,
+        pages: TPages,
         *,
         site_url: str = "",
-        languages: "dict[str, str] | None" = None,
+        languages: dict[str, str] | None = None,
         default: str = DEFAULT_LANG,
     ) -> None:
         self.pages: dict[str, Page] = {}
@@ -73,8 +73,8 @@ class Nav:
 
     def _init_multi_language(
         self,
-        pages: "TPagesMultiLang",
-        languages: "dict[str, str]",
+        pages: TPagesMultiLang,
+        languages: dict[str, str],
     ) -> None:
         self.languages = self._build_languages(languages)
 
@@ -97,7 +97,7 @@ class Nav:
 
     def _init_single_language(
         self,
-        pages: "TPagesBranch",
+        pages: TPagesBranch,
         default: str,
     ) -> None:
         self.toc[default] = []
@@ -111,10 +111,10 @@ class Nav:
         )
         self._max_index[default] = len(self.urls[default]) - 1
 
-    def get_page(self, url: str) -> "Page | None":
+    def get_page(self, url: str) -> Page | None:
         return self.pages.get(url) or self.pages.get(f"{url}/") or None
 
-    def get_page_nav(self, page: "Page") -> "PageNav":
+    def get_page_nav(self, page: Page) -> PageNav:
         prev_page = self._get_prev(page.url, lang=page.lang)
         next_page = self._get_next(page.url, lang=page.lang)
         toc = self.toc[page.lang]
@@ -138,7 +138,7 @@ class Nav:
 
     # Private
 
-    def _build_languages(self, languages: "dict[str, str]") -> "dict[str, Language]":
+    def _build_languages(self, languages: dict[str, str]) -> dict[str, Language]:
         """
         Takes a dict of `code: Name` pairs and improves it with the
         root of the language content.
@@ -173,13 +173,13 @@ class Nav:
 
     def _index_pages(
         self,
-        pages: "TPages",
+        pages: TPagesBranch,
         *,
         lang: str,
         base_url: str,
         root: str,
         section_title: str = "",
-        section: "list",
+        section: list,
     ) -> None:
         """
         Recursively process the pages list to build the table of contents
@@ -210,13 +210,13 @@ class Nav:
         # self.toc
         {
             LANG: [
-                ["/index", "Home", null],
+                ["/index", "Home"],
                 [null, "Guide", [
-                    ["/guide/index", "The Guide", null],
-                    ["/guide/arguments", "The Arguments", null],
-                    ["/guide/extra", "Extra arguments", null],
+                    ["/guide/index", "The Guide"],
+                    ["/guide/arguments", "The Arguments"],
+                    ["/guide/extra", "Extra arguments"],
                 ]],
-                ["/faq", "FAQ", null],
+                ["/faq", "FAQ"],
             ],
             ...
         }
@@ -263,8 +263,6 @@ class Nav:
         }
         ```
         """
-        tuple_or_list = (tuple, list)
-
         for item in pages:
             if isinstance(item, str):
                 self._index_page(
@@ -276,7 +274,7 @@ class Nav:
                     section=section,
                 )
 
-            elif isinstance(item, tuple_or_list) and len(item) == 2:
+            elif isinstance(item, (tuple, list)) and len(item) == 2:
                 self._index_section(
                     tuple(item),  # type: ignore
                     lang=lang,
@@ -296,7 +294,7 @@ class Nav:
         base_url: str,
         root: str,
         section_title: str,
-        section: "list",
+        section: list,
     ) -> None:
         filepath = self._content_folder / root / item
         source, meta = load_markdown_metadata(filepath)
@@ -321,12 +319,12 @@ class Nav:
 
     def _index_section(
         self,
-        item: "tuple[str, TPagesBranch]",
+        item: tuple[str, TPagesBranch],
         *,
         lang: str,
         base_url: str,
         root: str,
-        section: "list",
+        section: list,
     ) -> None:
         section_title, subpages = item
 
@@ -353,7 +351,7 @@ class Nav:
 
         return ""
 
-    def _get_prev(self, url: str, lang: str = "") -> "Page":
+    def _get_prev(self, url: str, lang: str = "") -> Page:
         index = self.pages[url].index
         if index <= 0:
             return Page()
@@ -361,7 +359,7 @@ class Nav:
         prev_url = self.urls[lang][index - 1]
         return self.pages[prev_url]
 
-    def _get_next(self, url: str, lang: str = "") -> "Page":
+    def _get_next(self, url: str, lang: str = "") -> Page:
         lang = lang or self.default
         index = self.pages[url].index
         if index >= self._max_index[lang]:
@@ -442,7 +440,7 @@ class Nav:
 INDEX = "index.mdx"
 
 
-def get_pages_in_folder(path: "TStrOrPath") -> "TPages":
+def get_pages_in_folder(path: TStrOrPath) -> TPages:
     def recursive_listdir(path, prefix=""):
         items = []
         for item_name in sorted(os.listdir(path)):

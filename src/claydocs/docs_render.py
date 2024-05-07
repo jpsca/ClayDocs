@@ -1,10 +1,13 @@
+import re
 import shutil
 import textwrap
+import uuid
 import typing as t
 
 import inflection
 import markdown
 from image_processing import ImageProcessing
+from markupsafe import Markup
 from pymdownx import emoji
 from markdown.extensions.toc import slugify_unicode  # type: ignore
 from jinjax.catalog import Catalog
@@ -13,9 +16,8 @@ from .jinja_code import CodeExtension
 from .jinja_markdown import MarkdownExtension
 from .utils import load_markdown_metadata, logger, timestamp, widont
 
-if t.TYPE_CHECKING:
-    from pathlib import Path
-    from .utils import Page, THasPaths
+from pathlib import Path
+from .utils import Page, THasPaths
 
 
 DEFAULT_MD_EXTENSIONS = [
@@ -78,17 +80,22 @@ DEFAULT_EXTENSIONS = [
     MarkdownExtension,
 ]
 
+RX_CODE = re.compile(
+    r"<code[^>]*>(.*?)</code>",
+    re.IGNORECASE | re.DOTALL
+)
+
 
 class DocsRender(THasPaths if t.TYPE_CHECKING else object):
     def __init_renderer__(
         self,
         *,
-        globals: "dict[str, t.Any] | None" = None,
-        filters: "dict[str, t.Any] | None" = None,
-        tests: "dict[str, t.Any] | None" = None,
-        extensions: "list | None" = None,
-        md_extensions: "list[str] | None" = None,
-        md_ext_config: "dict[str, t.Any] | None" = None,
+        globals: dict[str, t.Any] | None = None,
+        filters: dict[str, t.Any] | None = None,
+        tests: dict[str, t.Any] | None = None,
+        extensions: list | None = None,
+        md_extensions: list[str] | None = None,
+        md_ext_config: dict[str, t.Any] | None = None,
     ) -> None:
         self.__init_markdowner__(
             extensions=md_extensions or DEFAULT_MD_EXTENSIONS,
@@ -130,10 +137,10 @@ class DocsRender(THasPaths if t.TYPE_CHECKING else object):
 
     def __init_catalog__(
         self,
-        globals: "dict[str, t.Any] | None" = None,
-        filters: "dict[str, t.Any] | None" = None,
-        tests: "dict[str, t.Any] | None" = None,
-        extensions: "list | None" = None,
+        globals: dict[str, t.Any] | None = None,
+        filters: dict[str, t.Any] | None = None,
+        tests: dict[str, t.Any] | None = None,
+        extensions: list | None = None,
     ) -> None:
         _globals = globals or {}
         _globals["utils"] = UTILS.copy()
@@ -163,19 +170,20 @@ class DocsRender(THasPaths if t.TYPE_CHECKING else object):
             logger.debug(f"Adding add-on {module}")
             catalog.add_module(module)
 
+        catalog.jinja_env.autoescape = False
         self.catalog = catalog
 
-    def render(self, url: str, **kw) -> str:
+    def render(self, url: str, **kwargs) -> str:
         page = self.nav.get_page(url)
         if not page:
             return ""
-        return self.render_page(page, **kw)
+        return self.render_page(page, **kwargs)
 
-    def render_page(self, page: "Page", **kw) -> str:
+    def render_page(self, page: Page, **kwargs) -> str:
         filepath = self.content_folder / page.filename.strip("/")
         logger.debug(f"Rendering `{filepath}`")
         md_source, meta = load_markdown_metadata(filepath)
-        html = self.render_markdown(md_source)
+        html, code_blocks = self.render_markdown(md_source)
         content = f"<!--startpage-->{html}<!--endpage-->"
 
         nav = self.nav.get_page_nav(page)
@@ -183,19 +191,36 @@ class DocsRender(THasPaths if t.TYPE_CHECKING else object):
         component = meta.get("component", self.DEFAULT_COMPONENT)
         meta.setdefault("title", nav.page.title)
 
-        source = f'<{component} title="{nav.page.title}">{content}</{component}>'
+        jx_source = f'<{component} title="{nav.page.title}">{content}</{component}>'
+
         self.catalog.jinja_env.globals["nav"] = nav
         self.catalog.jinja_env.globals["meta"] = meta
         self.catalog.jinja_env.globals["utils"]["timestamp"] = timestamp()
-        return self.catalog.render(component, __source=source, **kw)
 
-    def render_markdown(self, source: str) -> str:
+        try:
+            return self.catalog.render(
+                component,
+                __source=jx_source,
+                __globals=code_blocks,
+                **kwargs
+            )
+        except Exception:
+            print(jx_source)
+            raise
+
+    def render_markdown(self, source: str) -> tuple[str, dict[str, t.Any]]:
         source = textwrap.dedent(source.strip("\n"))
-        return (
-            self.markdowner.convert(source)
-            .replace("<code", "{% raw %}<code")
-            .replace("</code>", "</code>{% endraw %}")
-        )
+        html = self.markdowner.convert(source)
+        code_blocks = {}
+
+        def generate_uuid(match):
+            placeholder = f"code_{uuid.uuid4().hex}"
+            code_blocks[placeholder] = Markup(match.group())
+            return "{{" + placeholder + "}}"
+
+        html = re.sub(RX_CODE, generate_uuid, html)
+        html = html.replace("<pre><span></span>", "<pre>")
+        return html, code_blocks
 
     def cache_pages(self) -> None:
         shutil.rmtree(self.cache_folder, ignore_errors=True)
@@ -208,13 +233,13 @@ class DocsRender(THasPaths if t.TYPE_CHECKING else object):
                 continue
             self.cache_page(page)
 
-    def cache_page(self, page: "Page") -> None:
+    def cache_page(self, page: Page) -> None:
         filepath = self.get_cache_path(page)
         html = self.render_page(page)
         filepath.write_text(html)
         page.cache_path = filepath
 
-    def get_cache_path(self, page: "Page") -> "Path":
+    def get_cache_path(self, page: Page) -> "Path":
         filename = page.url.strip("/")
         filename = f"{filename}/index.html".lstrip("/")
         filepath = self.cache_folder / filename
