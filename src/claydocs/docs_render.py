@@ -1,19 +1,15 @@
-import re
 import shutil
 import textwrap
-import uuid
 import typing as t
 
 import inflection
 import markdown
 from image_processing import ImageProcessing
-from markupsafe import Markup
 from pymdownx import emoji
 from markdown.extensions.toc import slugify_unicode  # type: ignore
 from jinjax.catalog import Catalog
 
 from .jinja_code import CodeExtension
-from .jinja_markdown import MarkdownExtension
 from .utils import load_markdown_metadata, logger, timestamp, widont
 
 from pathlib import Path
@@ -77,13 +73,7 @@ UTILS = {
 DEFAULT_EXTENSIONS = [
     "jinja2.ext.loopcontrols",
     CodeExtension,
-    MarkdownExtension,
 ]
-
-RX_CODE = re.compile(
-    r"<code[^>]*>(.*?)</code>",
-    re.IGNORECASE | re.DOTALL
-)
 
 
 class DocsRender(THasPaths if t.TYPE_CHECKING else object):
@@ -149,6 +139,7 @@ class DocsRender(THasPaths if t.TYPE_CHECKING else object):
         _filters = filters or {}
         for name, func in UTILS.items():
             _filters[f"utils.{name}"] = func
+        _filters["markdown"] = self.render_markdown
 
         _tests = tests or {}
 
@@ -183,7 +174,7 @@ class DocsRender(THasPaths if t.TYPE_CHECKING else object):
         filepath = self.content_folder / page.filename.strip("/")
         logger.debug(f"Rendering `{filepath}`")
         md_source, meta = load_markdown_metadata(filepath)
-        html, code_blocks = self.render_markdown(md_source)
+        html = self.render_markdown(md_source)
         content = f"<!--startpage-->{html}<!--endpage-->"
 
         nav = self.nav.get_page_nav(page)
@@ -198,29 +189,29 @@ class DocsRender(THasPaths if t.TYPE_CHECKING else object):
         self.catalog.jinja_env.globals["utils"]["timestamp"] = timestamp()
 
         try:
-            return self.catalog.render(
-                component,
-                __source=jx_source,
-                __globals=code_blocks,
-                **kwargs
-            )
+            return self.catalog.render(component, __source=jx_source, **kwargs)
         except Exception:
             print(jx_source)
             raise
 
-    def render_markdown(self, source: str) -> tuple[str, dict[str, t.Any]]:
+    def render_markdown(self, source: str) -> str:
         source = textwrap.dedent(source.strip("\n"))
+        source = self.anti_escape(source)
         html = self.markdowner.convert(source)
-        code_blocks = {}
-
-        def generate_uuid(match):
-            placeholder = f"code_{uuid.uuid4().hex}"
-            code_blocks[placeholder] = Markup(match.group())
-            return "{{" + placeholder + "}}"
-
-        html = re.sub(RX_CODE, generate_uuid, html)
         html = html.replace("<pre><span></span>", "<pre>")
-        return html, code_blocks
+        # html = html.replace("{", "&#123;")
+        # html = html.replace("}", "&#125;")
+        return html
+
+    def anti_escape(self, s: str, /) -> str:
+        return (
+            s
+            .replace("&amp;", "&")
+            .replace("&gt;", ">")
+            .replace("&lt;", "<")
+            .replace("&#39;", "'")
+            .replace("&#34;", '"')
+        )
 
     def cache_pages(self) -> None:
         shutil.rmtree(self.cache_folder, ignore_errors=True)
