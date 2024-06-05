@@ -199,8 +199,6 @@ class DocsRender(THasPaths if t.TYPE_CHECKING else object):
         source = self.anti_escape(source)
         html = self.markdowner.convert(source)
         html = html.replace("<pre><span></span>", "<pre>")
-        # html = html.replace("{", "&#123;")
-        # html = html.replace("}", "&#125;")
         return html
 
     def anti_escape(self, s: str, /) -> str:
@@ -214,8 +212,9 @@ class DocsRender(THasPaths if t.TYPE_CHECKING else object):
         )
 
     def cache_pages(self) -> None:
-        shutil.rmtree(self.cache_folder, ignore_errors=True)
-        self.cache_folder.mkdir()
+        if self.cache:
+            shutil.rmtree(self.cache_folder, ignore_errors=True)
+            self.cache_folder.mkdir()
 
         for url in self.nav.pages:
             page = self.nav.get_page(url)
@@ -224,11 +223,13 @@ class DocsRender(THasPaths if t.TYPE_CHECKING else object):
                 continue
             self.cache_page(page)
 
-    def cache_page(self, page: Page) -> None:
-        filepath = self.get_cache_path(page)
+    def cache_page(self, page: Page) -> str:
         html = self.render_page(page)
-        filepath.write_text(html)
-        page.cache_path = filepath
+        if self.cache:
+            filepath = self.get_cache_path(page)
+            filepath.write_text(html)
+            page.cache_path = filepath
+        return html
 
     def get_cache_path(self, page: Page) -> "Path":
         filename = page.url.strip("/")
@@ -242,11 +243,11 @@ class DocsRender(THasPaths if t.TYPE_CHECKING else object):
         if not page:
             return ""
         if not page.cache_path or not page.cache_path.exists():
-            self.cache_page(page)
-
-        assert page.cache_path
-        return page.cache_path.read_text()
+            return self.cache_page(page)
+        else:
+            assert page.cache_path
+            return page.cache_path.read_text()
 
     def refresh(self, src_path: str) -> None:
-        if src_path.endswith((".mdx", ".jinja")):
+        if self.cache and src_path.endswith((".mdx", ".jinja")):
             self.cache_pages()

@@ -29,6 +29,7 @@ class Docs(DocsBuilder, DocsRender, DocsServer):
         default: str = DEFAULT_LANG,
         site_url: str = "/",
         search: bool = True,
+        cache: bool = True,
         add_ons: list[t.Any] | None = None,
         globals: dict[str, t.Any] | None = None,
         filters: dict[str, t.Any] | None = None,
@@ -65,8 +66,10 @@ class Docs(DocsBuilder, DocsRender, DocsServer):
         self.static_folder = (root / STATIC_FOLDER).resolve()
         logger.debug(f"static_folder is {self.static_folder}")
 
-        self.cache_folder = (root / CACHE_FOLDER).resolve()
-        logger.debug(f"cache_folder is {self.cache_folder}")
+        self.cache = cache
+        if cache:
+            self.cache_folder = (root / CACHE_FOLDER).resolve()
+            logger.debug(f"cache_folder is {self.cache_folder}")
 
         self.build_folder = (root / BUILD_FOLDER).resolve()
         self.build_folder_static = self.build_folder / STATIC_FOLDER

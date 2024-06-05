@@ -59,6 +59,7 @@ class THasPaths:
     static_folder: Path
     build_folder: Path
     build_folder_static: Path
+    cache: bool
     cache_folder: Path
     temp_folder: Path
     static_url: str
