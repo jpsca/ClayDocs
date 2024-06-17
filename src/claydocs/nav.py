@@ -191,16 +191,16 @@ class Nav:
 
         ```python
         [
-            "index.mdx",
+            "index.md",
             [
                 "Guide",
                 [
-                    "guide/index.mdx",
-                    "guide/arguments.mdx",
-                    "guide/extra.mdx",
+                    "guide/index.md",
+                    "guide/arguments.md",
+                    "guide/extra.md",
                 ],
             ],
-            "faq.mdx",
+            "faq.md",
         ]
         ```
 
@@ -225,27 +225,27 @@ class Nav:
         {
             "/index":
                 <Page
-                    lang="en" url="/index", root="en/index.mdx",
+                    lang="en" url="/index", root="en/index.md",
                     title="Home", index=0, section="", meta={...}
                 >,
             "/guide/index":
                 <Page
-                    lang="en" url="/guide/index", root="en/guide/index.mdx",
+                    lang="en" url="/guide/index", root="en/guide/index.md",
                     title="The Guide", index=1, section="Guide", meta={...}
                 >,
             "/guide/arguments":
                 <Page
-                    lang="en" url="/guide/arguments", root="en/guide/arguments.mdx",
+                    lang="en" url="/guide/arguments", root="en/guide/arguments.md",
                     title="The Arguments", index=2, section="Guide", meta={...}
                 >,
             "/guide/extra":
                 <Page
-                    lang="en" url="/guide/extra", root="en/guide/extra.mdx",
+                    lang="en" url="/guide/extra", root="en/guide/extra.md",
                     title="Extra arguments", index=3, section="Guide", meta={...}
                 >,
             "/faq":
                 <Page
-                    lang="en" url="/faq", root="en/faq.mdx",
+                    lang="en" url="/faq", root="en/faq.md",
                     title="FAQ", index=4, section="", meta={...}
                 >,
             },
@@ -423,7 +423,7 @@ class Nav:
         return page_toc
 
     def _get_url(self, filename: str) -> str:
-        url = filename.strip(" /").removesuffix(".mdx").removesuffix("index")
+        url = filename.strip(" /").removesuffix(".md").removesuffix("index")
         return "/".join([slugify(part) for part in url.split("/")])
 
     def _log_initial_status(self) -> None:
@@ -437,7 +437,7 @@ class Nav:
             logger.debug(f"self.{name}:\n{log_data}\n")
 
 
-INDEX = "index.mdx"
+INDEX = "index.md"
 
 
 def get_pages_in_folder(path: TStrOrPath) -> TPages:
@@ -447,7 +447,7 @@ def get_pages_in_folder(path: TStrOrPath) -> TPages:
             item_prefixed = os.path.join(prefix, item_name)
             item_path = os.path.join(path, item_name)
             if os.path.isfile(item_path):
-                if item_name.endswith(".mdx"):
+                if item_name.endswith(".md"):
                     items.append(item_prefixed)
             else:
                 item = recursive_listdir(item_path, prefix=item_prefixed)

@@ -3,7 +3,7 @@ from claydocs import Docs
 
 
 pages = [
-    "index.mdx",
+    "index.md",
 ]
 
 docs = Docs(pages, add_ons=[jinjax_ui])

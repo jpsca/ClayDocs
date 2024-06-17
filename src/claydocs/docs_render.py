@@ -249,5 +249,5 @@ class DocsRender(THasPaths if t.TYPE_CHECKING else object):
             return page.cache_path.read_text()
 
     def refresh(self, src_path: str) -> None:
-        if self.cache and src_path.endswith((".mdx", ".jinja")):
+        if self.cache and src_path.endswith((".md", ".jinja")):
             self.cache_pages()
