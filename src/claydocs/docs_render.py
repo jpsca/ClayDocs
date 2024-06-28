@@ -1,3 +1,4 @@
+import re
 import shutil
 import textwrap
 import typing as t
@@ -75,6 +76,8 @@ DEFAULT_EXTENSIONS = [
     CodeExtension,
 ]
 
+RX_CODE = re.compile("<code[^>]*>.*?</code>", re.DOTALL)
+
 
 class DocsRender(THasPaths if t.TYPE_CHECKING else object):
     def __init_renderer__(
@@ -139,7 +142,7 @@ class DocsRender(THasPaths if t.TYPE_CHECKING else object):
         _filters = filters or {}
         for name, func in UTILS.items():
             _filters[f"utils.{name}"] = func
-        _filters["markdown"] = self.render_markdown
+        _filters["markdown"] = self.markdown_filter
 
         _tests = tests or {}
 
@@ -175,7 +178,7 @@ class DocsRender(THasPaths if t.TYPE_CHECKING else object):
         logger.debug(f"Rendering `{filepath}`")
         md_source, meta = load_markdown_metadata(filepath)
         html = self.render_markdown(md_source)
-        content = f"<!--startpage-->{html}<!--endpage-->"
+        content = f'<a id="startpage"></a>{html}<a id="endpage"></a>'
 
         nav = self.nav.get_page_nav(page)
         nav.page_toc = self.nav._get_page_toc(self.markdowner.toc_tokens)  # type: ignore
@@ -188,6 +191,10 @@ class DocsRender(THasPaths if t.TYPE_CHECKING else object):
         self.catalog.jinja_env.globals["meta"] = meta
         self.catalog.jinja_env.globals["utils"]["timestamp"] = timestamp()
 
+            # print("-" * 60)
+            # print(jx_source)
+            # print("-" * 60)
+
         try:
             return self.catalog.render(component, __source=jx_source, **kwargs)
         except Exception:
@@ -195,10 +202,15 @@ class DocsRender(THasPaths if t.TYPE_CHECKING else object):
             raise
 
     def render_markdown(self, source: str) -> str:
-        source = textwrap.dedent(source.strip("\n"))
         source = self.anti_escape(source)
+        source = textwrap.dedent(source.strip("\n"))
         html = self.markdowner.convert(source)
         html = html.replace("<pre><span></span>", "<pre>")
+        html = self.escape_jinja_in_code(html)
+        return html
+
+    def markdown_filter(self, source: str) -> str:
+        html = self.render_markdown(source)
         return html
 
     def anti_escape(self, s: str, /) -> str:
@@ -210,6 +222,16 @@ class DocsRender(THasPaths if t.TYPE_CHECKING else object):
             .replace("&#39;", "'")
             .replace("&#34;", '"')
         )
+
+    def escape_jinja_in_code(self, html: str) -> str:
+        def escape_block(match: re.Match[str]) -> str:
+            return (
+                match.group(0)
+                .replace("{", "&#123;")
+                .replace("}", "&#125;")
+            )
+
+        return RX_CODE.sub(escape_block, html)
 
     def cache_pages(self) -> None:
         if self.cache:
