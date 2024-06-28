@@ -368,7 +368,7 @@ class Nav:
         next_url = self.urls[lang][index + 1]
         return self.pages[next_url]
 
-    def _get_page_toc(self, toc_tokens: dict) -> list:
+    def _get_page_toc(self, page, toc_tokens: list[dict[str, t.Any]]) -> list:
         """Takes the `toc_tokens` attribute from the "toc" markdown extension,
         and generates an structure, similar to the global toc.
 
@@ -418,6 +418,14 @@ class Nav:
                 headers.append(header)
                 if tok["children"]:
                     parse_level(tok["children"], header[2])
+
+        if (not toc_tokens or toc_tokens[0]["level"] > 1) and page.title:
+            toc_tokens.insert(0, {
+                "level": 1,
+                "id": "",
+                "name": page.title,
+                "children": [],
+            })
 
         parse_level(toc_tokens, page_toc)
         return page_toc

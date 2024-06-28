@@ -9,6 +9,7 @@ from image_processing import ImageProcessing
 from pymdownx import emoji
 from markdown.extensions.toc import slugify_unicode  # type: ignore
 from jinjax.catalog import Catalog
+from slugify import slugify
 
 from .jinja_code import CodeExtension
 from .utils import load_markdown_metadata, logger, timestamp, widont
@@ -66,6 +67,7 @@ UTILS = {
     "ordinalize": inflection.ordinalize,
     "parameterize": inflection.parameterize,
     "pluralize": inflection.pluralize,
+    "slugify": slugify,
     "singularize": inflection.singularize,
     "titleize": inflection.titleize,
     "underscore": inflection.underscore,
@@ -178,10 +180,10 @@ class DocsRender(THasPaths if t.TYPE_CHECKING else object):
         logger.debug(f"Rendering `{filepath}`")
         md_source, meta = load_markdown_metadata(filepath)
         html = self.render_markdown(md_source)
-        content = f'<a id="startpage"></a>{html}<a id="endpage"></a>'
+        content = f"<!-- start -->{html}<!-- end -->"
 
         nav = self.nav.get_page_nav(page)
-        nav.page_toc = self.nav._get_page_toc(self.markdowner.toc_tokens)  # type: ignore
+        nav.page_toc = self.nav._get_page_toc(page, self.markdowner.toc_tokens)  # type: ignore
         component = meta.get("component", self.DEFAULT_COMPONENT)
         meta.setdefault("title", nav.page.title)
 
