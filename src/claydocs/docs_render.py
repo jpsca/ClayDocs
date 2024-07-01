@@ -7,10 +7,10 @@ import inflection
 import markdown
 from image_processing import ImageProcessing
 from pymdownx import emoji
-from markdown.extensions.toc import slugify_unicode  # type: ignore
 from jinjax.catalog import Catalog
 from slugify import slugify
 
+from . import outliner
 from .jinja_code import CodeExtension
 from .utils import load_markdown_metadata, logger, timestamp, widont
 
@@ -25,7 +25,6 @@ DEFAULT_MD_EXTENSIONS = [
     "meta",
     "sane_lists",
     "tables",
-    "toc",
     "pymdownx.betterem",
     "pymdownx.caret",
     "pymdownx.emoji",
@@ -43,12 +42,6 @@ DEFAULT_MD_EXTENSIONS = [
 DEFAULT_MD_EXT_CONFIG = {
     "keys": {
         "camel_case": True,
-    },
-    "toc": {
-        "marker": "",
-        "anchorlink": False,
-        "permalink": True,
-        "slugify": slugify_unicode,
     },
     "pymdownx.highlight": {
         "linenums_style": "pymdownx-inline",
@@ -179,29 +172,34 @@ class DocsRender(THasPaths if t.TYPE_CHECKING else object):
         filepath = self.content_folder / page.filename.strip("/")
         logger.debug(f"Rendering `{filepath}`")
         md_source, meta = load_markdown_metadata(filepath)
+
         html = self.render_markdown(md_source)
-        content = f"<!-- start -->{html}<!-- end -->"
+        html, page_toc = outliner.outline(html)
 
         nav = self.nav.get_page_nav(page)
-        nav.page_toc = self.nav._get_page_toc(page, self.markdowner.toc_tokens)  # type: ignore
+        nav.page_toc = page_toc
+
         component = meta.get("component", self.DEFAULT_COMPONENT)
         meta.setdefault("title", nav.page.title)
 
-        jx_source = f'<{component} title="{nav.page.title}">{content}</{component}>'
+        content = f"{html}"
+        jx_source = "\n".join([
+            f'<{component} title="{nav.page.title}">',
+            content,
+            f"</{component}>"
+        ])
 
         self.catalog.jinja_env.globals["nav"] = nav
         self.catalog.jinja_env.globals["meta"] = meta
         self.catalog.jinja_env.globals["utils"]["timestamp"] = timestamp()
 
-            # print("-" * 60)
-            # print(jx_source)
-            # print("-" * 60)
-
         try:
-            return self.catalog.render(component, __source=jx_source, **kwargs)
+            html = self.catalog.render(component, __source=jx_source, **kwargs)
         except Exception:
             print(jx_source)
             raise
+
+        return html
 
     def render_markdown(self, source: str) -> str:
         source = self.anti_escape(source)

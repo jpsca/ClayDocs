@@ -368,68 +368,6 @@ class Nav:
         next_url = self.urls[lang][index + 1]
         return self.pages[next_url]
 
-    def _get_page_toc(self, page, toc_tokens: list[dict[str, t.Any]]) -> list:
-        """Takes the `toc_tokens` attribute from the "toc" markdown extension,
-        and generates an structure, similar to the global toc.
-
-        Example input:
-        ```
-        [
-            {
-                "level": 1,
-                "id": "t1",
-                "name": "T1",
-                "children": [
-                    {"level": 2, "id": "t2a", "name": "T2A", "children": []},
-                    {
-                        "level": 2,
-                        "id": "t2b",
-                        "name": "T2C",
-                        "children": [
-                            {"level": 3, "id": "t3a", "name": "T3B", "children": []},
-                            {"level": 3, "id": "t3b", "name": "T3C", "children": []},
-                        ],
-                    },
-                    {"level": 2, "id": "t2c", "name": "T2C", "children": []},
-                ],
-            },
-        }
-        ```
-
-        Example output:
-        ```
-        [
-            ["#t1", "T1", [
-                ["#t2a", "T2A", []],
-                ["#t2b", "T2B", [
-                    ["#t3a", "T3A", []],
-                    ["#t3b", "T3B", []],
-                ]],
-                ["#t2c", "T2C", []],
-            ]]
-        ]
-        ```
-        """
-        page_toc = []
-
-        def parse_level(tokens, headers):
-            for tok in tokens:
-                header = [f"#{tok['id']}", tok["name"], []]
-                headers.append(header)
-                if tok["children"]:
-                    parse_level(tok["children"], header[2])
-
-        if (not toc_tokens or toc_tokens[0]["level"] > 1) and page.title:
-            toc_tokens.insert(0, {
-                "level": 1,
-                "id": "",
-                "name": page.title,
-                "children": [],
-            })
-
-        parse_level(toc_tokens, page_toc)
-        return page_toc
-
     def _get_url(self, filename: str) -> str:
         url = filename.strip(" /").removesuffix(".md").removesuffix("index")
         return "/".join([slugify(part) for part in url.split("/")])
