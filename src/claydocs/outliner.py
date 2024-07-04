@@ -71,7 +71,15 @@ HEADERS = ["h1", "h2", "h3", "h4", "h5", "h6"]
 
 def outline(html, id_prefix="s", wrapper_cls="section%(LEVEL)d"):
     soup = BeautifulSoup(html, 'html.parser')
+
     toc_tokens = []
+    for child in soup.find_all(HEADERS):
+        depth = int(child.name[1])  # type: ignore
+        header_text = ''.join(child.text).strip()
+        header_id = f"{id_prefix}-{slugify_unicode(header_text, separator='-')}"
+        toc_tokens.append({"level": depth, "id": header_id, "name": header_text})
+    page_toc = nest_toc_tokens(toc_tokens)
+
     stack = []
     root = soup.new_tag("div")  # Create a root element to hold everything
 
@@ -84,16 +92,11 @@ def outline(html, id_prefix="s", wrapper_cls="section%(LEVEL)d"):
             continue
 
         name = child.name  # type: ignore
+
         if name and name.lower() in HEADERS:
             depth = int(name[1])  # type: ignore
-            header_text = ''.join(child.stripped_strings)
+            header_text = ''.join(child.text).strip()
             header_id = f"{id_prefix}-{slugify_unicode(header_text, separator='-')}"
-
-            toc_tokens.append({
-                "level": depth,
-                "id": header_id,
-                "name": header_text,
-            })
 
             section = soup.new_tag("section")
             section['id'] = header_id
@@ -115,5 +118,5 @@ def outline(html, id_prefix="s", wrapper_cls="section%(LEVEL)d"):
             root.append(child.extract())
 
     html = "".join(str(child) for child in root.children).strip()
-    page_toc = nest_toc_tokens(toc_tokens)
+
     return html, page_toc

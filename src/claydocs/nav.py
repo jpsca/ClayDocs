@@ -11,7 +11,6 @@ from .exceptions import InvalidNav
 from .utils import Page, load_markdown_metadata, logger
 
 
-
 TPagesBranch = t.Sequence[str | tuple[str, "TPagesBranch"]]
 TPagesMultiLang = dict[str, TPagesBranch]
 TPages = TPagesBranch | TPagesMultiLang
@@ -21,6 +20,7 @@ DEFAULT_LANG = "en"
 rx_markdwown_h1 = re.compile(r"(^|\n)#\s+(?P<h1>[^\n]+)(\n|$)")
 rx_html_h1 = re.compile(r"<h1>(?P<h1>.+)</h1>", re.IGNORECASE)
 
+SOCIAL_SUFFIX = "/__social"
 
 
 @dataclass
@@ -38,6 +38,7 @@ class PageNav:
     toc: list
     page_toc: list
     languages: list[Language]
+    domain: str = ""
     base_url: str = ""
 
 
@@ -47,7 +48,8 @@ class Nav:
         content_folder: TStrOrPath,
         pages: TPages,
         *,
-        site_url: str = "",
+        domain: str = "",
+        base_url: str = "",
         languages: dict[str, str] | None = None,
         default: str = DEFAULT_LANG,
     ) -> None:
@@ -58,10 +60,11 @@ class Nav:
         self._max_index: dict[str, int] = {}
 
         self._content_folder = Path(content_folder)
-        site_url = site_url.strip() or "/"
-        if site_url != "/":
-            site_url = f"/{site_url.strip('/')}/"
-        self.site_url = site_url
+        base_url = base_url.strip() or "/"
+        if base_url != "/":
+            base_url = f"/{base_url.strip('/')}/"
+        self.base_url = base_url
+        self.domain = domain.rstrip("/")
         self.default = default
 
         if isinstance(pages, dict):
@@ -82,9 +85,9 @@ class Nav:
             self.toc[lang] = []
             self.urls[lang] = []
             if lang == self.default:
-                base_url = self.site_url
+                base_url = self.base_url
             else:
-                base_url = f"{self.site_url}{lang}/"
+                base_url = f"{self.base_url}{lang}/"
 
             self._index_pages(
                 pages[lang],
@@ -105,7 +108,7 @@ class Nav:
         self._index_pages(
             pages,
             lang=default,
-            base_url=self.site_url,
+            base_url=self.base_url,
             root="",
             section=self.toc[default],
         )
@@ -132,6 +135,7 @@ class Nav:
             next_page=next_page,
             toc=toc,
             page_toc=[],
+            domain=self.domain,
             base_url=base_url,
             languages=languages,
         )
@@ -164,9 +168,9 @@ class Nav:
         langs = {}
         for code, name in languages.items():
             if code == self.default:
-                url = self.site_url
+                url = self.base_url
             else:
-                url = f"{self.site_url}{code}/"
+                url = f"{self.base_url}{code}/"
             langs[code] = Language(code=code, url=url, name=name)
 
         return langs
@@ -312,6 +316,7 @@ class Nav:
             title=title,
             index=index,
             section=section_title,
+            description=meta.get("description", ""),
             meta=meta,
         )
         self.urls[lang].append(url)

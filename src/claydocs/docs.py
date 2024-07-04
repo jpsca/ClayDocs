@@ -27,13 +27,19 @@ class Docs(DocsBuilder, DocsRender, DocsServer):
         content_folder: str | Path = "",
         languages: dict[str, str] | None = None,
         default: str = DEFAULT_LANG,
-        site_url: str = "/",
+        domain: str = "",
+        base_url: str = "/",
         search: bool = True,
         cache: bool = True,
         add_ons: list[t.Any] | None = None,
+
+        default_component: str = "Page",
+        default_social="SocialCard",
+
         globals: dict[str, t.Any] | None = None,
         filters: dict[str, t.Any] | None = None,
         tests: dict[str, t.Any] | None = None,
+
         extensions: list | None = None,
         md_extensions: list[str] | None = None,
         md_ext_config: dict[str, t.Any] | None = None,
@@ -42,14 +48,15 @@ class Docs(DocsBuilder, DocsRender, DocsServer):
         CACHE_FOLDER: str = ".cache",
         STATIC_URL: str = "static",
         THUMBNAILS_URL: str = "thumbnails",
-        DEFAULT_COMPONENT: str = "Page",
     ) -> None:
         """
         """
         self.CACHE_FOLDER = CACHE_FOLDER
         self.STATIC_URL = STATIC_URL
         self.THUMBNAILS_URL = THUMBNAILS_URL
-        self.DEFAULT_COMPONENT = DEFAULT_COMPONENT
+
+        self.default_component = default_component
+        self.default_social = default_social
 
         root = Path(root).resolve()
         if root.is_file():
@@ -86,7 +93,8 @@ class Docs(DocsBuilder, DocsRender, DocsServer):
         self.nav = Nav(
             self.content_folder,
             pages,
-            site_url=site_url,
+            domain=domain,
+            base_url=base_url,
             languages=languages or {},
             default=default,
         )
@@ -102,7 +110,6 @@ class Docs(DocsBuilder, DocsRender, DocsServer):
             md_extensions=md_extensions,
             md_ext_config=md_ext_config,
         )
-        print(self.nav.pages)
 
     def add_folder(self, folder: str | Path, *, prefix: str = "") -> None:
         self.catalog.add_folder(folder, prefix=prefix)

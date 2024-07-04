@@ -5,7 +5,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "claydocs"
-version = "0.1"
+version = "0.2"
 description = "Markdoc-based extensible authoring system"
 authors = ["Juan-Pablo Scaletti <juanpablo@jpscaletti.com>"]
 license = "MIT"
@@ -48,12 +48,11 @@ jinjax-ui = ">=0.1"
 markdown = ">=3.2"
 pygments = ">=2.6.1"
 pymdown-extensions = ">=9.0"
-pystemmer = "2.0.1"
 python-slugify = ">=6.1.0"
 pyyaml = ">=6.0"
 watchdog = ">=2.0"
-html5lib = "^1.1"
 beautifulsoup4 = "^4.12.3"
+html2image = "^2.0.4.3"
 
 [tool.poetry.group.dev]
 optional = true

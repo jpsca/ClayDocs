@@ -39,6 +39,7 @@ class Page:
     title: str = ""
     index: int = 0
     section: str = ""
+    description: str = ""
     meta: dict = field(default_factory=dict)
     html: str = ""
     cache_path: Path | None = None
@@ -52,7 +53,9 @@ class THasPaths:
 
     STATIC_URL: str
     THUMBNAILS_URL: str
-    DEFAULT_COMPONENT: str
+
+    default_component: str
+    default_social: str
 
     root: Path
     content_folder: Path
@@ -74,6 +77,9 @@ class THasRender(THasPaths):
     def render_page(self, page: Page, **kwargs) -> str:  # type: ignore
         ...
 
+    def render_social_card(self, page: Page, **kwargs) -> str:  # type: ignore
+        ...
+
     def get_cached_page(self, url: str, **kwargs) -> str:  # type: ignore
         ...
 
@@ -90,18 +96,18 @@ def timestamp() -> int:
 
 
 def load_markdown_metadata(filepath: Path) -> tuple[str, dict]:
-    source = filepath.read_text().lstrip()
+    source = filepath.read_text().strip()
     if not source.startswith(META_START):
         return source, {}
 
-    source = source.lstrip("-")
+    source = source.strip().lstrip("- ")
     front_matter, source = source.split(META_END, 1)
     try:
         meta = yaml.load(front_matter, SafeLoader)
     except Exception as err:
         raise InvalidFrontMatter(str(filepath), *err.args)
 
-    return source.lstrip(" -"), meta
+    return source.strip().lstrip("- "), meta
 
 
 RANDOM_MESSAGES = [

@@ -3,17 +3,21 @@ import shutil
 import typing as t
 from pathlib import Path
 
-from .utils import THasRender, logger, print_random_messages
+from html2image import Html2Image
+
+from .utils import Page, THasRender, logger, print_random_messages
 
 
 RX_ABS_URL = re.compile(
     r"""\s(src|href|data-[a-z0-9_-]+)\s*=\s*['"](\/(?:[a-z0-9_-][^'"]*)?)[\'"]""",
     re.IGNORECASE,
 )
+SOCIAL_CARD_SIZE = (1200, 630)
 
 
 class DocsBuilder(THasRender if t.TYPE_CHECKING else object):
     relativize_static: bool = False
+    hti: Html2Image
 
     def build(self) -> None:
         self.build_folder.mkdir(exist_ok=True)
@@ -23,27 +27,56 @@ class DocsBuilder(THasRender if t.TYPE_CHECKING else object):
         self._copy_static_folder()
 
         logger.info("Rendering pages...")
+        self.hti = Html2Image()
+
         for url in self.nav.pages:
             page = self.nav.get_page(url)
             if not page:
                 logger.error(f"Page not found: {url}")
                 continue
+            self._build_page(page)
+            self._build_social_card(page)
 
-            filename = page.url.strip("/")
-            filename = f"{filename}/index.html".lstrip("/")
-            filepath = self.build_folder / filename
-            filepath.parent.mkdir(parents=True, exist_ok=True)
-
-            html = self.render_page(page)
-            logger.debug("Relativizing URLs")
-            html = self._fix_urls(html, filename)
-
-            logger.info(f"Writing {filename}")
-            filepath.write_text(html)
-
-        logger.info("...")
+        logger.info("   ...")
         print_random_messages()
         logger.info("✨ Done! ✨")
+
+    def _build_page(self, page: Page) -> None:
+        url = page.url.strip("/")
+        filename = f"{url}/index.html".lstrip("/")
+        filepath = self.build_folder / filename
+        folderpath = filepath.parent
+        folderpath.mkdir(parents=True, exist_ok=True)
+
+        logger.debug(f"Rendering page {url}")
+        html = self.render_page(page)
+
+        logger.debug("Relativizing page URLs")
+        html = self._fix_urls(html, filename)
+
+        logger.info("Writing file")
+        filepath.write_text(html)
+
+
+    def _build_social_card(self, page: Page) -> None:
+        url = page.url.strip("/")
+        filename = f"{url}/og-card.html".lstrip("/")
+        filepath = self.build_folder / filename
+        folderpath = filepath.parent
+
+        logger.debug(f"Rendering social card for page {url}")
+        html = self.render_social_card(page)
+        html = self._fix_urls(html, filename, relativize_static=True)
+        filepath.write_text(html)
+
+        logger.info("Generating social card")
+        self.hti.output_path = folderpath
+        self.hti.screenshot(
+            url=str(filepath),
+            size=SOCIAL_CARD_SIZE,
+            save_as="og-card.png",
+        )
+        filepath.unlink()
 
     def _copy_static_folder(self) -> None:
         shutil.copytree(
@@ -56,8 +89,14 @@ class DocsBuilder(THasRender if t.TYPE_CHECKING else object):
         self,
         html: str,
         filename: str,
+        relativize_static: bool | None = None,
     ) -> str:
         pos = 0
+        relativize_static = (
+            self.relativize_static
+            if relativize_static is None
+            else relativize_static
+        )
 
         while True:
             match = RX_ABS_URL.search(html, pos=pos)
@@ -67,7 +106,7 @@ class DocsBuilder(THasRender if t.TYPE_CHECKING else object):
             attr, url = match.groups()
             if url.startswith(self.static_url):
                 newurl = self._fix_static_url(url)
-                if self.relativize_static:
+                if relativize_static:
                     newurl = self._get_relative_url(newurl, filename)
             else:
                 newurl = self._get_relative_url(url, filename)

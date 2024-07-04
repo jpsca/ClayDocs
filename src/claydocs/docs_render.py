@@ -47,6 +47,7 @@ DEFAULT_MD_EXT_CONFIG = {
         "linenums_style": "pymdownx-inline",
         "anchor_linenums": False,
         "css_class": "highlight",
+        "linenums": True,
     },
     "pymdownx.emoji": {
         "emoji_generator": emoji.to_alt,
@@ -72,6 +73,7 @@ DEFAULT_EXTENSIONS = [
 ]
 
 RX_CODE = re.compile("<code[^>]*>.*?</code>", re.DOTALL)
+SOCIAL_SUFFIX = "/og-card.png"
 
 
 class DocsRender(THasPaths if t.TYPE_CHECKING else object):
@@ -162,49 +164,47 @@ class DocsRender(THasPaths if t.TYPE_CHECKING else object):
         catalog.jinja_env.autoescape = False
         self.catalog = catalog
 
-    def render(self, url: str, **kwargs) -> str:
+    def render(self, url: str) -> str:
         page = self.nav.get_page(url)
         if not page:
             return ""
-        return self.render_page(page, **kwargs)
+        return self.render_page(page)
 
-    def render_page(self, page: Page, **kwargs) -> str:
+    def render_page(self, page: Page) -> str:
         filepath = self.content_folder / page.filename.strip("/")
         logger.debug(f"Rendering `{filepath}`")
-        md_source, meta = load_markdown_metadata(filepath)
-
-        html = self.render_markdown(md_source)
-        html, page_toc = outliner.outline(html)
 
         nav = self.nav.get_page_nav(page)
-        nav.page_toc = page_toc
+        md_source, meta = load_markdown_metadata(filepath)
+        source = self.render_markdown(md_source)
+        source = source.removeprefix("<p>").removesuffix("</p>")
 
-        component = meta.get("component", self.DEFAULT_COMPONENT)
         meta.setdefault("title", nav.page.title)
-
-        content = f"{html}"
-        jx_source = "\n".join([
-            f'<{component} title="{nav.page.title}">',
-            content,
-            f"</{component}>"
-        ])
-
         self.catalog.jinja_env.globals["nav"] = nav
         self.catalog.jinja_env.globals["meta"] = meta
         self.catalog.jinja_env.globals["utils"]["timestamp"] = timestamp()
 
-        try:
-            html = self.catalog.render(component, __source=jx_source, **kwargs)
-        except Exception:
-            print(jx_source)
-            raise
+        html = self.catalog.render("", __source=source)
+        html, page_toc = outliner.outline(html)
+        nav.page_toc = page_toc
+        component = meta.get("component", self.default_component)
+        # I use `catalog.irender` to not reset the assets collected in rendering
+        # the content
+        return self.catalog.irender(component, __content=html)
 
-        return html
+    def render_social_card(self, page: Page) -> str:
+        component = page.meta.get("social_card", self.default_social)
+        return self.catalog.render(
+            component,
+            title=page.title,
+            section=page.section,
+            **page.meta
+        )
 
-    def render_markdown(self, source: str) -> str:
-        source = self.anti_escape(source)
-        source = textwrap.dedent(source.strip("\n"))
-        html = self.markdowner.convert(source)
+    def render_markdown(self, md_source: str) -> str:
+        md_source = self.anti_escape(md_source)
+        md_source = textwrap.dedent(md_source.strip("\n")).strip()
+        html = self.markdowner.convert(md_source)
         html = html.replace("<pre><span></span>", "<pre>")
         html = self.escape_jinja_in_code(html)
         return html
@@ -261,9 +261,17 @@ class DocsRender(THasPaths if t.TYPE_CHECKING else object):
         return filepath
 
     def get_cached_page(self, url: str) -> str:
+        social = url.endswith(SOCIAL_SUFFIX)
+        if social:
+            url = url.removesuffix(SOCIAL_SUFFIX)
+
         page = self.nav.get_page(url)
         if not page:
             return ""
+
+        if social:
+            return self.render_social_card(page)
+
         if not page.cache_path or not page.cache_path.exists():
             return self.cache_page(page)
         else:
