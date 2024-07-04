@@ -194,12 +194,7 @@ class DocsRender(THasPaths if t.TYPE_CHECKING else object):
 
     def render_social_card(self, page: Page) -> str:
         component = page.meta.get("social_card", self.default_social)
-        return self.catalog.render(
-            component,
-            title=page.title,
-            section=page.section,
-            **page.meta
-        )
+        return self.catalog.render(component, page=page)
 
     def render_markdown(self, md_source: str) -> str:
         md_source = self.anti_escape(md_source)
