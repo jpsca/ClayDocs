@@ -22,7 +22,6 @@ SKIP_TAG_ATTR = "data-md-skip"
 ATX = "atx"
 ATX_CLOSED = "atx_closed"
 UNDERLINED = "underlined"
-SETEXT = ATX
 
 # Newline style
 SPACES = "spaces"
@@ -86,7 +85,7 @@ class MarkdownConverter(object):
         escape_asterisks = True
         escape_underscores = True
         escape_misc = True
-        heading_style = UNDERLINED
+        heading_style = ATX
         keep_inline_images_in = []
         newline_style = SPACES
         strip = None

@@ -72,6 +72,8 @@ Consecutive headers aren't a problem:
     [{'level': 1, 'id': 's-one', 'name': 'ONE', 'children': [{'level': 3, 'id': 's-too-deep', 'name': 'TOO Deep', 'children': []}, {'level': 2, 'id': 's-level-2', 'name': 'Level 2', 'children': []}]}, {'level': 1, 'id': 's-two', 'name': 'TWO', 'children': []}]
 
 '''
+import re
+
 from bs4 import BeautifulSoup, NavigableString
 
 from markdown.extensions.toc import nest_toc_tokens, slugify_unicode
@@ -84,13 +86,20 @@ def html_escape(html: str) -> str:
     return html.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
 
+def get_text(child) -> str:
+    text = ''.join(child.text)
+    text = re.sub(r"\n+", " ", text)
+    text = re.sub(r"\s+", " ", text)
+    return html_escape(text.strip())
+
+
 def outline(html, id_prefix="s", wrapper_cls="section%(LEVEL)d"):
     soup = BeautifulSoup(html, 'html.parser')
 
     toc_tokens = []
     for child in soup.find_all(HEADERS):
         depth = int(child.name[1])  # type: ignore
-        header_text = html_escape(''.join(child.text).strip())
+        header_text = get_text(child)
         header_id = f"{id_prefix}-{slugify_unicode(header_text, separator='-')}"
         toc_tokens.append({"level": depth, "id": header_id, "name": header_text})
 
@@ -113,7 +122,7 @@ def outline(html, id_prefix="s", wrapper_cls="section%(LEVEL)d"):
 
         if name and name.lower() in HEADERS:
             depth = int(name[1])  # type: ignore
-            header_text = html_escape(''.join(child.text).strip())
+            header_text = get_text(child)
             header_id = f"{id_prefix}-{slugify_unicode(header_text, separator='-')}"
 
             section = soup.new_tag("section")
