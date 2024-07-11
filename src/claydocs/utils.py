@@ -3,7 +3,6 @@ import random
 import re
 import time
 import typing as t
-from dataclasses import dataclass, field
 from pathlib import Path
 
 import jinjax
@@ -17,7 +16,7 @@ except ImportError:  # pragma: no cover
     from yaml import SafeLoader  # type: ignore
 
 if t.TYPE_CHECKING:
-    from .nav import Nav
+    from .nav import Nav, Page
     from .server import LiveReloadServer
 
 
@@ -29,20 +28,6 @@ META_END = "\n---"
 
 logger = logging.getLogger(LOGGER_NAME)
 logger.setLevel(LOGGER_LEVEL)
-
-
-@dataclass
-class Page:
-    lang: str = ""
-    url: str = ""
-    filename: str = ""
-    title: str = ""
-    index: int = 0
-    section: str = ""
-    description: str = ""
-    meta: dict = field(default_factory=dict)
-    html: str = ""
-    cache_path: Path | None = None
 
 
 class THasPaths:
@@ -73,11 +58,12 @@ class THasPaths:
 
 class THasRender(THasPaths):
     catalog: jinjax.Catalog
+    metadata: dict[str, str]
 
-    def render_page(self, page: Page, **kwargs) -> str:  # type: ignore
+    def render_page(self, page: "Page", **kwargs) -> str:  # type: ignore
         ...
 
-    def render_social_card(self, page: Page, **kwargs) -> str:  # type: ignore
+    def render_social_card(self, page: "Page", **kwargs) -> str:  # type: ignore
         ...
 
     def get_cached_page(self, url: str, **kwargs) -> str:  # type: ignore

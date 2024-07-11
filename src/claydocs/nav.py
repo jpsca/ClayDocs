@@ -2,13 +2,13 @@ import json
 import os
 import re
 import typing as t
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
 from pathlib import Path
 
 from slugify import slugify
 
 from .exceptions import InvalidNav
-from .utils import Page, load_markdown_metadata, logger
+from .utils import load_markdown_metadata, logger
 
 
 TPagesBranch = t.Sequence[str | tuple[str, "TPagesBranch"]]
@@ -30,19 +30,42 @@ class Language:
     name: str = ""
 
 
-@dataclass
-class PageNav:
-    page: Page
-    prev_page: Page
-    next_page: Page
-    toc: list
-    page_toc: list
-    languages: list[Language]
-    domain: str = ""
+class Page:
+    lang: str = ""
+    url: str = ""
     base_url: str = ""
+    filename: str = ""
+    title: str = ""
+    index: int = 0
+    section: str = ""
+    description: str = ""
+    content: str = ""
+    cache_path: Path | None = None
+    prev_page: "Page"
+    next_page: "Page"
+    meta: dict
+    toc: list
+
+    def __init__(self, **kwargs):
+        kwargs.setdefault("meta", {})
+        kwargs.setdefault("toc", [])
+        for key, value in kwargs.items():
+            setattr(self, key, value)
 
 
 class Nav:
+    domain: str
+    base_url: str
+    languages: dict[str, Language]
+    default: str
+
+    pages: dict[str, Page]
+    toc: dict[str, list]
+    urls: dict[str, list[str]]
+
+    _max_index: dict[str, int]
+    _content_folder: Path
+
     def __init__(
         self,
         content_folder: TStrOrPath,
@@ -53,11 +76,11 @@ class Nav:
         languages: dict[str, str] | None = None,
         default: str = DEFAULT_LANG,
     ) -> None:
-        self.pages: dict[str, Page] = {}
-        self.languages: dict[str, Language] = {}
-        self.toc: dict[str, list] = {}
-        self.urls: dict[str, list[str]] = {}
-        self._max_index: dict[str, int] = {}
+        self.pages = {}
+        self.languages = {}
+        self.toc = {}
+        self.urls = {}
+        self._max_index = {}
 
         self._content_folder = Path(content_folder)
         base_url = base_url.strip() or "/"
@@ -72,7 +95,26 @@ class Nav:
         else:
             self._init_single_language(pages, default)
 
+        for page in self.pages.values():
+            page.prev_page = self._get_prev(page)
+            page.next_page = self._get_next(page)
+
         self._log_initial_status()
+
+    def get_page(self, url: str) -> Page | None:
+        return self.pages.get(url) or self.pages.get(f"{url}/") or None
+
+    def asdict(self, lang: str) -> dict:
+        return {
+            "domain": self.domain,
+            "languages": self.languages,
+            "default": self.default,
+            "pages": self.pages,
+            "toc": self.toc[lang],
+            "urls": self.urls[lang],
+        }
+
+    # Private
 
     def _init_multi_language(
         self,
@@ -113,34 +155,6 @@ class Nav:
             section=self.toc[default],
         )
         self._max_index[default] = len(self.urls[default]) - 1
-
-    def get_page(self, url: str) -> Page | None:
-        return self.pages.get(url) or self.pages.get(f"{url}/") or None
-
-    def get_page_nav(self, page: Page) -> PageNav:
-        prev_page = self._get_prev(page.url, lang=page.lang)
-        next_page = self._get_next(page.url, lang=page.lang)
-        toc = self.toc[page.lang]
-
-        if self.languages:
-            base_url = self.languages[page.lang].url
-            languages = list(self.languages.values())
-        else:
-            base_url = "/"
-            languages = []
-
-        return PageNav(
-            page=page,
-            prev_page=prev_page,
-            next_page=next_page,
-            toc=toc,
-            page_toc=[],
-            domain=self.domain,
-            base_url=base_url,
-            languages=languages,
-        )
-
-    # Private
 
     def _build_languages(self, languages: dict[str, str]) -> dict[str, Language]:
         """
@@ -215,7 +229,7 @@ class Nav:
         {
             LANG: [
                 ["/index", "Home"],
-                [null, "Guide", [
+                [None, "Guide", [
                     ["/guide/index", "The Guide"],
                     ["/guide/arguments", "The Arguments"],
                     ["/guide/extra", "Extra arguments"],
@@ -267,6 +281,7 @@ class Nav:
         }
         ```
         """
+
         for item in pages:
             if isinstance(item, str):
                 self._index_page(
@@ -318,6 +333,7 @@ class Nav:
             section=section_title,
             description=meta.get("description", ""),
             meta=meta,
+            base_url=base_url
         )
         self.urls[lang].append(url)
         section.append([url, title, None])
@@ -356,17 +372,17 @@ class Nav:
 
         return ""
 
-    def _get_prev(self, url: str, lang: str = "") -> Page:
-        index = self.pages[url].index
+    def _get_prev(self, page: Page) -> Page:
+        index = page.index
         if index <= 0:
             return Page()
-        lang = lang or self.default
+        lang = page.lang
         prev_url = self.urls[lang][index - 1]
         return self.pages[prev_url]
 
-    def _get_next(self, url: str, lang: str = "") -> Page:
-        lang = lang or self.default
-        index = self.pages[url].index
+    def _get_next(self, page: Page) -> Page:
+        index = page.index
+        lang = page.lang
         if index >= self._max_index[lang]:
             return Page()
 
@@ -381,7 +397,7 @@ class Nav:
         for name in "pages,toc,languages".split(","):
             log_data = json.dumps(
                 getattr(self, name),
-                default=lambda o: asdict(o),
+                default=lambda o: str(o),
                 ensure_ascii=False,
                 indent=2,
             )

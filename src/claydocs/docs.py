@@ -34,7 +34,8 @@ class Docs(DocsBuilder, DocsRender, DocsServer):
         add_ons: list[t.Any] | None = None,
 
         default_component: str = "Page",
-        default_social="SocialCard",
+        default_social: str = "SocialCard",
+        metadata: dict[str, str] | None = None,
 
         globals: dict[str, t.Any] | None = None,
         filters: dict[str, t.Any] | None = None,
@@ -43,6 +44,7 @@ class Docs(DocsBuilder, DocsRender, DocsServer):
         extensions: list | None = None,
         md_extensions: list[str] | None = None,
         md_ext_config: dict[str, t.Any] | None = None,
+
         STATIC_FOLDER: str = "static",
         BUILD_FOLDER: str = "build",
         CACHE_FOLDER: str = ".cache",
@@ -57,6 +59,7 @@ class Docs(DocsBuilder, DocsRender, DocsServer):
 
         self.default_component = default_component
         self.default_social = default_social
+        self.metadata = metadata or {}
 
         root = Path(root).resolve()
         if root.is_file():

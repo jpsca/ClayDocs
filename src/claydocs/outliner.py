@@ -39,7 +39,18 @@ Usage
     <p>Section 2</p></section>
 
     >>> print(page_toc)
-    [{'level': 1, 'id': 's-1', 'name': '1', 'children': [{'level': 2, 'id': 's-11', 'name': '1.1', 'children': []}, {'level': 2, 'id': 's-12', 'name': '1.2', 'children': [{'level': 3, 'id': 's-121', 'name': '1.2.1', 'children': []}, {'level': 3, 'id': 's-122', 'name': '1.2.2', 'children': [{'level': 4, 'id': 's-1221', 'name': '1.2.2.1', 'children': []}]}]}]}, {'level': 1, 'id': 's-2', 'name': '2', 'children': []}]
+    [
+        {'level': 1, 'id': 's-1', 'name': '1', 'children': [
+            {'level': 2, 'id': 's-11', 'name': '1.1', 'children': []},
+            {'level': 2, 'id': 's-12', 'name': '1.2', 'children': [
+                {'level': 3, 'id': 's-121', 'name': '1.2.1', 'children': []},
+                {'level': 3, 'id': 's-122', 'name': '1.2.2', 'children': [
+                    {'level': 4, 'id': 's-1221', 'name': '1.2.2.1', 'children': []}
+                ]}
+            ]}
+        ]},
+        {'level': 1, 'id': 's-2', 'name': '2', 'children': []},
+    ]
 
 Consecutive headers aren't a problem:
 
@@ -69,16 +80,23 @@ from markdown.extensions.toc import nest_toc_tokens, slugify_unicode
 HEADERS = ["h1", "h2", "h3", "h4", "h5", "h6"]
 
 
+def html_escape(html: str) -> str:
+    return html.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+
+
 def outline(html, id_prefix="s", wrapper_cls="section%(LEVEL)d"):
     soup = BeautifulSoup(html, 'html.parser')
 
     toc_tokens = []
     for child in soup.find_all(HEADERS):
         depth = int(child.name[1])  # type: ignore
-        header_text = ''.join(child.text).strip()
+        header_text = html_escape(''.join(child.text).strip())
         header_id = f"{id_prefix}-{slugify_unicode(header_text, separator='-')}"
         toc_tokens.append({"level": depth, "id": header_id, "name": header_text})
+
     page_toc = nest_toc_tokens(toc_tokens)
+    if (page_toc and page_toc[0]["level"] == 1):
+        page_toc[0]["id"] = ""
 
     stack = []
     root = soup.new_tag("div")  # Create a root element to hold everything
@@ -95,7 +113,7 @@ def outline(html, id_prefix="s", wrapper_cls="section%(LEVEL)d"):
 
         if name and name.lower() in HEADERS:
             depth = int(name[1])  # type: ignore
-            header_text = ''.join(child.text).strip()
+            header_text = html_escape(''.join(child.text).strip())
             header_id = f"{id_prefix}-{slugify_unicode(header_text, separator='-')}"
 
             section = soup.new_tag("section")

@@ -5,7 +5,8 @@ import tempfile
 import typing as t
 from pathlib import Path
 
-from ..utils import Page, is_debug, logger
+from ..nav import Page
+from ..utils import is_debug, logger
 from .text_extractor import TDoc, extract_docs, make_doc
 
 

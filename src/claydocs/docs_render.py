@@ -6,16 +6,16 @@ import typing as t
 import inflection
 import markdown
 from image_processing import ImageProcessing
-from pymdownx import emoji
+from pymdownx import emoji, superfences
 from jinjax.catalog import Catalog
 from slugify import slugify
 
 from . import outliner
-from .jinja_code import CodeExtension
+from .nav import Page
 from .utils import load_markdown_metadata, logger, timestamp, widont
 
 from pathlib import Path
-from .utils import Page, THasPaths
+from .utils import THasPaths
 
 
 DEFAULT_MD_EXTENSIONS = [
@@ -48,6 +48,10 @@ DEFAULT_MD_EXT_CONFIG = {
         "anchor_linenums": False,
         "css_class": "highlight",
         "linenums": True,
+        "pygments_lang_class": True,
+    },
+    "pymdownx.superfences": {
+        "disable_indented_code_blocks": True,
     },
     "pymdownx.emoji": {
         "emoji_generator": emoji.to_alt,
@@ -69,7 +73,6 @@ UTILS = {
 }
 DEFAULT_EXTENSIONS = [
     "jinja2.ext.loopcontrols",
-    CodeExtension,
 ]
 
 RX_CODE = re.compile("<code[^>]*>.*?</code>", re.DOTALL)
@@ -170,23 +173,26 @@ class DocsRender(THasPaths if t.TYPE_CHECKING else object):
             return ""
         return self.render_page(page)
 
-    def render_page(self, page: Page) -> str:
+    def render_page(self, page: Page, save_content: bool = False) -> str:
         filepath = self.content_folder / page.filename.strip("/")
         logger.debug(f"Rendering `{filepath}`")
 
-        nav = self.nav.get_page_nav(page)
         md_source, meta = load_markdown_metadata(filepath)
-        source = self.render_markdown(md_source)
-        source = source.removeprefix("<p>").removesuffix("</p>")
+        content = self.render_markdown(md_source)
+        content = content.removeprefix("<p>").removesuffix("</p>")
 
-        meta.setdefault("title", nav.page.title)
-        self.catalog.jinja_env.globals["nav"] = nav
+        meta.setdefault("title", page.title)
+        self.catalog.jinja_env.globals["nav"] = self.nav.asdict(page.lang)
+        self.catalog.jinja_env.globals["page"] = page
         self.catalog.jinja_env.globals["meta"] = meta
         self.catalog.jinja_env.globals["utils"]["timestamp"] = timestamp()
 
-        html = self.catalog.render("", __source=source)
+        html = self.catalog.render("", __source=content)
         html, page_toc = outliner.outline(html)
-        nav.page_toc = page_toc
+        page.toc = page_toc
+        if save_content:
+            page.content = html
+
         component = meta.get("component", self.default_component)
         # I use `catalog.irender` to not reset the assets collected in rendering
         # the content

@@ -12,7 +12,7 @@ from sys import exc_info
 
 import watchdog.events
 import watchdog.observers.polling
-from watchdog.observers import Observer
+from watchdog.observers.api import ObservedWatch
 
 from .utils import logger, timestamp
 
@@ -80,7 +80,7 @@ class LiveReloadServer(socketserver.ThreadingMixIn, wsgiref.simple_server.WSGISe
             target=lambda: self.serve_forever(shutdown_delay)
         )
         self.observer = watchdog.observers.polling.PollingObserver()
-        self.watch_refs: dict[str, Observer] = {}
+        self.watch_refs: dict[str, ObservedWatch] = {}
         self.running = False
 
         super().__init__((host, port), RequestHandler, **kwargs)
