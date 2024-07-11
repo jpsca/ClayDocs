@@ -39,7 +39,6 @@ class Page:
     index: int = 0
     section: str = ""
     description: str = ""
-    content: str = ""
     cache_path: Path | None = None
     prev_page: "Page"
     next_page: "Page"

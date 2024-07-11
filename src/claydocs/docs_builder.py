@@ -3,9 +3,7 @@ import shutil
 import typing as t
 from pathlib import Path
 
-from bs4 import BeautifulSoup
 from html2image import Html2Image
-from . import markdownify
 
 from .nav import Page
 from .utils import THasRender, logger, print_random_messages
@@ -22,12 +20,6 @@ SOCIAL_CARD_SIZE = (1200, 630)
 class DocsBuilder(THasRender if t.TYPE_CHECKING else object):
     relativize_static: bool = False
     hti: Html2Image
-
-    # This list stores the page contents (only what's inside #main)
-    # re-rendered to markdown from the rendered HTML.
-    # All pages will be joined at the end to have all the documentation,
-    # in a single markdown document, for LLM training or whatever.
-    md_pages: list[str]
 
     def build(self) -> None:
         if self.build_folder.exists():
@@ -49,9 +41,6 @@ class DocsBuilder(THasRender if t.TYPE_CHECKING else object):
                 continue
             self._build_page(page)
             self._build_social_card(page)
-            self._markdownify_content(page, prefix=f"{index}.")
-
-        self._build_markdown_doc()
 
         logger.info("   ...")
         print_random_messages()
@@ -94,98 +83,6 @@ class DocsBuilder(THasRender if t.TYPE_CHECKING else object):
             save_as="og-card.png",
         )
         filepath.unlink()
-
-    def _markdownify_content(self, page: Page, prefix: str) -> None:
-        """Re-render to markdown the rendered HTML page content"""
-        logger.info("Re-rendering to markdown the rendered HTML page content")
-        html = self._absolutize_urls(page.content.strip())
-        md_content = markdownify.markdownify(
-            html,
-            heading_style=markdownify.ATX,
-            code_language_callback=extract_language,
-        )
-        md_content = re.sub("\n\n+", "\n\n", md_content.strip())
-        if not md_content:
-            return
-
-        if not md_content.startswith("# "):
-            md_content = f"# {page.title}\n\n{md_content}"
-
-        md_content = self._outline_md_headers(md_content, prefix=prefix)
-        self.md_pages.append(md_content)
-
-    def _outline_md_headers(self, md_content: str, prefix: str = "") -> str:
-        lines = md_content.split("\n")
-        RX_MD_HEADING = re.compile(r"^(#+) (.+)")
-        counters = [0] * 6      # Assuming maximum 6 levels of headers
-        code_block = False
-
-        for i, line in enumerate(lines):
-            # Ignore comments that looks like headers
-            if line.startswith("```"):
-                code_block = not code_block
-            if code_block:
-                continue
-
-            match = RX_MD_HEADING.match(line)
-            if not match:
-                continue
-
-            level = len(match.group(1))
-
-            # Reset counters for deeper levels
-            counters[level - 1] += 1
-            for j in range(level, 6):
-                counters[j] = 0
-
-            # Generate ID
-            id_parts = [str(c) for c in counters[:level] if c != 0]
-            id_string = f"s{prefix}{'.'.join(id_parts)}"
-
-            # Add ID to the header
-            lines[i] = f'<a id="{id_string}"></a>\n{match.group(0)}'
-
-        return "\n".join(lines)
-
-    def _build_markdown_doc(self) -> None:
-        multilanguage = len(self.nav.toc.keys()) > 1
-        for language, toc in self.nav.toc.items():
-            doc_parts: list[str] = []
-            meta_parts: list[str] = []
-
-            if self.metadata:
-                md_meta = self._generate_markdown_meta(language)
-                meta_parts.append(md_meta)
-
-            md_toc = generate_markdown_toc(self.nav.get_page, toc)
-            meta_parts.append("## Table of contents\n")
-            meta_parts.append(md_toc.rstrip())
-            doc_parts.append("\n".join(meta_parts))
-
-            doc_parts.extend(self.md_pages)
-
-            if multilanguage and language != self.nav.default:
-                filename = f"docs-{language}.md"
-            else:
-                filename = "docs.md"
-            logger.info(f"Writing {filename}...")
-            filepath = self.build_folder / filename
-            filepath.write_text("\n\n================\n\n".join(doc_parts))
-
-    def _generate_markdown_meta(self, language: str) -> str:
-        doc: list[str] = ["----"]
-
-        for key, value in self.metadata.items():
-            doc.append(f"{key}: {value}")
-
-        if "language" not in self.metadata:
-            doc.append(f"language: {language}")
-
-        doc.append("----")
-
-        if "name" in self.metadata:
-            doc.append(f"\n# {self.metadata['name']}\n")
-        return "\n".join(doc)
 
     def _copy_static_folder(self) -> None:
         shutil.copytree(
@@ -237,9 +134,6 @@ class DocsBuilder(THasRender if t.TYPE_CHECKING else object):
 
         return url
 
-    def _absolutize_urls(self, html: str) -> str:
-        return RX_ABS_URL.sub(f"\\1{self.nav.domain}\\2\\3", html)
-
     def _download_url(self, url: str, filepath: Path) -> None:
         logger.info(f"Downloading {url}...")
         sf = self.server.application.find_file(url)
@@ -259,153 +153,3 @@ class DocsBuilder(THasRender if t.TYPE_CHECKING else object):
         if not url.startswith("."):
             url = f"./{url}"
         return url
-
-
-# ----
-
-
-def extract_language(pre: BeautifulSoup) -> str | None:
-    parent = pre.parent
-    if not parent:
-        return None
-    pclass = parent.get("class")
-    if not pclass:
-        return None
-    if not pclass[0].startswith("language-"):
-        return None
-    return pclass[0].removeprefix("language-")
-
-
-def generate_markdown_toc(
-    get_page: t.Callable[[str], Page | None],
-    toc: list,
-    *,
-    level: int = 0,
-    prefix: str = "",
-) -> str:
-    """
-    >>> toc = [
-    ...     ["/", "Welcome", None],
-    ...     [
-    ...         None,
-    ...         "Guide",
-    ...         [
-    ...             ["/guide/", "Quickstart", None],
-    ...             ["/guide/components", "Components", None],
-    ...             ["/guide/extra", "Extra Arguments", None],
-    ...             ["/guide/css-and-js", "Adding CSS and JS", None],
-    ...         ],
-    ...     ],
-    ...     [
-    ...         None,
-    ...         "UI components",
-    ...         [
-    ...             ["/ui/", "UI components", None],
-    ...             ["/ui/tabs", "Tabs", None],
-    ...             ["/ui/popover", "Pop-over", None],
-    ...             ["/ui/menu", "Menu (Dropdown)", None],
-    ...             ["/ui/accordion", "Accordion", None],
-    ...             ["/ui/linkedlist", "Linked Lists", None],
-    ...             ["/ui/reldate", "Relative date", None],
-    ...         ],
-    ...     ],
-    ... ]
-    >>> fake_get_page = lambda url: None
-    >>> print(generate_markdown_toc(fake_get_page, toc))
-    - 1 Welcome
-    - 2 Guide
-        - [2.1 Quickstart](#s2.1)
-        - [2.2 Components](#s2.2)
-        - [2.3 Extra Arguments](#s2.3)
-        - [2.4 Adding CSS and JS](#s2.4)
-    - 3 UI components
-        - [3.1 UI components](#s3.1)
-        - [3.2 Tabs](#s3.2)
-        - [3.3 Pop-over](#s3.3)
-        - [3.4 Menu (Dropdown)](#s3.4)
-        - [3.5 Accordion](#s3.5)
-        - [3.6 Linked Lists](#s3.6)
-        - [3.7 Relative date](#s3.7)
-
-    """
-    markdown = ""
-    for index, item in enumerate(toc, start=1):
-        url, title, children = item
-        indent = "    " * level
-
-        if level == 0:
-            current_prefix = f"{index}."
-            markdown += f"{indent}- {current_prefix} {title}\n"
-        else:
-            current_prefix = f"{prefix}{index}."
-            header_id = f"s{current_prefix[:-1]}"
-            markdown += f"{indent}- [{current_prefix} {title}](#{header_id})\n"
-
-        if children:
-            # It's a section, so recursively process children
-            markdown += generate_markdown_toc(
-                get_page,
-                children,
-                level=level + 1,
-                prefix=current_prefix,
-            )
-        else:
-            # It's a page, so process it's own toc
-            page = get_page(url)
-            if page and page.toc:
-                markdown += generate_markdown_page_toc(
-                    page.toc[0]["children"],
-                    level=level + 1,
-                    prefix=current_prefix,
-                )
-
-    return markdown
-
-
-def generate_markdown_page_toc(toc: list, *, level: int, prefix: str) -> str:
-    """
-    >>> toc = [
-    ...     {
-    ...         "level": 1,
-    ...         "name": "Tabs",
-    ...         "children": [
-    ...             {"level": 2, "name": "Styling states", "children": []},
-    ...             {
-    ...                 "level": 2,
-    ...                 "name": "Component arguments",
-    ...                 "children": [
-    ...                     {"level": 3, "name": "TabGroup", "children": []},
-    ...                     {"level": 3, "name": "TabList", "children": []},
-    ...                     {"level": 3, "name": "Tab", "children": []},
-    ...                     {"level": 3, "name": "TabPanel", "children": []},
-    ...                 ],
-    ...             },
-    ...             {"level": 2, "name": "Events", "children": []},
-    ...         ],
-    ...     },
-    ... ]
-    >>> print(generate_markdown_page_toc(toc, level=0, prefix=""))
-    - [1 Tabs](#s1)
-        - [1.1 Styling states](#s1.1)
-        - [1.2 Component arguments](#s1.2)
-            - [1.2.1 TabGroup](#s1.2.1)
-            - [1.2.2 TabList](#s1.2.2)
-            - [1.2.3 Tab](#s1.2.3)
-            - [1.2.4 TabPanel](#s1.2.4)
-        - [1.3 Events](#s1.3)
-
-    """
-    markdown = ""
-    for index, item in enumerate(toc, start=1):
-        current_prefix = f"{prefix}{index}."
-        indent = "    " * level
-        header_id = f"s{current_prefix[:-1]}"
-        markdown += f"{indent}- [{current_prefix} {item['name']}](#{header_id})\n"
-
-        if item["children"]:
-            markdown += generate_markdown_page_toc(
-                item["children"],
-                level=level + 1,
-                prefix=current_prefix,
-            )
-    return markdown
