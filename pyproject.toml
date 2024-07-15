@@ -53,6 +53,7 @@ pyyaml = ">=6.0"
 watchdog = ">=2.0"
 beautifulsoup4 = "^4.12.3"
 html2image = "^2.0.4.3"
+docstring-parser = "^0.16"
 
 [tool.poetry.group.dev]
 optional = true

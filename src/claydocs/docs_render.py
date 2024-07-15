@@ -6,11 +6,12 @@ import typing as t
 import inflection
 import markdown
 from image_processing import ImageProcessing
-from pymdownx import emoji, superfences
+from pymdownx import emoji
 from jinjax.catalog import Catalog
 from slugify import slugify
 
 from . import outliner
+from .autodoc import autodoc
 from .nav import Page
 from .utils import load_markdown_metadata, logger, timestamp, widont
 
@@ -186,6 +187,7 @@ class DocsRender(THasPaths if t.TYPE_CHECKING else object):
         self.catalog.jinja_env.globals["page"] = page
         self.catalog.jinja_env.globals["meta"] = meta
         self.catalog.jinja_env.globals["utils"]["timestamp"] = timestamp()
+        self.catalog.jinja_env.globals["autodoc"] = autodoc
 
         html = self.catalog.render("", __source=content)
         html, page_toc = outliner.outline(html)
