@@ -3,6 +3,7 @@ import random
 import re
 import time
 import typing as t
+from dataclasses import dataclass
 from pathlib import Path
 
 import jinjax
@@ -28,6 +29,12 @@ META_END = "\n---"
 
 logger = logging.getLogger(LOGGER_NAME)
 logger.setLevel(LOGGER_LEVEL)
+
+
+@dataclass
+class DocsMetadata:
+    name: str = ""
+    version: str = ""
 
 
 class THasPaths:
@@ -58,7 +65,7 @@ class THasPaths:
 
 class THasRender(THasPaths):
     catalog: jinjax.Catalog
-    metadata: dict[str, str]
+    metadata: DocsMetadata
 
     def render_page(self, page: "Page", **kwargs) -> str:  # type: ignore
         ...

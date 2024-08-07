@@ -54,7 +54,7 @@ class DocsBuilder(THasRender if t.TYPE_CHECKING else object):
         folderpath.mkdir(parents=True, exist_ok=True)
 
         logger.info(f"Rendering page {url}")
-        html = self.render_page(page, save_content=True)
+        html = self.render_page(page)
 
         logger.info("Relativizing page URLs")
         html = self._relativize_urls(html, filename)

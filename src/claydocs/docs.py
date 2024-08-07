@@ -11,11 +11,12 @@ from .docs_builder import DocsBuilder
 from .docs_render import DocsRender
 from .docs_server import DocsServer
 from .nav import DEFAULT_LANG, Nav, TPages
-from .utils import logger
+from .utils import DocsMetadata, logger
 
 
 VALID_COMMANDS = ("serve", "build", "index")
 INDEX_JSON = "search-{lang}.json"
+
 
 
 class Docs(DocsBuilder, DocsRender, DocsServer):
@@ -59,7 +60,12 @@ class Docs(DocsBuilder, DocsRender, DocsServer):
 
         self.default_component = default_component
         self.default_social = default_social
-        self.metadata = metadata or {}
+
+        metadata = metadata or {}
+        self.metadata = DocsMetadata(
+            name=metadata.get("name", ""),
+            version=metadata.get("version", ""),
+        )
 
         root = Path(root).resolve()
         if root.is_file():

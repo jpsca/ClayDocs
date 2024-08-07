@@ -79,7 +79,14 @@ from bs4 import BeautifulSoup, NavigableString
 from markdown.extensions.toc import nest_toc_tokens, slugify_unicode
 
 
-HEADERS = ["h1", "h2", "h3", "h4", "h5", "h6"]
+HEADERS = [
+    "h1",
+    "h2",
+    "h3",
+    "h4",
+    "h5",
+    "h6",
+]
 
 
 def html_escape(html: str) -> str:
@@ -87,10 +94,12 @@ def html_escape(html: str) -> str:
 
 
 def get_text(child) -> str:
-    text = ''.join(child.text)
+    text = str(child)
+    text = re.sub(r"<small[^>]+>.*?</small>", "", text, re.DOTALL | re.IGNORECASE)
+    text = re.sub(r"</?[^>]+>", "", text)
     text = re.sub(r"\n+", " ", text)
     text = re.sub(r"\s+", " ", text)
-    return html_escape(text.strip())
+    return text.strip()
 
 
 def outline(html, id_prefix="s", wrapper_cls="section%(LEVEL)d"):
@@ -98,6 +107,8 @@ def outline(html, id_prefix="s", wrapper_cls="section%(LEVEL)d"):
 
     toc_tokens = []
     for child in soup.find_all(HEADERS):
+        if "data-outline-skip" in child.attrs:
+            continue
         depth = int(child.name[1])  # type: ignore
         header_text = get_text(child)
         header_id = f"{id_prefix}-{slugify_unicode(header_text, separator='-')}"

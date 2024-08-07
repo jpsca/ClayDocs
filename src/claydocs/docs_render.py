@@ -174,13 +174,12 @@ class DocsRender(THasPaths if t.TYPE_CHECKING else object):
             return ""
         return self.render_page(page)
 
-    def render_page(self, page: Page, save_content: bool = False) -> str:
+    def render_page(self, page: Page) -> str:
         filepath = self.content_folder / page.filename.strip("/")
         logger.debug(f"Rendering `{filepath}`")
 
         md_source, meta = load_markdown_metadata(filepath)
         content = self.render_markdown(md_source)
-        content = content.removeprefix("<p>").removesuffix("</p>")
 
         meta.setdefault("title", page.title)
         self.catalog.jinja_env.globals["nav"] = self.nav.asdict(page.lang)
@@ -192,8 +191,6 @@ class DocsRender(THasPaths if t.TYPE_CHECKING else object):
         html = self.catalog.render("", __source=content)
         html, page_toc = outliner.outline(html)
         page.toc = page_toc
-        if save_content:
-            page.content = html
 
         component = meta.get("component", self.default_component)
         # I use `catalog.irender` to not reset the assets collected in rendering
@@ -207,7 +204,8 @@ class DocsRender(THasPaths if t.TYPE_CHECKING else object):
     def render_markdown(self, md_source: str) -> str:
         md_source = self.anti_escape(md_source)
         md_source = textwrap.dedent(md_source.strip("\n")).strip()
-        html = self.markdowner.convert(md_source)
+        html = self.markdowner.convert(md_source).strip()
+        html.removeprefix("<p>").removesuffix("</p>")
         html = html.replace("<pre><span></span>", "<pre>")
         html = self.escape_jinja_in_code(html)
         return html
